@@ -30,7 +30,7 @@ Unless you already have these packages installed, the first thing to do is to in
 ]
 
 
-```r
+``` r
 install.packages("sf")
 install.packages("terra")
 install.packages("spData")
@@ -46,7 +46,7 @@ The following command will install **all** dependencies required to reproduce th
 The packages needed to run the code presented in this chapter can be 'loaded' (technically they are attached) with the `library()` function as follows:
 
 
-```r
+``` r
 library(sf)            # classes and functions for vector data
 #> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
 ```
@@ -54,14 +54,14 @@ library(sf)            # classes and functions for vector data
 The output from `library(sf)` reports which versions of key geographic libraries such as GEOS the package is using, as outlined in Section \@ref(intro-sf).
 
 
-```r
+``` r
 library(terra)         # classes and functions for raster data
 ```
 
 The other packages that were installed contain data that will be used in the book:
 
 
-```r
+``` r
 library(spData)        # load geographic data
 library(spDataLarge)   # load larger geographic data
 ```
@@ -169,7 +169,7 @@ We will discuss **s2** in subsequent chapters.
 These can be viewed offline as follows:
 
 
-```r
+``` r
 vignette(package = "sf") # see which vignettes are available
 vignette("sf1")          # an introduction to the package
 ```
@@ -181,9 +181,12 @@ We will use the `world` dataset provided by **spData** [@R-spData], loaded at th
 `world` is an '`sf` data frame' containing spatial and attribute columns, the names of which are returned by the function `names()` (the last column in this example contains the geographic information).
 
 
-```r
+``` r
 class(world)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
+```
+
+``` r
 names(world)
 #>  [1] "iso_a2"    "name_long" "continent" "region_un" "subregion" "type"     
 #>  [7] "area_km2"  "pop"       "lifeExp"   "gdpPercap" "geom"
@@ -197,7 +200,7 @@ Although part of R's default installation (base R), `plot()` is a [*generic*](ht
 **sf** contains the non-exported (hidden from users most of the time) `plot.sf()` function which is what is called behind the scenes in the following command, which creates Figure \@ref(fig:world-all).
 
 
-```r
+``` r
 plot(world)
 ```
 
@@ -213,7 +216,7 @@ More broadly, treating geographic objects as regular data frames with spatial po
 The commonly used `summary()` function, for example, provides a useful overview of the variables within the `world` object.
 
 
-```r
+``` r
 summary(world["lifeExp"])
 #>     lifeExp                geom    
 #>  Min.   :50.6   MULTIPOLYGON :177  
@@ -239,7 +242,7 @@ It is also worth taking a deeper look at the basic behavior and contents of this
 The output shows two major differences compared with a regular `data.frame`: the inclusion of additional geographic metadata (`Geometry type`, `Dimension`, `Bounding box` and coordinate reference system information), and the presence of a 'geometry column', here named `geom`:
 
 
-```r
+``` r
 world_mini = world[1:2, 1:3]
 world_mini
 #> Simple feature collection with 2 features and 3 fields
@@ -292,7 +295,7 @@ Unlike the function `st_read()`, which returns attributes stored in a base R `da
 This is demonstrated below:
 
 
-```r
+``` r
 world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
 #> Reading layer `world' from data source 
 #>   `/usr/local/lib/R/site-library/spData/shapes/world.shp' using driver `ESRI Shapefile'
@@ -301,9 +304,15 @@ world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
 #> Dimension:     XY
 #> Bounding box:  xmin: -180 ymin: -89.9 xmax: 180 ymax: 83.6
 #> Geodetic CRS:  WGS 84
+```
+
+``` r
 world_tbl = read_sf(system.file("shapes/world.shp", package = "spData"))
 class(world_dfr)
 #> [1] "sf"         "data.frame"
+```
+
+``` r
 class(world_tbl)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
@@ -321,7 +330,7 @@ Colors can also be set with `col = `, although this will not create a continuous
 \index{map making!basic}
 
 
-```r
+``` r
 plot(world[3:6])
 plot(world["pop"])
 ```
@@ -338,7 +347,7 @@ Plots are added as layers to existing images by setting `add = TRUE`.^[
 To demonstrate this, and to provide an insight into the contents of Chapters \@ref(attr) and \@ref(spatial-operations) on attribute and spatial data operations, the subsequent code chunk filters countries in Asia and combines them into a single feature:
 
 
-```r
+``` r
 world_asia = world[world$continent == "Asia", ]
 asia = st_union(world_asia)
 ```
@@ -348,7 +357,7 @@ Note that the first plot must only have one facet for `add = TRUE` to work.
 If the first plot has a key, `reset = FALSE` must be used:
 
 
-```r
+``` r
 plot(world["pop"], reset = FALSE)
 plot(asia, add = TRUE, col = "red")
 ```
@@ -369,7 +378,7 @@ Note: many plot arguments are ignored in facet maps, when more than one `sf` col
 An unprojected version of this figure can be created with the following commands (see exercises at the end of this chapter and the script [`02-contplot.R`](https://github.com/geocompx/geocompr/blob/main/code/02-contpop.R) to reproduce Figure \@ref(fig:contpop)):
 
 
-```r
+``` r
 plot(world["continent"], reset = FALSE)
 cex = sqrt(world$pop) / 10000
 world_cents = st_centroid(world, of_largest = TRUE)
@@ -393,7 +402,7 @@ An alternative is to use `india[0]`, which returns an `sf` object that contains 
 ]
 
 
-```r
+``` r
 india = world[world$name_long == "India", ]
 plot(st_geometry(india), expandBB = c(0, 0.2, 0.1, 1), col = "gray", lwd = 3)
 plot(st_geometry(world_asia), add = TRUE)
@@ -497,7 +506,7 @@ Objects of class `sf` represent such data by combining the attributes (`data.fra
 They are created with `st_sf()` as illustrated below, which creates the London example described above:
 
 
-```r
+``` r
 lnd_point = st_point(c(0.1, 51.5))                 # sfg object
 lnd_geom = st_sfc(lnd_point, crs = "EPSG:4326")    # sfc object
 lnd_attrib = data.frame(                           # data.frame object
@@ -514,7 +523,7 @@ Third, attributes were stored in a `data.frame`, which was combined with the `sf
 This results in an `sf` object, as demonstrated below (some output is omitted):
 
 
-```r
+``` r
 lnd_sf
 #> Simple feature collection with 1 features and 3 fields
 #> ...
@@ -523,7 +532,7 @@ lnd_sf
 ```
 
 
-```r
+``` r
 class(lnd_sf)
 #> [1] "sf"         "data.frame"
 ```
@@ -562,13 +571,22 @@ The names of these functions are simple and consistent, as they all start with t
 The function `st_point()` creates single points from numeric vectors:
 
 
-```r
+``` r
 st_point(c(5, 2))                 # XY point
 #> POINT (5 2)
+```
+
+``` r
 st_point(c(5, 2, 3))              # XYZ point
 #> POINT Z (5 2 3)
+```
+
+``` r
 st_point(c(5, 2, 1), dim = "XYM") # XYM point
 #> POINT M (5 2 1)
+```
+
+``` r
 st_point(c(5, 2, 3, 1))           # XYZM point
 #> POINT ZM (5 2 3 1)
 ```
@@ -579,12 +597,15 @@ The XYM type must be specified using the `dim` argument (which is short for dime
 By contrast, use matrices in the case of multipoint (`st_multipoint()`) and linestring (`st_linestring()`) objects:
 
 
-```r
+``` r
 # the rbind function simplifies the creation of matrices
 ## MULTIPOINT
 multipoint_matrix = rbind(c(5, 2), c(1, 3), c(3, 4), c(3, 2))
 st_multipoint(multipoint_matrix)
 #> MULTIPOINT ((5 2), (1 3), (3 4), (3 2))
+```
+
+``` r
 ## LINESTRING
 linestring_matrix = rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2))
 st_linestring(linestring_matrix)
@@ -594,7 +615,7 @@ st_linestring(linestring_matrix)
 Finally, use lists for the creation of multilinestrings, (multi-)polygons and geometry collections:
 
 
-```r
+``` r
 ## POLYGON
 polygon_list = list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5)))
 st_polygon(polygon_list)
@@ -602,7 +623,7 @@ st_polygon(polygon_list)
 ```
 
 
-```r
+``` r
 ## POLYGON with a hole
 polygon_border = rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5))
 polygon_hole = rbind(c(2, 4), c(3, 4), c(3, 3), c(2, 3), c(2, 4))
@@ -612,7 +633,7 @@ st_polygon(polygon_with_hole_list)
 ```
 
 
-```r
+``` r
 ## MULTILINESTRING
 multilinestring_list = list(rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2)), 
                             rbind(c(1, 2), c(2, 4)))
@@ -621,7 +642,7 @@ st_multilinestring(multilinestring_list)
 ```
 
 
-```r
+``` r
 ## MULTIPOLYGON
 multipolygon_list = list(list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5))),
                          list(rbind(c(0, 2), c(1, 2), c(1, 3), c(0, 3), c(0, 2))))
@@ -630,7 +651,7 @@ st_multipolygon(multipolygon_list)
 ```
 
 
-```r
+``` r
 ## GEOMETRYCOLLECTION
 geometrycollection_list = list(st_multipoint(multipoint_matrix),
                               st_linestring(linestring_matrix))
@@ -648,7 +669,7 @@ For instance, to combine two simple features into one object with two features, 
 This is important since `sfc` represents the geometry column in **sf** data frames:
 
 
-```r
+``` r
 # sfc POINT
 point1 = st_point(c(5, 2))
 point2 = st_point(c(1, 3))
@@ -668,7 +689,7 @@ Therefore, when we convert `sfg` objects of type polygon into a simple feature g
 Equally, a geometry column of multilinestrings would result in an `sfc` object of type multilinestring:
 
 
-```r
+``` r
 # sfc POLYGON
 polygon_list1 = list(rbind(c(1, 5), c(2, 2), c(4, 1), c(4, 4), c(1, 5)))
 polygon1 = st_polygon(polygon_list1)
@@ -681,7 +702,7 @@ st_geometry_type(polygon_sfc)
 ```
 
 
-```r
+``` r
 # sfc MULTILINESTRING
 multilinestring_list1 = list(rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2)), 
                             rbind(c(1, 2), c(2, 4)))
@@ -698,7 +719,7 @@ st_geometry_type(multilinestring_sfc)
 It is also possible to create an `sfc` object from `sfg` objects with different geometry types:
 
 
-```r
+``` r
 # sfc GEOMETRY
 point_multilinestring_sfc = st_sfc(point1, multilinestring1)
 st_geometry_type(point_multilinestring_sfc)
@@ -710,7 +731,7 @@ As mentioned before, `sfc` objects can additionally store information on the coo
 The default value is `NA` (*Not Available*), as can be verified with `st_crs()`:
 
 
-```r
+``` r
 st_crs(points_sfc)
 #> Coordinate Reference System: NA
 ```
@@ -719,7 +740,7 @@ All geometries in `sfc` objects must have the same CRS.
 A CRS can be specified with the `crs` argument of `st_sfc()` (or `st_sf()`), which takes a **CRS identifier** provided as a text string, such as `crs = "EPSG:4326"` (see Section \@ref(crs-in-r) for other CRS representations and details on what this means).
 
 
-```r
+``` r
 # Set the CRS with an identifier referring to an 'EPSG' CRS code:
 points_sfc_wgs = st_sfc(point1, point2, crs = "EPSG:4326")
 st_crs(points_sfc_wgs) # print CRS (only first 4 lines of output shown)
@@ -751,7 +772,7 @@ The simplest use-case for **sfheaders** is demonstrated in the code chunks below
 We will start by creating the simplest possible `sfg` object, a single coordinate pair, assigned to a vector named `v`:
 
 
-```r
+``` r
 v = c(1, 1)
 v_sfg_sfh = sfheaders::sfg_point(obj = v)
 v_sfg_sfh # printing without sf loaded
@@ -769,7 +790,7 @@ The example above shows how the `sfg` object `v_sfg_sfh` is printed when **sf** 
 When **sf** is loaded (as is the case here), the result of the above command is indistinguishable from `sf` objects:
 
 
-```r
+``` r
 v_sfg_sf = st_point(v)
 print(v_sfg_sf) == print(v_sfg_sfh)
 #> POINT (1 1)
@@ -782,11 +803,14 @@ print(v_sfg_sf) == print(v_sfg_sfh)
 The next examples shows how **sfheaders** creates `sfg` objects from matrices and data frames:
 
 
-```r
+``` r
 # matrices
 m = matrix(1:8, ncol = 2)
 sfheaders::sfg_linestring(obj = m)
 #> LINESTRING (1 5, 2 6, 3 7, 4 8)
+```
+
+``` r
 # data frames
 df = data.frame(x = 1:4, y = 4:1)
 sfheaders::sfg_polygon(obj = df)
@@ -796,7 +820,7 @@ sfheaders::sfg_polygon(obj = df)
 Reusing the objects `v`, `m`, and `df` we can also build simple feature columns (`sfc`) as follows (outputs not shown):
 
 
-```r
+``` r
 sfheaders::sfc_point(obj = v)
 sfheaders::sfc_linestring(obj = m)
 sfheaders::sfc_polygon(obj = df)
@@ -805,7 +829,7 @@ sfheaders::sfc_polygon(obj = df)
 Similarly, `sf` objects can be created as follows:
 
 
-```r
+``` r
 sfheaders::sf_point(obj = v)
 sfheaders::sf_linestring(obj = m)
 sfheaders::sf_polygon(obj = df)
@@ -815,7 +839,7 @@ In each of these examples the CRS (coordinate reference system) is not defined.
 If you plan on doing any calculations or geometric operations using **sf** functions, we encourage you to set the CRS (see Chapter \@ref(reproj-geo-data) for details):
 
 
-```r
+``` r
 df_sf = sfheaders::sf_polygon(obj = df)
 st_crs(df_sf) = "EPSG:4326"
 ```
@@ -838,7 +862,7 @@ Although potentially useful for describing locations anywhere on Earth using cha
 By default the S2 geometry engine is turned on, as can be verified with the following command:
 
 
-```r
+``` r
 sf_use_s2()
 #> [1] TRUE
 ```
@@ -846,14 +870,41 @@ sf_use_s2()
 An example of the consequences of turning the geometry engine off is shown below, by creating buffers around the `india` object created earlier in the chapter (note the warnings emitted when S2 is turned off) (Figure \@ref(fig:s2example)):
 
 
-```r
+``` r
 india_buffer_with_s2 = st_buffer(india, 1) # 1 meter
 sf_use_s2(FALSE)
 #> Spherical geometry (s2) switched off
+```
+
+``` r
 india_buffer_without_s2 = st_buffer(india, 1) # 1 degree
 #> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
 #> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data
 #> dist is assumed to be in decimal degrees (arc_degrees).
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.32 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.192 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -867,7 +918,7 @@ Throughout this book we will assume that S2 is turned on, unless explicitly stat
 Turn it on again with the following command.
 
 
-```r
+``` r
 sf_use_s2(TRUE)
 #> Spherical geometry (s2) switched on
 ```
@@ -907,6 +958,40 @@ This and map algebra (Section \@ref(map-algebra)) makes raster processing much m
 In contrast to vector data, the cell of one raster layer can only hold a single value.^[Thus to store many values for a single location we need to have many raster layers.]
 The value might be continuous or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.16 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.44 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.83 0.285
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>
@@ -916,6 +1001,30 @@ Raster maps usually represent continuous phenomena such as elevation, temperatur
 Discrete features such as soil or land-cover classes can also be represented in the raster data model.
 Both uses of raster datasets are illustrated in Figure \@ref(fig:raster-intro-plot2), which shows how the borders of discrete features may become blurred in raster datasets.
 Depending on the nature of the application, vector representations of discrete features may be more suitable.
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.96 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.96 0.285
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%" />
@@ -966,7 +1075,7 @@ For example, `srtm.tif` is a digital elevation model of this area (for more deta
 First, let's create a `SpatRaster` object named `my_rast`:
 
 
-```r
+``` r
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 my_rast = rast(raster_filepath)
 class(my_rast)
@@ -978,7 +1087,7 @@ class(my_rast)
 Typing the name of the raster into the console, will print out the raster header (dimensions, resolution, extent, CRS) and some additional information (class, data source, summary of the raster values): 
 
 
-```r
+``` r
 my_rast
 #> class       : SpatRaster 
 #> dimensions  : 457, 465, 1  (nrow, ncol, nlyr)
@@ -1002,7 +1111,7 @@ Similar to the **sf** package, **terra** also provides `plot()` methods for its 
 \index{map making!basic raster}
 
 
-```r
+``` r
 plot(my_rast)
 ```
 
@@ -1025,7 +1134,7 @@ The easiest way to create a raster object in R is to read-in a raster file from 
 \index{raster!class}
 
 
-```r
+``` r
 single_raster_file = system.file("raster/srtm.tif", package = "spDataLarge")
 single_rast = rast(raster_filepath)
 ```
@@ -1041,7 +1150,7 @@ Remember: `rast()` fills cells row-wise (unlike `matrix()`) starting at the uppe
 For other ways of creating raster objects, see `?rast`.
 
 
-```r
+``` r
 new_raster = rast(nrows = 6, ncols = 6, 
                   xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
                   vals = 1:36)
@@ -1055,7 +1164,7 @@ However, one can specify any other CRS with the `crs` argument.
 The `SpatRaster` class also handles multiple layers, which typically correspond to a single multispectral satellite file or a time-series of rasters.
 
 
-```r
+``` r
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 multi_rast
@@ -1073,7 +1182,7 @@ multi_rast
 `nlyr()` retrieves the number of layers stored in a `SpatRaster` object:
 
 
-```r
+``` r
 nlyr(multi_rast)
 #> [1] 4
 ```
@@ -1083,7 +1192,7 @@ The `terra::subset()` can also be used to select layers.
 It accepts a layer number or its name as the second argument:
 
 
-```r
+``` r
 multi_rast3 = subset(multi_rast, 3)
 multi_rast4 = subset(multi_rast, "landsat_4")
 ```
@@ -1091,7 +1200,7 @@ multi_rast4 = subset(multi_rast, "landsat_4")
 The opposite operation, combining several `SpatRaster` objects into one, can be done using the `c` function:
 
 
-```r
+``` r
 multi_rast34 = c(multi_rast3, multi_rast4)
 ```
 
@@ -1197,12 +1306,12 @@ This is demonstrated in the code chunk below, which calculates the area of Luxem
 \index{sf!units}
 
 
-```r
+``` r
 luxembourg = world[world$name_long == "Luxembourg", ]
 ```
 
 
-```r
+``` r
 st_area(luxembourg) # requires the s2 package in recent versions of sf
 #> 2.41e+09 [m^2]
 ```
@@ -1214,7 +1323,7 @@ To take the Luxembourg example, if the units remained unspecified, one could inc
 To translate the huge number into a more digestible size, it is tempting to divide the results by a million (the number of square meters in a square kilometer):
 
 
-```r
+``` r
 st_area(luxembourg) / 1000000
 #> 2409 [m^2]
 ```
@@ -1223,7 +1332,7 @@ However, the result is incorrectly given again as square meters.
 The solution is to set the correct units with the **units** package:
 
 
-```r
+``` r
 units::set_units(st_area(luxembourg), km^2)
 #> 2409 [km^2]
 ```
@@ -1234,7 +1343,7 @@ The `my_rast` object (see above) uses a WGS84 projection with decimal degrees as
 Consequently, its resolution is also given in decimal degrees but you have to know it, since the `res()` function simply returns a numeric vector.
 
 
-```r
+``` r
 res(my_rast)
 #> [1] 0.000833 0.000833
 ```
@@ -1242,7 +1351,7 @@ res(my_rast)
 If we used the UTM projection, the units would change.
 
 
-```r
+``` r
 repr = project(my_rast, "EPSG:26912")
 res(repr)
 #> [1] 83.5 83.5

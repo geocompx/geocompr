@@ -13,7 +13,7 @@
 [^13-transport-1]: The **nabor** package must also be installed, although it does not need to be attached.
 
 
-```r
+``` r
 library(sf)
 library(dplyr)
 library(spDataLarge)
@@ -147,7 +147,7 @@ Note the zones get smaller in densely populated areas: each houses a similar num
 `bristol_zones` contains no attribute data on transport, however, only the name and code of each zone:
 
 
-```r
+``` r
 names(bristol_zones)
 #> [1] "geo_code" "name"     "geometry"
 ```
@@ -159,9 +159,12 @@ The first column is the ID of the zone of origin and the second column is the zo
 `bristol_od` has more rows than `bristol_zones`, representing travel *between* zones rather than the zones themselves:
 
 
-```r
+``` r
 nrow(bristol_od)
 #> [1] 2910
+```
+
+``` r
 nrow(bristol_zones)
 #> [1] 102
 ```
@@ -169,7 +172,7 @@ nrow(bristol_zones)
 The results of the previous code chunk shows that there are more than 10 OD pairs for every zone, meaning we will need to aggregate the origin-destination data before it is joined with `bristol_zones`, as illustrated below (origin-destination data is described in Section \@ref(desire-lines)).
 
 
-```r
+``` r
 zones_attr = bristol_od |> 
   group_by(o) |> 
   summarize(across(where(is.numeric), sum)) |> 
@@ -188,7 +191,7 @@ The resulting object `zones_attr` is a data frame with rows representing zones a
 We can verify that the IDs match those in the `zones` dataset using the `%in%` operator as follows:
 
 
-```r
+``` r
 summary(zones_attr$geo_code %in% bristol_zones$geo_code)
 #>    Mode    TRUE 
 #> logical     102
@@ -201,10 +204,13 @@ This is done using the joining function `left_join()` (note that `inner_join()` 
     This could be done by changing the order of the IDs in the `summary()` command --- `summary(bristol_zones$geo_code %in% zones_attr$geo_code)` --- or by using `setdiff()` as follows: `setdiff(bristol_zones$geo_code, zones_attr$geo_code)`.
 
 
-```r
+``` r
 zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
 sum(zones_joined$all)
 #> [1] 238805
+```
+
+``` r
 names(zones_joined)
 #> [1] "geo_code"   "name"       "all"        "bicycle"    "foot"      
 #> [6] "car_driver" "train"      "geometry"
@@ -225,7 +231,7 @@ This explains why the spatial distribution represented in the right panel in Fig
 The result is `zones_od`, which contains a new column reporting the number of trip destinations by any mode, is created as follows:
 
 
-```r
+``` r
 zones_destinations = bristol_od |> 
   group_by(d) |> 
   summarize(across(where(is.numeric), sum)) |> 
@@ -236,9 +242,23 @@ zones_od = inner_join(zones_joined, zones_destinations, by = "geo_code")
 A simplified version of Figure \@ref(fig:zones) is created with the code below (see `13-zones.R` in the [`code`](https://github.com/geocompx/geocompr/tree/main/code) folder of the book's GitHub repository to reproduce the figure and Section \@ref(faceted-maps) for details on faceted maps with **tmap**\index{tmap (package)}):
 
 
-```r
+``` r
 qtm(zones_od, c("all", "all_dest")) +
   tm_layout(panel.labels = c("Origin", "Destination"))
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  1.09
 ```
 
 <div class="figure" style="text-align: center">
@@ -258,7 +278,7 @@ This origin-destination (OD) data frame object represents the number of people t
 To arrange the OD data by all trips and then filter-out only the top 5, type (please refer to Chapter \@ref(attr) for a detailed description of non-spatial attribute operations):
 
 
-```r
+``` r
 od_top5 = bristol_od |> 
   slice_max(all, n = 5)
 ```
@@ -283,7 +303,7 @@ But from a policy perspective, the raw data presented in Table \@ref(tab:od) is 
 The following command calculates the percentage of each desire line that is made by these active modes:
 
 
-```r
+``` r
 bristol_od$Active = (bristol_od$bicycle + bristol_od$foot) /
   bristol_od$all * 100
 ```
@@ -294,7 +314,7 @@ Intrazonal OD pairs represent travel within the same zone (see the top row of Ta
 The following code chunk splits `od_bristol` into these two types:
 
 
-```r
+``` r
 od_intra = filter(bristol_od, o == d)
 od_inter = filter(bristol_od, o != d)
 ```
@@ -306,7 +326,7 @@ The next step is to convert the interzonal OD pairs into an `sf` object represen
     For real-world use one would use centroid values generated from projected data or, preferably, use *population-weighted* centroids [@lovelace_propensity_2017].
 
 
-```r
+``` r
 desire_lines = od2line(od_inter, zones_od)
 #> Creating centroids representing desire line start and end points.
 ```
@@ -314,8 +334,24 @@ desire_lines = od2line(od_inter, zones_od)
 An illustration of the results is presented in Figure \@ref(fig:desire), a simplified version of which is created with the following command (see the code in `13-desire.R` to reproduce the figure exactly and Chapter \@ref(adv-map) for details on visualization with **tmap**\index{tmap (package)}):
 
 
-```r
+``` r
 qtm(desire_lines, lines.lwd = "all")
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <int> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#> 2:     1    NA    NA <tm_legend_standard_portrait[82]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.19  1.29
+#> 2:   left    top     2      <NA>      <NA>       TRUE vertical  1.15  1.48
 ```
 
 <div class="figure" style="text-align: center">
@@ -363,7 +399,7 @@ The first stage is to identify the desire lines with most public transport trave
 To make the approach easier to follow, we will select only the top three desire lines\index{desire lines} in terms of rails use:
 
 
-```r
+``` r
 desire_rail = top_n(desire_lines, n = 3, wt = train)
 ```
 
@@ -375,9 +411,12 @@ This **stplanr**\index{stplanr (package)} function takes input lines and points 
 The output is the same as the input line, except it has new geometry columns representing the journey via public transport nodes, as demonstrated below:
 
 
-```r
+``` r
 ncol(desire_rail)
 #> [1] 9
+```
+
+``` r
 desire_rail = line_via(desire_rail, bristol_stations)
 ncol(desire_rail)
 #> [1] 12
@@ -496,7 +535,7 @@ Short trips (around 5 km, which can be cycled in 15 minutes at a speed of 20 km/
 These considerations inform the following code chunk which filters the desire lines and returns the object `desire_lines_short` representing OD pairs between which many (100+) short (2.5 to 5 km Euclidean distance) trips are driven:
 
 
-```r
+``` r
 desire_lines$distance_km = as.numeric(st_length(desire_lines)) / 1000
 desire_lines_short = desire_lines |> 
   filter(car_driver >= 100, distance_km <= 5, distance_km >= 2.5)
@@ -508,7 +547,7 @@ The next stage is to convert these desire lines into routes.
 This is done using the publicly available OSRM service with the **stplanr** functions `route()` and `route_osrm()`\index{stplanr (package)} in the code chunk below:
 
 
-```r
+``` r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
 ```
@@ -556,7 +595,7 @@ This is of course an unrealistic scenario [@lovelace_propensity_2017], but is a 
 In this case, we can model mode shift from cars to bikes as follows:
 
 
-```r
+``` r
 uptake = function(x) {
   case_when(
     x <= 3 ~ 0.5,
@@ -577,7 +616,7 @@ For this, we will use the function `overline()` from the **stplanr** package.
 The function breaks linestrings at junctions (were two or more linestring geometries meet), and calculates aggregate statistics for each unique route segment [@morgan_travel_2020], taking an object containing routes and the names of the attributes to summarize as the first and second argument:
 
 
-```r
+``` r
 route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 ```
 
@@ -593,7 +632,7 @@ Such route network datasets are available worldwide from OpenStreetMap, and can 
 To save time downloading and preparing OSM\index{OpenStreetMap}, we will use the `bristol_ways` object from the **spDataLarge** package, an `sf` object with LINESTRING geometries and attributes representing a sample of the transport network in the case study region (see `?bristol_ways` for details), as shown in the output below:
 
 
-```r
+``` r
 summary(bristol_ways)
 #>      highway       maxspeed             ref                     geometry   
 #>  cycleway:1721   Length:6160        Length:6160        LINESTRING   :6160  
@@ -609,7 +648,7 @@ To overcome this limitation of **igraph**, the **sfnetworks**\index{sfnetworks (
 We will demonstrate **sfnetworks** functionality on the `bristol_ways` object.
 
 
-```r
+``` r
 bristol_ways$lengths = st_length(bristol_ways)
 ways_sfn = as_sfnetwork(bristol_ways)
 class(ways_sfn)
@@ -617,7 +656,7 @@ class(ways_sfn)
 ```
 
 
-```r
+``` r
 ways_sfn
 #> # A sfnetwork with 5728 nodes and 4915 edges
 #> # A directed multigraph with 1013 components with spatially explicit edges
@@ -636,10 +675,26 @@ The output of the edge betweenness calculation is shown Figure \@ref(fig:wayssln
 The results demonstrate that each graph edge represents a segment: the segments near the center of the road network have the highest betweenness values, whereas segments closer to central Bristol have higher cycling potential, based on these simplistic datasets.
 
 
-```r
+``` r
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <int> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[82]>    out center bottom
+#> 2:     1    NA    NA <tm_legend_standard_portrait[82]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.02 0.701
+#> 2:   left    top     2      <NA>      <NA>       TRUE horizontal  3.15 0.701
 ```
 
 <div class="figure" style="text-align: center">
@@ -668,7 +723,7 @@ The final code chunk of this chapter combines these strands of analysis, by over
 This new dataset is created in the code chunk below which: 1) filters out the cycleway entities from the `bristol_ways` object representing the transport network; 2) 'unions' the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering); and 3) creates a 100 m buffer around them to create a polygon.
 
 
-```r
+``` r
 existing_cycleways_buffer = bristol_ways |> 
   filter(highway == "cycleway") |>    # 1) filter out cycleways
   st_union() |>                       # 2) unite geometries
@@ -680,7 +735,7 @@ The next stage is to create a dataset representing points on the network where t
 
 
 
-```r
+``` r
 route_network_no_infra = st_difference(
   route_network_scenario,
   route_network_scenario |> st_set_crs(st_crs(existing_cycleways_buffer)),
@@ -693,7 +748,7 @@ route_network_no_infra = st_difference(
 The results of the preceding code chunks are shown in Figure \@ref(fig:cycleways), which shows routes with high levels of car dependency and high cycling potential but no cycleways.
 
 
-```r
+``` r
 tmap_mode("view")
 qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
     lines.lwd = 5)
@@ -701,6 +756,20 @@ qtm(route_network_no_infra, basemaps = leaflet::providers$Esri.WorldTopoMap,
 
 <!-- toDo: rl -->
 <!-- the next figure must be updated -->
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[82]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  3.15  1.29
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/cycleways-1.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right)." width="50%" /><img src="images/bristol_cycleways_zoomed.png" alt="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right)." width="50%" />

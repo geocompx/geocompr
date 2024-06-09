@@ -10,7 +10,7 @@ The chapter makes use of bridges to GIS software, and spatial cross-validation, 
 The chapter uses the following packages:
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -64,7 +64,7 @@ For this, we will make use of a random forest model\index{random forest} --- a v
 All the data needed for the subsequent analyses is available via the **spDataLarge** package.
 
 
-```r
+``` r
 data("study_area", "random_points", "comm", package = "spDataLarge")
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
@@ -74,7 +74,7 @@ ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 `comm` is a community matrix of the wide data format [@wickham_tidy_2014] where the rows represent the visited sites in the field and the columns the observed species.^[In statistics, this is also called a contingency table or cross-table.]
 
 
-```r
+``` r
 # sites 35 to 40 and corresponding occurrences of the first five species in the
 # community matrix
 comm[35:40, 1:5]
@@ -109,7 +109,7 @@ To compute catchment area\index{catchment area} and catchment slope, we can make
 Here, we present only a selection of the complete output.
 
 
-```r
+``` r
 # if not already done, enable the saga next generation plugin
 qgisprocess::qgis_enable_plugins("processing_saga_nextgen")
 # show help
@@ -153,7 +153,7 @@ Specifying 1 as the `SLOPE_TYPE` makes sure that the algorithm will return the c
 The resulting rasters\index{raster} are saved to temporary files with an `.sdat` extension which is the native SAGA\index{SAGA} raster format.
 
 
-```r
+``` r
 # environmental predictors: catchment slope and catchment area
 ep = qgisprocess::qgis_run_algorithm(
   alg = "sagang:sagawetnessindex",
@@ -169,7 +169,7 @@ Let's read in catchment area as well as catchment slope into a multilayer `SpatR
 Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`.
 
 
-```r
+``` r
 # read in catchment area and catchment slope
 ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
@@ -183,21 +183,21 @@ Additionally, the catchment area\index{catchment area} values are highly skewed 
 A log10-transformation makes the distribution more normal.
 
 
-```r
+``` r
 ep$carea = log10(ep$carea)
 ```
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
 
-```r
+``` r
 ep = rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 
-```r
+``` r
 # terra::extract adds automatically a for our purposes unnecessary ID column
 ep_rp = terra::extract(ep, random_points, ID = FALSE)
 random_points = cbind(random_points, ep_rp)
@@ -233,7 +233,7 @@ Ordination techniques such as NMDS\index{NMDS} require at least one observation 
 Hence, we need to dismiss all sites in which no species were found.
 
 
-```r
+``` r
 # presence-absence matrix
 pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
@@ -248,7 +248,7 @@ NMDS\index{NMDS} is an iterative procedure trying to make the ordinated space mo
 To make sure that the algorithm converges, we set the number of steps to 500 using the `try` parameter.
 
 
-```r
+``` r
 set.seed(25072018)
 nmds = vegan::metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
@@ -275,7 +275,7 @@ Since humidity is highly correlated with elevation, we rotate the NMDS axes\inde
 Plotting the result reveals that the first axis is, as intended, clearly associated with altitude (Figure \@ref(fig:xy-nmds)).
 
 
-```r
+``` r
 elev = dplyr::filter(random_points, id %in% rownames(pa)) |> 
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
@@ -308,7 +308,7 @@ To introduce decision trees by example, we first construct a response-predictor 
 We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)} modeling later on.
 
 
-```r
+``` r
 # construct response-predictor matrix
 # id- and response variable
 rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
@@ -320,7 +320,7 @@ Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS\index{NMDS} axis as the response (`sc`) and altitude (`dem`) as the only predictor.
 
 
-```r
+``` r
 tree_mo = tree::tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
@@ -378,7 +378,7 @@ Having already constructed the input variables (`rp`), we are all set for specif
 For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021 & Section \@ref(spatial-cv-with-mlr3)], and since our response (`sc`) is numeric, we use a regression\index{regression} task.
 
 
-```r
+``` r
 # create task
 task = mlr3spatiotempcv::as_task_regr_st(
   select(rp, -id, -spri),
@@ -392,7 +392,7 @@ Additionally, we got rid of the columns `id` and `spri` since these variables sh
 Next, we go on to construct the a random forest\index{random forest} learner from the **ranger** package [@wright_ranger_2017].
 
 
-```r
+``` r
 lrn_rf = lrn("regr.ranger", predict_type = "response")
 ```
 
@@ -410,7 +410,7 @@ Hyperparameter\index{hyperparameter} combinations will be selected randomly but 
 `mtry` should range between 1 and the number of predictors (4) <!-- (4)-->, `sample.fraction` should range between 0.2 and 0.9 and `min.node.size` should range between 1 and 10 [@probst_hyperparameters_2018].
 
 
-```r
+``` r
 # specifying the search space
 search_space = paradox::ps(
   mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
@@ -426,7 +426,7 @@ In each of these spatial partitions, we run 50 models (`trm()`) while using rand
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
-```r
+``` r
 autotuner_rf = mlr3tuning::auto_tuner(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
@@ -440,7 +440,7 @@ autotuner_rf = mlr3tuning::auto_tuner(
 Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperparameter\index{hyperparameter} tuning, and will find the optimal hyperparameter\index{hyperparameter} combination for the specified parameters.
 
 
-```r
+``` r
 # hyperparameter tuning
 set.seed(0412022)
 autotuner_rf$train(task)
@@ -451,7 +451,7 @@ autotuner_rf$train(task)
 
 
 
-```r
+``` r
 autotuner_rf$tuning_result
 #>     mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse
 #>    <int>           <num>         <int>             <list>    <list>     <num>
@@ -464,7 +464,7 @@ The tuned hyperparameters\index{hyperparameter} can now be used for the predicti
 To do so, we only need to run the `predict` method of our fitted `AutoTuner` object.
 
 
-```r
+``` r
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
 #> <PredictionRegr> for 84 observations:
@@ -482,7 +482,7 @@ The `predict` method will apply the model to all observations used in the modeli
 Given a multilayer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial distribution maps, i.e., predict to new data.
 
 
-```r
+``` r
 pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 ```
 
@@ -494,7 +494,7 @@ pred = terra::predict(ep, model = autotuner_rf, fun = predict)
 In case, `terra::predict()` does not support a model algorithm, you can still make the predictions manually.
 
 
-```r
+``` r
 newdata = as.data.frame(as.matrix(ep))
 colSums(is.na(newdata))  # 0 NAs
 # but assuming there were 0s results in a more generic approach

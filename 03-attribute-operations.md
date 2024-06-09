@@ -7,7 +7,7 @@
 - This chapter requires the following packages to be installed and attached:
 
 
-```r
+``` r
 library(sf)      # vector data package introduced in Chapter 2
 library(terra)   # raster data package introduced in Chapter 2
 library(dplyr)   # tidyverse package for data frame manipulation
@@ -16,7 +16,7 @@ library(dplyr)   # tidyverse package for data frame manipulation
 - It relies on **spData**, which loads datasets used in the code examples of this chapter:
 
 
-```r
+``` r
 library(spData)  # spatial data package introduced in Chapter 2
 ```
 
@@ -62,12 +62,12 @@ This was described in Chapter \@ref(spatial-class), which demonstrated how *gene
 **sf** also provides generics that allow `sf` objects to behave like regular data frames, as shown by printing the class's methods:
 
 
-```r
+``` r
 methods(class = "sf") # methods for sf objects, first 12 shown
 ```
 
 
-```r
+``` r
 #> [1] [             [[<-          $<-           aggregate    
 #> [5] as.data.frame cbind         coerce        filter       
 #> [9] identify      initialize    merge         plot        
@@ -95,9 +95,12 @@ Before using these capabilities it is worth re-capping how to discover the basic
 Let's start by using base R functions to learn about the `world` dataset from the **spData** package:
 
 
-```r
+``` r
 class(world) # it's an sf object and a (tidy) data frame
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
+```
+
+``` r
 dim(world)   # it is a 2 dimensional object, with 177 rows and 11 columns
 #> [1] 177  11
 ```
@@ -107,10 +110,13 @@ dim(world)   # it is a 2 dimensional object, with 177 rows and 11 columns
 The function `st_drop_geometry()` keeps only the attributes data of an `sf` object, in other words removing its geometry:
 
 
-```r
+``` r
 world_df = st_drop_geometry(world)
 class(world_df)
 #> [1] "tbl_df"     "tbl"        "data.frame"
+```
+
+``` r
 ncol(world_df)
 #> [1] 10
 ```
@@ -141,7 +147,7 @@ The examples below demonstrate subsetting with base R.
 Guess the number of rows and columns in the `sf` data frames returned by each command and check the results on your own computer (see the end of the chapter for more exercises):
 
 
-```r
+``` r
 world[1:6, ]    # subset rows by position
 world[, 1:3]    # subset columns by position
 world[1:6, 1:3] # subset rows and columns by position
@@ -156,11 +162,14 @@ A demonstration of the utility of using `logical` vectors for subsetting is show
 This creates a new object, `small_countries`, containing nations whose surface area is smaller than 10,000 km^2^.
 
 
-```r
+``` r
 i_small = world$area_km2 < 10000
 summary(i_small) # a logical vector
 #>    Mode   FALSE    TRUE 
 #> logical     170       7
+```
+
+``` r
 small_countries = world[i_small, ]
 ```
 
@@ -168,14 +177,14 @@ The intermediary `i_small` (short for index representing small countries) is a l
 A more concise command, which omits the intermediary object, generates the same result:
 
 
-```r
+``` r
 small_countries = world[world$area_km2 < 10000, ]
 ```
 
 The base R function `subset()` provides another way to achieve the same result:
 
 
-```r
+``` r
 small_countries = subset(world, area_km2 < 10000)
 ```
 
@@ -190,7 +199,7 @@ Key functions for subsetting data frames (including `sf` data frames) with **dpl
 For example, you could select only two columns, `name_long` and `pop`, with the following command:
 
 
-```r
+``` r
 world1 = select(world, name_long, pop)
 names(world1)
 #> [1] "name_long" "pop"       "geom"
@@ -200,7 +209,7 @@ Note: as with the equivalent command in base R (`world[, c("name_long", "pop")]`
 `select()` also allows selecting a range of columns with the help of the `:` operator: 
 
 
-```r
+``` r
 # all columns between name_long and pop (inclusive)
 world2 = select(world, name_long:pop)
 ```
@@ -208,7 +217,7 @@ world2 = select(world, name_long:pop)
 You can remove specific columns with the `-` operator:
 
 
-```r
+``` r
 # all columns except subregion and area_km2 (inclusive)
 world3 = select(world, -subregion, -area_km2)
 ```
@@ -216,14 +225,14 @@ world3 = select(world, -subregion, -area_km2)
 Subset and rename columns at the same time with the `new_name = old_name` syntax:
 
 
-```r
+``` r
 world4 = select(world, name_long, population = pop)
 ```
 
 It is worth noting that the command above is more concise than base R equivalent, which requires two lines of code:
 
 
-```r
+``` r
 world5 = world[, c("name_long", "pop")] # subset columns by name
 names(world5)[names(world5) == "pop"] = "population" # rename column manually
 ```
@@ -234,7 +243,7 @@ Most **dplyr** verbs return a data frame, but you can extract a single column as
 You can get the same result in base R with the list subsetting operators `$` and `[[`, the three following commands return the same numeric vector:
 
 
-```r
+``` r
 pull(world, pop)
 world$pop
 world[["pop"]]
@@ -248,7 +257,7 @@ world[["pop"]]
 The following code chunk, for example, selects rows 1 to 6:
 
 
-```r
+``` r
 slice(world, 1:6)
 ```
 
@@ -256,7 +265,7 @@ slice(world, 1:6)
 It keeps only rows matching given criteria, e.g., only countries with an area below a certain threshold, or with a high average of life expectancy, as shown in the following examples:
 
 
-```r
+``` r
 world7 = filter(world, area_km2 < 10000)  # countries with a small area
 world7 = filter(world, lifeExp > 82)      # with high life expectancy
 ```
@@ -287,7 +296,7 @@ Pipes enable expressive code: the output of a previous function becomes the firs
 This is illustrated below, in which only countries from Asia are filtered from the `world` dataset, next the object is subset by columns (`name_long` and `continent`) and the first five rows (result not shown).
 
 
-```r
+``` r
 world7 = world |>
   filter(continent == "Asia") |>
   select(name_long, continent) |>
@@ -299,7 +308,7 @@ the above run from top to bottom (line-by-line) and left to right.
 An alternative to piped operations is nested function calls, which are harder to read:
 
 
-```r
+``` r
 world8 = slice(
   select(
     filter(world, continent == "Asia"),
@@ -310,7 +319,7 @@ world8 = slice(
 Another alternative is to split the operations into multiple self-contained lines, which is recommended when developing new R packages, an approach which has the advantage of saving intermediate results with distinct names which can be later inspected for debugging purposes (an approach which has disadvantages of being verbose and cluttering the global environment when undertaking interactive analysis):
 
 
-```r
+``` r
 world9_filtered = filter(world, continent == "Asia")
 world9_selected = select(world9_filtered, continent)
 world9 = slice(world9_selected, 1:5)
@@ -330,7 +339,7 @@ The aim is to find the `sum()` of country populations for each continent, result
 This can be done with the base R function `aggregate()` as follows:
 
 
-```r
+``` r
 world_agg1 = aggregate(pop ~ continent, FUN = sum, data = world,
                        na.rm = TRUE)
 class(world_agg1)
@@ -343,11 +352,14 @@ The result is a non-spatial data frame with six rows, one per continent, and two
 **sf** provides the method `aggregate.sf()` which is activated automatically when `x` is an `sf` object and a `by` argument is provided:
 
 
-```r
+``` r
 world_agg2 = aggregate(world["pop"], by = list(world$continent), FUN = sum, 
                        na.rm = TRUE)
 class(world_agg2)
 #> [1] "sf"         "data.frame"
+```
+
+``` r
 nrow(world_agg2)
 #> [1] 8
 ```
@@ -358,7 +370,7 @@ The resulting `world_agg2` object is a spatial object containing 8 features repr
 `group_by() |> summarize()` is the **dplyr** equivalent of `aggregate()`, with the variable name provided in the `group_by()` function specifying the grouping variable and information on what is to be summarized passed to the `summarize()` function, as shown below:
 
 
-```r
+``` r
 world_agg3 = world |>
   group_by(continent) |>
   summarize(pop = sum(pop, na.rm = TRUE))
@@ -368,7 +380,7 @@ The approach may seem more complex but it has benefits: flexibility, readability
 This flexibility is illustrated in the command below, which calculates not only the population but also the area and number of countries in each continent:
 
 
-```r
+``` r
 world_agg4  = world |> 
   group_by(continent) |> 
   summarize(Pop = sum(pop, na.rm = TRUE), Area = sum(area_km2), N = n())
@@ -384,7 +396,7 @@ Let's combine what we have learned so far about **dplyr** functions, by chaining
 The following command calculates population density (with `mutate()`), arranges continents by the number countries they contain (with `arrange()`), and keeps only the 3 most populous continents (with `slice_max()`), the result of which is presented in Table \@ref(tab:continents)):
 
 
-```r
+``` r
 world_agg5 = world |> 
   st_drop_geometry() |>                      # drop the geometry for speed
   select(pop, continent, area_km2) |> # subset the columns of interest  
@@ -428,9 +440,12 @@ It has three columns:
 A 'left join', which preserves the first dataset, merges `world` with `coffee_data`.
 
 
-```r
+``` r
 world_coffee = left_join(world, coffee_data)
 #> Joining with `by = join_by(name_long)`
+```
+
+``` r
 class(world_coffee)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
@@ -440,13 +455,16 @@ The result is an `sf` object identical to the original `world` object but with t
 This can be plotted as a map, as illustrated in Figure \@ref(fig:coffeemap), generated with the `plot()` function below.
 
 
-```r
+``` r
 names(world_coffee)
 #>  [1] "iso_a2"                 "name_long"              "continent"             
 #>  [4] "region_un"              "subregion"              "type"                  
 #>  [7] "area_km2"               "pop"                    "lifeExp"               
 #> [10] "gdpPercap"              "geom"                   "coffee_production_2016"
 #> [13] "coffee_production_2017"
+```
+
+``` r
 plot(world_coffee["coffee_production_2017"])
 ```
 
@@ -466,7 +484,7 @@ In the majority of cases where variable names are not the same, you have two opt
 The latter approach is demonstrated below on a renamed version of `coffee_data`.
 
 
-```r
+``` r
 coffee_renamed = rename(coffee_data, nm = name_long)
 world_coffee2 = left_join(world, coffee_renamed, by = join_by(name_long == nm))
 ```
@@ -482,9 +500,12 @@ What if we only want to keep countries that have a match in the key variable?
 In that case an inner join can be used.
 
 
-```r
+``` r
 world_coffee_inner = inner_join(world, coffee_data)
 #> Joining with `by = join_by(name_long)`
+```
+
+``` r
 nrow(world_coffee_inner)
 #> [1] 45
 ```
@@ -494,7 +515,7 @@ What happened to the remaining rows?
 We can identify the rows that did not match using the `setdiff()` function as follows:
 
 
-```r
+``` r
 setdiff(coffee_data$name_long, world$name_long)
 #> [1] "Congo, Dem. Rep. of" "Others"
 ```
@@ -504,7 +525,7 @@ it has been abbreviated, causing the join to miss it.
 The following command uses a string matching (*regex*) function from the **stringr** package to confirm what `Congo, Dem. Rep. of` should be.
 
 
-```r
+``` r
 drc = stringr::str_subset(world$name_long, "Dem*.+Congo")
 drc
 #> [1] "Democratic Republic of the Congo"
@@ -518,10 +539,13 @@ To fix this issue, we will create a new version of `coffee_data` and update the 
 `inner_join()`ing the updated data frame returns a result with all 46 coffee-producing nations.
 
 
-```r
+``` r
 coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = drc
 world_coffee_match = inner_join(world, coffee_data)
 #> Joining with `by = join_by(name_long)`
+```
+
+``` r
 nrow(world_coffee_match)
 #> [1] 46
 ```
@@ -532,9 +556,12 @@ In contrast with the previous joins, the result is *not* another simple feature 
 the output of a join tends to match its first argument.
 
 
-```r
+``` r
 coffee_world = left_join(coffee_data, world)
 #> Joining with `by = join_by(name_long)`
+```
+
+``` r
 class(coffee_world)
 #> [1] "tbl_df"     "tbl"        "data.frame"
 ```
@@ -556,7 +583,7 @@ For this we need to divide a population column, here `pop`, by an area column, h
 Using base R, we can type:
 
 
-```r
+``` r
 world_new = world # do not overwrite our original data
 world_new$pop_dens = world_new$pop / world_new$area_km2
 ```
@@ -566,7 +593,7 @@ Alternatively, we can use one of **dplyr** functions - `mutate()` or `transmute(
 `mutate()` adds new columns at the penultimate position in the `sf` object (the last one is reserved for the geometry):
 
 
-```r
+``` r
 world_new2 = world |> 
   mutate(pop_dens = pop / area_km2)
 ```
@@ -579,7 +606,7 @@ For example, we want to combine the `continent` and `region_un` columns into a n
 Additionally, we can define a separator (here: a colon `:`) which defines how the values of the input columns should be joined, and if the original columns should be removed (here: `TRUE`).
 
 
-```r
+``` r
 world_unite = world |>
   tidyr::unite("con_reg", continent:region_un, sep = ":", remove = TRUE)
 ```
@@ -589,7 +616,7 @@ The resulting `sf` object has a new column called `con_reg` representing the con
 **tidyr**'s `separate()` function does the opposite of `unite()`: it splits one column into multiple columns using either a regular expression or character positions.
 
 
-```r
+``` r
 world_separate = world_unite |>
   tidyr::separate(con_reg, c("continent", "region_un"), sep = ":")
 ```
@@ -602,7 +629,7 @@ The first replaces an old name with a new one.
 The following command, for example, renames the lengthy `name_long` column to simply `name`:
 
 
-```r
+``` r
 world |> 
   rename(name = name_long)
 ```
@@ -614,7 +641,7 @@ This is illustrated below, which outputs the same `world` object, but with very 
 
 
 
-```r
+``` r
 new_names = c("i", "n", "c", "r", "s", "t", "a", "p", "l", "gP", "geom")
 world_new_names = world |>
   setNames(new_names)
@@ -628,7 +655,7 @@ Do this with `st_drop_geometry()`, **not** manually with commands such as `selec
 ]
 
 
-```r
+``` r
 world_data = world |> st_drop_geometry()
 class(world_data)
 #> [1] "tbl_df"     "tbl"        "data.frame"
@@ -645,7 +672,7 @@ The following code recreates the raster dataset used in Section \@ref(raster-cla
 This demonstrates how the `rast()` function works to create an example raster named `elev` (representing elevations).
 
 
-```r
+``` r
 elev = rast(nrows = 6, ncols = 6,
             xmin = -1.5, xmax = 1.5, ymin = -1.5, ymax = 1.5,
             vals = 1:36)
@@ -660,7 +687,7 @@ Raster objects can also contain categorical values of class `logical` or `factor
 The following code creates the raster datasets shown in Figure \@ref(fig:cont-raster):
 
 
-```r
+``` r
 grain_order = c("clay", "silt", "sand")
 grain_char = sample(grain_order, 36, replace = TRUE)
 grain_fact = factor(grain_char, levels = grain_order)
@@ -678,7 +705,7 @@ Each element of this list is a layer of the raster.
 It is also possible to use the function `levels()` for retrieving and adding new or replacing existing factor levels.
 
 
-```r
+``` r
 grain2 = grain # do not overwrite the original data
 levels(grain2) = data.frame(value = c(0, 1, 2), wetness = c("wet", "moist", "dry"))
 levels(grain2)
@@ -718,7 +745,7 @@ The first two subsetting options are demonstrated in the commands below ---
 both return the value of the top left pixel in the raster object `elev` (results not shown).
 
 
-```r
+``` r
 # row 1, column 1
 elev[1, 1]
 # cell ID 1
@@ -733,7 +760,7 @@ Cell values can be modified by overwriting existing values in conjunction with a
 The following code chunk, for example, sets the upper left cell of `elev` to 0 (results not shown):
 
 
-```r
+``` r
 elev[1, 1] = 0
 elev[]
 ```
@@ -742,14 +769,14 @@ Leaving the square brackets empty is a shortcut version of `values()` for retrie
 Multiple cells can also be modified in this way:
 
 
-```r
+``` r
 elev[1, c(1, 2)] = 0
 ```
 
 Replacing values of multilayered rasters can be done with a matrix with as many columns as layers and rows as replaceable cells (results not shown):
 
 
-```r
+``` r
 two_layers = c(grain, elev) 
 two_layers[1] = cbind(c(1), c(4))
 two_layers[]
@@ -765,7 +792,7 @@ Printing a raster object to the console by typing its name returns minimum and m
 Further summary operations such as the standard deviation (see below) or custom summary statistics can be calculated with `global()`. 
 
 
-```r
+``` r
 global(elev, sd)
 ```
 
@@ -775,7 +802,7 @@ global(elev, sd)
 Additionally, the `freq()` function allows to get the frequency table of categorical values.
 
 
-```r
+``` r
 freq(grain)
 #>   layer value count
 #> 1     1  clay    10
@@ -787,7 +814,7 @@ Raster value statistics can be visualized in a variety of ways.
 Specific functions such as `boxplot()`, `density()`, `hist()` and `pairs()` work also with raster objects, as demonstrated in the histogram created with the command below (not shown).
 
 
-```r
+``` r
 hist(elev)
 ```
 
@@ -822,7 +849,7 @@ is therefore not recommended.</p>
 For these exercises we will use the `us_states` and `us_states_df` datasets from the **spData** package.
 You must have attached the package, and other packages used in the attribute operations chapter (**sf**, **dplyr**, **terra**) with commands such as `library(spData)` before attempting these exercises:
 
-```r
+``` r
 library(sf)
 library(dplyr)
 library(terra)

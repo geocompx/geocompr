@@ -7,7 +7,7 @@
 This chapter requires the following packages:
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -46,7 +46,7 @@ Many open and proprietary GIS programs, including GRASS GIS, ArcGIS\index{ArcGIS
 GDAL\index{GDAL} provides access to more than 200 vector and raster data formats.
 Table \@ref(tab:formats) presents some basic information about selected and often used spatial file formats.
 
-<table>
+<table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>(\#tab:formats)(\#tab:formats)Selected spatial file formats.</caption>
  <thead>
   <tr>
@@ -60,73 +60,73 @@ Table \@ref(tab:formats) presents some basic information about selected and ofte
 <tbody>
   <tr>
    <td style="text-align:left;"> ESRI Shapefile </td>
-   <td style="text-align:left;width: 7em; "> .shp (the main file) </td>
-   <td style="text-align:left;width: 14em; "> Popular format consisting of at least three files. No support for: files &gt; 2GB;  mixed types; names &gt; 10 chars; cols &gt; 255. </td>
-   <td style="text-align:left;"> Vector </td>
-   <td style="text-align:left;width: 7em; "> Partially open </td>
+   <td style="text-align:left;width: 5em; "> .shp (the main file) </td>
+   <td style="text-align:left;width: 12em; "> Popular format consisting of at least three files. No support for: files &gt; 2GB;  mixed types; names &gt; 10 chars; cols &gt; 255. </td>
+   <td style="text-align:left;width: 4em; "> Vector </td>
+   <td style="text-align:left;width: 5em; "> Partially open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> GeoJSON </td>
-   <td style="text-align:left;width: 7em; "> .geojson </td>
-   <td style="text-align:left;width: 14em; "> Extends the JSON exchange format by including a subset of the simple feature representation; mostly used for storing coordinates in longitude and latitude; it is extended by the TopoJSON format </td>
-   <td style="text-align:left;"> Vector </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .geojson </td>
+   <td style="text-align:left;width: 12em; "> Extends the JSON exchange format by including a subset of the simple feature representation; mostly used for storing coordinates in longitude and latitude; it is extended by the TopoJSON format </td>
+   <td style="text-align:left;width: 4em; "> Vector </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> KML </td>
-   <td style="text-align:left;width: 7em; "> .kml </td>
-   <td style="text-align:left;width: 14em; "> XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file forms the KMZ format. </td>
-   <td style="text-align:left;"> Vector </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .kml </td>
+   <td style="text-align:left;width: 12em; "> XML-based format for spatial visualization, developed for use with Google Earth. Zipped KML file forms the KMZ format. </td>
+   <td style="text-align:left;width: 4em; "> Vector </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> GPX </td>
-   <td style="text-align:left;width: 7em; "> .gpx </td>
-   <td style="text-align:left;width: 14em; "> XML schema created for exchange of GPS data. </td>
-   <td style="text-align:left;"> Vector </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .gpx </td>
+   <td style="text-align:left;width: 12em; "> XML schema created for exchange of GPS data. </td>
+   <td style="text-align:left;width: 4em; "> Vector </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> FlatGeobuf </td>
-   <td style="text-align:left;width: 7em; "> .fgb </td>
-   <td style="text-align:left;width: 14em; "> Single file format allowing for quick reading and writing of vector data. Has streaming capabilities. </td>
-   <td style="text-align:left;"> Vector </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .fgb </td>
+   <td style="text-align:left;width: 12em; "> Single file format allowing for quick reading and writing of vector data. Has streaming capabilities. </td>
+   <td style="text-align:left;width: 4em; "> Vector </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> GeoTIFF </td>
-   <td style="text-align:left;width: 7em; "> .tif/.tiff </td>
-   <td style="text-align:left;width: 14em; "> Popular raster format. A TIFF file containing additional spatial metadata. </td>
-   <td style="text-align:left;"> Raster </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .tif/.tiff </td>
+   <td style="text-align:left;width: 12em; "> Popular raster format. A TIFF file containing additional spatial metadata. </td>
+   <td style="text-align:left;width: 4em; "> Raster </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Arc ASCII </td>
-   <td style="text-align:left;width: 7em; "> .asc </td>
-   <td style="text-align:left;width: 14em; "> Text format where the first six lines represent the raster header, followed by the raster cell values arranged in rows and columns. </td>
-   <td style="text-align:left;"> Raster </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .asc </td>
+   <td style="text-align:left;width: 12em; "> Text format where the first six lines represent the raster header, followed by the raster cell values arranged in rows and columns. </td>
+   <td style="text-align:left;width: 4em; "> Raster </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> SQLite/SpatiaLite </td>
-   <td style="text-align:left;width: 7em; "> .sqlite </td>
-   <td style="text-align:left;width: 14em; "> Standalone  relational database, SpatiaLite is the spatial extension of SQLite. </td>
-   <td style="text-align:left;"> Vector and raster </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .sqlite </td>
+   <td style="text-align:left;width: 12em; "> Standalone  relational database, SpatiaLite is the spatial extension of SQLite. </td>
+   <td style="text-align:left;width: 4em; "> Vector and raster </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
   <tr>
    <td style="text-align:left;"> ESRI FileGDB </td>
-   <td style="text-align:left;width: 7em; "> .gdb </td>
-   <td style="text-align:left;width: 14em; "> Spatial and nonspatial objects created by ArcGIS. Allows: multiple feature classes; topology. Limited support from GDAL. </td>
-   <td style="text-align:left;"> Vector and raster </td>
-   <td style="text-align:left;width: 7em; "> Proprietary </td>
+   <td style="text-align:left;width: 5em; "> .gdb </td>
+   <td style="text-align:left;width: 12em; "> Spatial and nonspatial objects created by ArcGIS. Allows: multiple feature classes; topology. Limited support from GDAL. </td>
+   <td style="text-align:left;width: 4em; "> Vector and raster </td>
+   <td style="text-align:left;width: 5em; "> Proprietary </td>
   </tr>
   <tr>
    <td style="text-align:left;"> GeoPackage </td>
-   <td style="text-align:left;width: 7em; "> .gpkg </td>
-   <td style="text-align:left;width: 14em; "> Lightweight database container based on SQLite allowing an easy and platform-independent exchange of geodata </td>
-   <td style="text-align:left;"> Vector and (very limited) raster </td>
-   <td style="text-align:left;width: 7em; "> Open </td>
+   <td style="text-align:left;width: 5em; "> .gpkg </td>
+   <td style="text-align:left;width: 12em; "> Lightweight database container based on SQLite allowing an easy and platform-independent exchange of geodata </td>
+   <td style="text-align:left;width: 4em; "> Vector and (very limited) raster </td>
+   <td style="text-align:left;width: 5em; "> Open </td>
   </tr>
 </tbody>
 </table>
@@ -261,7 +261,7 @@ The following commands show the first three drivers reported the computer's GDAL
 Note that the majority of drivers can write data, while only a dozen or so formats can efficiently represent raster data in addition to vector data (see `?st_drivers()` for details):
 
 
-```r
+``` r
 sf_drivers = st_drivers()
 head(sf_drivers, n = 3)
 summary(sf_drivers[-c(1:2)])
@@ -273,7 +273,7 @@ In most cases, as with the ESRI Shapefile\index{Shapefile} (`.shp`) or the `GeoP
 `read_sf()` guesses the driver based on the file extension, as illustrated for a `.gpkg` file below:
 
 
-```r
+``` r
 f = system.file("shapes/world.gpkg", package = "spData")
 world = read_sf(f)
 ```
@@ -290,7 +290,7 @@ An example below extracts data for Tanzania only (Figure \@ref(fig:readsfquery):
 It is done by specifying that we want to get all columns (`SELECT *`) from the `"world"` layer for which the `name_long` is equal to `"Tanzania"`:
 
 
-```r
+``` r
 tanzania = read_sf(f, query = 'SELECT * FROM world WHERE name_long = "Tanzania"')
 ```
 
@@ -306,7 +306,7 @@ Let's try it using a small example -- we want to read polygons from our file tha
 To do it, we need to prepare our "filter" by (a) creating the buffer (Section \@ref(buffers)), (b) converting the `sf` buffer object into an `sfc` geometry object with `st_geometry()`, and (c) translating geometries into their well-known text representation with `st_as_text()`:
 
 
-```r
+``` r
 tanzania_buf = st_buffer(tanzania, 50000)
 tanzania_buf_geom = st_geometry(tanzania_buf)
 tanzania_buf_wkt = st_as_text(tanzania_buf_geom)
@@ -315,11 +315,55 @@ tanzania_buf_wkt = st_as_text(tanzania_buf_geom)
 Now, we can apply this "filter" using the `wkt_filter` argument.
 
 
-```r
+``` r
 tanzania_neigh = read_sf(f, wkt_filter = tanzania_buf_wkt)
 ```
 
 Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.936 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     3
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.26 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.935 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     3
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.24 0.285
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
@@ -336,7 +380,7 @@ To find out about possible options, please refer to the 'Open Options' section o
 For the comma-separated value (csv) format, visit https://gdal.org/drv_csv.html.
 
 
-```r
+``` r
 cycle_hire_txt = system.file("misc/cycle_hire_xy.csv", package = "spData")
 cycle_hire_xy = read_sf(cycle_hire_txt,
   options = c("X_POSSIBLE_NAMES=X", "Y_POSSIBLE_NAMES=Y"))
@@ -348,7 +392,7 @@ For instance, the `world_wkt.csv` file has a column named `WKT` representing pol
 We will again use the `options` parameter to indicate this.
 
 
-```r
+``` r
 world_txt = system.file("misc/world_wkt.csv", package = "spData")
 world_wkt = read_sf(world_txt, options = "GEOM_POSSIBLE_NAMES=WKT")
 ```
@@ -366,7 +410,7 @@ This file contains more than one layer.
 We choose the first layer `Placemarks` and say so with the help of the `layer` parameter in `read_sf()`.
 
 
-```r
+``` r
 u = "https://developers.google.com/kml/documentation/KML_Samples.kml"
 download.file(u, "KML_Samples.kml")
 st_layers("KML_Samples.kml")
@@ -377,6 +421,9 @@ st_layers("KML_Samples.kml")
 #> 2      Styles and Markup                      1     11   WGS 84
 #> 3       Highlighted Icon                      1     11   WGS 84
 ....
+```
+
+``` r
 kml = read_sf("KML_Samples.kml", layer = "Placemarks")
 ```
 
@@ -390,7 +437,7 @@ Similar to vector data, raster data comes in many file formats with some of them
 **terra**'s `rast()` command reads in a single layer when a file with just one layer is provided.
 
 
-```r
+``` r
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 single_layer = rast(raster_filepath)
 ```
@@ -398,7 +445,7 @@ single_layer = rast(raster_filepath)
 It also works in case you want to read a multilayer file.
 
 
-```r
+``` r
 multilayer_filepath = system.file("raster/landsat.tif", package = "spDataLarge")
 multilayer_rast = rast(multilayer_filepath)
 ```
@@ -414,7 +461,7 @@ Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file 
 To read an online file, we just need to provide its URL together with the `/vsicurl/` prefix.
 
 
-```r
+``` r
 myurl = paste0("/vsicurl/https://zenodo.org/record/5774954/files/",
                "clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif")
 snow = rast(myurl)
@@ -435,7 +482,7 @@ This allows us also to just read a tiny portion of the data without downloading 
 For example, we can get the snow probability for December in Reykjavik (70%) by specifying its coordinates and applying the `extract()` function:
 
 
-```r
+``` r
 rey = data.frame(lon = -21.94, lat = 64.15)
 snow_rey = extract(snow, rey)
 snow_rey
@@ -471,14 +518,14 @@ Based on the file name, `write_sf()` decides automatically which driver to use.
 The speed of the writing process depends also on the driver.
 
 
-```r
+``` r
 write_sf(obj = world, dsn = "world.gpkg")
 ```
 
 **Note**: if you try to write to the same data source again, the function will overwrite the file:
 
 
-```r
+``` r
 write_sf(obj = world, dsn = "world.gpkg")
 ```
 
@@ -486,7 +533,7 @@ Instead of overwriting the file, we could add a new layer to the file by specify
 This is supported by several spatial formats, including GeoPackage.
 
 
-```r
+``` r
 write_sf(obj = world, dsn = "world_many_layers.gpkg", layer = "second_layer")
 ```
 
@@ -494,7 +541,7 @@ Alternatively, you can use `st_write()` since it is equivalent to `write_sf()`.
 However, it has different defaults -- it does not overwrite files (returns an error when you try to do it) and shows a short summary of the written file format and the object.
 
 
-```r
+``` r
 st_write(obj = world, dsn = "world2.gpkg")
 #> Writing layer `world2' to data source `world2.gpkg' using driver `GPKG'
 #> Writing 177 features with 10 fields and geometry type Multi Polygon.
@@ -506,7 +553,7 @@ This can be done by specifying `GEOMETRY` inside of `layer_options`.
 It could be either `AS_XY` for simple point datasets (it creates two new columns for coordinates) or `AS_WKT` for more complex spatial data (one new column is created which contains the well-known text representation of spatial objects).
 
 
-```r
+``` r
 write_sf(cycle_hire_xy, "cycle_hire_xy.csv", layer_options = "GEOMETRY=AS_XY")
 write_sf(world_wkt, "world_wkt.csv", layer_options = "GEOMETRY=AS_WKT")
 ```
@@ -550,7 +597,7 @@ By default, the output file format is derived from the filename.
 Naming a file `*.tif` will create a GeoTIFF file, as demonstrated below:
 
 
-```r
+``` r
 writeRaster(single_layer, filename = "my_raster.tif", datatype = "INT2U")
 ```
 
@@ -559,7 +606,7 @@ GeoTIFF files are written in **terra**, by default, with the LZW compression `gd
 To change or disable the compression, we need to modify this argument.
 
 
-```r
+``` r
 writeRaster(x = single_layer, filename = "my_raster.tif",
             gdal = c("COMPRESS=NONE"), overwrite = TRUE)
 ```
@@ -568,7 +615,7 @@ writeRaster(x = single_layer, filename = "my_raster.tif",
 Additionally, we can save our raster object as COG (*Cloud Optimized GeoTIFF*, Section \@ref(file-formats)) with the `filetype = "COG"` options.
 
 
-```r
+``` r
 writeRaster(x = single_layer, filename = "my_raster.tif",
             filetype = "COG", overwrite = TRUE)
 ```
@@ -596,7 +643,7 @@ Downloads can be initiated from the command line using a variety of techniques, 
 Files hosted on static URLs can be downloaded with `download.file()`, as illustrated in the code chunk below which accesses PeRL: Permafrost Region Pond and Lake Database from [pangaea.de](https://doi.pangaea.de/10.1594/PANGAEA.868349):
 
 
-```r
+``` r
 download.file(url = "https://hs.pangaea.de/Maps/PeRL/PeRL_permafrost_landscapes.zip",
               destfile = "PeRL_permafrost_landscapes.zip", 
               mode = "wb")
@@ -610,7 +657,7 @@ canada_perma_land = read_sf("PeRL_permafrost_landscapes/canada_perma_land.shp")
 Many R packages have been developed for accessing geographic data, some of which are presented in Table \@ref(tab:datapackages).
 These provide interfaces to one or more spatial libraries or geoportals and aim to make data access even quicker from the command line.
 
-<table class="table" style="margin-left: auto; margin-right: auto;">
+<table>
 <caption>(\#tab:datapackages)(\#tab:datapackages)Selected R packages for geographic data retrieval.</caption>
  <thead>
   <tr>
@@ -620,36 +667,36 @@ These provide interfaces to one or more spatial libraries or geoportals and aim 
  </thead>
 <tbody>
   <tr>
-   <td style="text-align:left;"> climateR </td>
-   <td style="text-align:left;"> Access over 100,000k gridded climate and landscape datasets from over 2,000 data providers by area of interest. </td>
+   <td style="text-align:left;width: 5em; "> climateR </td>
+   <td style="text-align:left;width: 22em; "> Access over 100,000k gridded climate and landscape datasets from over 2,000 data providers by area of interest. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> elevatr </td>
-   <td style="text-align:left;"> Access point and raster elevation data from various sources. </td>
+   <td style="text-align:left;width: 5em; "> elevatr </td>
+   <td style="text-align:left;width: 22em; "> Access point and raster elevation data from various sources. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> FedData </td>
-   <td style="text-align:left;"> Datasets maintained by the US Federal government, including elevation and land cover. </td>
+   <td style="text-align:left;width: 5em; "> FedData </td>
+   <td style="text-align:left;width: 22em; "> Datasets maintained by the US Federal government, including elevation and land cover. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> geodata </td>
-   <td style="text-align:left;"> Download and import imports administrative, elevation, WorldClim data. </td>
+   <td style="text-align:left;width: 5em; "> geodata </td>
+   <td style="text-align:left;width: 22em; "> Download and import imports administrative, elevation, WorldClim data. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> osmdata </td>
-   <td style="text-align:left;"> Download and import small OpenStreetMap datasets. </td>
+   <td style="text-align:left;width: 5em; "> osmdata </td>
+   <td style="text-align:left;width: 22em; "> Download and import small OpenStreetMap datasets. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> osmextract </td>
-   <td style="text-align:left;"> Download and import large OpenStreetMap datasets. </td>
+   <td style="text-align:left;width: 5em; "> osmextract </td>
+   <td style="text-align:left;width: 22em; "> Download and import large OpenStreetMap datasets. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> rnaturalearth </td>
-   <td style="text-align:left;"> Access to Natural Earth vector and raster data. </td>
+   <td style="text-align:left;width: 5em; "> rnaturalearth </td>
+   <td style="text-align:left;width: 22em; "> Access to Natural Earth vector and raster data. </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> rnoaa </td>
-   <td style="text-align:left;"> Imports National Oceanic and Atmospheric Administration (NOAA) climate data. </td>
+   <td style="text-align:left;width: 5em; "> rnoaa </td>
+   <td style="text-align:left;width: 22em; "> Imports National Oceanic and Atmospheric Administration (NOAA) climate data. </td>
   </tr>
 </tbody>
 </table>
@@ -672,7 +719,7 @@ This diversity is demonstrated in the subsequent code chunks, which show how to 
 Country borders are often useful and these can be accessed with the `ne_countries()` function from the **rnaturalearth** package [@R-rnaturalearth] as follows:
 
 
-```r
+``` r
 library(rnaturalearth)
 usa_sf = ne_countries(country = "United States of America", returnclass = "sf")
 ```
@@ -683,7 +730,7 @@ A second example downloads a series of rasters containing global monthly precipi
 The result is a multilayer object of class `SpatRaster`.
 
 
-```r
+``` r
 library(geodata)
 worldclim_prec = worldclim_global("prec", res = 10, path = tempdir())
 class(worldclim_prec)
@@ -695,7 +742,7 @@ The result is passed to a function for selecting which OSM elements we're intere
 Next, they are passed to the function `osmdata_sf()` which does the work of downloading the data and converting it into a list of `sf` objects (see `vignette('osmdata')` for further details):
 
 
-```r
+``` r
 library(osmdata)
 parks = opq(bbox = "leeds uk") |> 
   add_osm_feature(key = "leisure", value = "park") |> 
@@ -719,7 +766,7 @@ For more information on data import with R packages, see Sections 5.5 and 5.6 of
 ]
 
 
-```r
+``` r
 world2 = spData::world
 world3 = read_sf(system.file("shapes/world.gpkg", package = "spData"))
 ```
@@ -737,7 +784,7 @@ This function also allows to select a geocoding service with the `method` argume
 Let's try this package by searching for coordinates of the John Snow blue plaque located on a building in the Soho district of London.
 
 
-```r
+``` r
 library(tidygeocoder)
 geo_df = data.frame(address = "54 Frith St, London W1D 4SJ, UK")
 geo_df = geocode(geo_df, address, method = "osm")
@@ -747,7 +794,7 @@ geo_df
 The resulting data frame can be converted into an `sf` object with `st_as_sf()`.
 
 
-```r
+``` r
 geo_sf = st_as_sf(geo_df, coords = c("long", "lat"), crs = "EPSG:4326")
 ```
 
@@ -766,7 +813,7 @@ It already supports various international standards for geographic metadata info
 Geographic metadata can be created with **geometa** as follows, which creates and saves a metadata file:
 
 
-```r
+``` r
 library(geometa)
 # create a metadata
 md = ISOMetadata$new()
@@ -811,7 +858,7 @@ One of the most fundamental requests is `getCapabilities`, demonstrated with **h
 The following code chunk demonstrates how API\index{API} queries can be constructed and dispatched, in this case to discover the capabilities of a service run by the Fisheries and Aquaculture Division of the Food and Agriculture Organization of the United Nations (UN-FAO).
 
 
-```r
+``` r
 library(httr)
 base_url = "https://www.fao.org"
 endpoint = "/fishery/geoserver/wfs"
@@ -827,7 +874,7 @@ As can be seen by executing `browseURL(res$url)`, the results can also be read d
 One way of extracting the contents of the request is as follows:
 
 
-```r
+``` r
 txt = content(res, "text")
 xml = xml2::read_xml(txt)
 xml
@@ -845,7 +892,7 @@ Available names differ depending on the accessed web feature service.
 One can extract them programmatically using web technologies [@nolan_xml_2014] or scrolling manually through the contents of the `GetCapabilities` output in a browser.
 
 
-```r
+``` r
 library(sf)
 sf::sf_use_s2(FALSE)
 qf = list(request = "GetFeature", typeName = "fifao:FAO_MAJOR")
@@ -868,7 +915,7 @@ The **ows4R** package relies on the principle of clients.
 To interact with an OWS service (such as WFS), a client is created as follows:
 
 
-```r
+``` r
 library(ows4R)
 WFS = WFSClient$new(
   url = "https://www.fao.org/fishery/geoserver/wfs",
@@ -880,7 +927,7 @@ WFS = WFSClient$new(
 The operations are then accessible from this client object, e.g., `getCapabilities` or `getFeatures`.
 
 
-```r
+``` r
 library(ows4R)
 caps = WFS$getCapabilities()
 features = WFS$getFeatures("fifao:FAO_MAJOR")
@@ -899,7 +946,7 @@ Chapter \@ref(adv-map) covers map making in detail but it is worth mentioning wa
 The most general method to save a static plot is to open a graphic device, create a plot, and close it, for example:
 
 
-```r
+``` r
 png(filename = "lifeExp.png", width = 500, height = 350)
 plot(world["lifeExp"])
 dev.off()
@@ -914,7 +961,7 @@ For example, the **tmap** package has the `tmap_save()` function.
 You can save a `tmap` object to different graphic formats or an HTML file by specifying the object name and a file path to a new file.
 
 
-```r
+``` r
 library(tmap)
 tmap_obj = tm_shape(world) + tm_polygons(col = "lifeExp")
 tmap_save(tmap_obj, filename = "lifeExp_tmap.png")
@@ -923,7 +970,7 @@ tmap_save(tmap_obj, filename = "lifeExp_tmap.png")
 On the other hand, you can save interactive maps created in the **mapview** package as an HTML file or image using the `mapshot2()` function:
 
 
-```r
+``` r
 library(mapview)
 mapview_obj = mapview(world, zcol = "lifeExp", legend = TRUE)
 mapshot2(mapview_obj, url = "my_interactive_map.html")

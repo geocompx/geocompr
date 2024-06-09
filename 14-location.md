@@ -7,7 +7,7 @@
 - This chapter requires the following packages (**tmaptools** must also be installed):
 
 
-```r
+``` r
 library(sf)
 library(dplyr)
 library(purrr)
@@ -70,7 +70,7 @@ The German government provides gridded census data at either 1 km or 100 m resol
 The following code chunk downloads, unzips and reads in the 1 km data.
 
 
-```r
+``` r
 download.file("https://tinyurl.com/ybtpkwxz", 
               destfile = "census.zip", mode = "wb")
 unzip("census.zip") # unzip the files
@@ -80,7 +80,7 @@ census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
 Please note that `census_de` is also available from the **spDataLarge** package:
 
 
-```r
+``` r
 data("census_de", package = "spDataLarge")
 ```
 
@@ -90,7 +90,7 @@ These variables are selected and renamed from German into English in the code ch
 Further, `mutate()` is used to convert values -1 and -9 (meaning "unknown") to `NA`.
 
 
-```r
+``` r
 # pop = population, hh_size = household size
 input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
                       women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
@@ -121,12 +121,12 @@ When setting its `type` argument to `xyz`, the `x` and `y` columns of the input 
 All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our GitHub repository).
 
 
-```r
+``` r
 input_ras = rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 ```
 
 
-```r
+``` r
 input_ras
 #> class       : SpatRaster 
 #> dimensions  : 868, 642, 4  (nrow, ncol, nlyr)
@@ -163,7 +163,7 @@ these are reclassified with a comparatively high weight of 3 because the target 
 Similarly, the classes containing the youngest people and highest proportion of single households are reclassified to have high weights.
 
 
-```r
+``` r
 rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
                    4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
                  ncol = 3, byrow = TRUE)
@@ -181,7 +181,7 @@ Subsequently, the `for`-loop\index{loop!for} applies the reclassification matrix
 Finally, the code chunk below ensures the `reclass` layers have the same name as the layers of `input_ras`.
 
 
-```r
+``` r
 reclass = input_ras
 for (i in seq_len(nlyr(reclass))) {
   reclass[[i]] = classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
@@ -190,7 +190,7 @@ names(reclass) = names(input_ras)
 ```
 
 
-```r
+``` r
 reclass # full output not shown
 #> ... 
 #> names       :  pop, women, mean_age, hh_size 
@@ -205,7 +205,7 @@ Pixels at this coarse resolution can rapidly be created using `aggregate()`\inde
 The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^).
 
 
-```r
+``` r
 pop_agg = aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
 summary(pop_agg)
 #>       pop         
@@ -221,7 +221,7 @@ summary(pop_agg)
 The next stage is to keep only cells with more than half a million people.
 
 
-```r
+``` r
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
@@ -232,7 +232,7 @@ It would be nice if we could join all cells belonging to one region.
 Subsequently, `as.polygons()` converts the raster object into spatial polygons, and `st_as_sf()` converts it into an `sf` object.
 
 
-```r
+``` r
 metros = pop_agg |> 
   patches(directions = 8) |>
   as.polygons() |>
@@ -252,7 +252,7 @@ Setting additionally `as.data.frame` to `TRUE` will give back a `data.frame` wit
 However, here, we are only interested in the name of the city.
 
 
-```r
+``` r
 metro_names = sf::st_centroid(metros, of_largest_polygon = TRUE) |>
   tmaptools::rev_geocode_OSM(as.data.frame = TRUE) |>
   select(city, town, state)
@@ -285,7 +285,7 @@ Hence, we replace Velbert with Düsseldorf (Figure \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we avoid them.
 
 
-```r
+``` r
 metro_names = metro_names$city |> 
   as.character() |>
   {\(x) ifelse(x == "Velbert", "Düsseldorf", x)}() |>
@@ -310,7 +310,7 @@ To save time and resources, we have put the output named `shops` into **spDataLa
 To make it available in your environment run `data("shops", package = "spDataLarge")`.
 
 
-```r
+``` r
 shops = purrr::map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
@@ -334,7 +334,7 @@ The following `if` condition simply checks if there is at least one shop for eac
 If not, we recommend to try to download the shops again for this/these specific region/s.
 
 
-```r
+``` r
 # checking if we have downloaded shops for each metropolitan area
 ind = purrr::map_dbl(shops, nrow) == 0
 if (any(ind)) {
@@ -346,7 +346,7 @@ if (any(ind)) {
 To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.] we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally combines all shops into one large `sf`\index{sf} object.
 
 
-```r
+``` r
 # select only specific columns
 shops = purrr::map_dfr(shops, select, osm_id, shop)
 ```
@@ -354,7 +354,7 @@ shops = purrr::map_dfr(shops, select, osm_id, shop)
 Note: `shops` is provided in the `spDataLarge` and can be accessed as follows:
 
 
-```r
+``` r
 data("shops", package = "spDataLarge")
 ```
 
@@ -368,7 +368,7 @@ The result of the subsequent code chunk is therefore an estimate of shop density
 
 
 
-```r
+``` r
 shops = sf::st_transform(shops, st_crs(reclass))
 # create poi raster
 poi = rasterize(x = shops, y = reclass, field = "osm_id", fun = "length")
@@ -380,7 +380,7 @@ One can use equal breaks, quantile breaks, fixed values or others.
 Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-class variance, the result of which provides an input for the reclassification matrix.
 
 
-```r
+``` r
 # construct reclassification matrix
 int = classInt::classIntervals(values(poi), n = 4, style = "fisher")
 int = round(int$brks)
@@ -401,7 +401,7 @@ Second, though it is advantageous to have many potential customers within a spec
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.
 
 
-```r
+``` r
 # remove population raster and add poi raster
 reclass = reclass[[names(reclass) != "pop"]] |>
   c(poi)
@@ -411,7 +411,7 @@ In common with other data science projects, data retrieval and 'tidying' have co
 With clean data, the final step --- calculating a final score by summing all raster\index{raster} layers --- can be accomplished in a single line of code.
 
 
-```r
+``` r
 # calculate the total score
 result = sum(reclass)
 ```

@@ -7,7 +7,7 @@
 - This chapter requires the same packages used in Chapter \@ref(attr): 
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -55,9 +55,33 @@ To demonstrate spatial subsetting, we will use the `nz` and `nz_height` datasets
 The following code chunk creates an object representing Canterbury, then uses spatial subsetting to return all high points in the region.
 
 
-```r
+``` r
 canterbury = nz |> filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.75 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.54 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -75,7 +99,7 @@ The default setting `st_intersects` is a 'catch all' topological relation that w
 Alternative spatial operators can be specified with the `op =` argument, as demonstrated in the following command which returns the opposite of `st_intersects()`, points that do not intersect with Canterbury (see Section \@ref(topological-relations)).
 
 
-```r
+``` r
 nz_height[canterbury, , op = st_disjoint]
 ```
 
@@ -91,10 +115,13 @@ Another way of doing spatial subsetting uses objects returned by topological ope
 These objects can be useful in their own right, for example when exploring the graph network of relationships between contiguous regions, but they can also be used for subsetting, as demonstrated in the code chunk below.
 
 
-```r
+``` r
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
 class(sel_sgbp)
 #> [1] "sgbp" "list"
+```
+
+``` r
 sel_sgbp
 #> Sparse geometry binary predicate list of length 101, where the
 #> predicate was `intersects'
@@ -106,6 +133,9 @@ sel_sgbp
 #>  5: 1
 #>  6: 1
 ....
+```
+
+``` r
 sel_logical = lengths(sel_sgbp) > 0
 canterbury_height2 = nz_height[sel_logical, ]
 ```
@@ -121,7 +151,7 @@ Note: the solution involving `sgbp` objects is more generalisable though, as it 
 The same result can be also achieved with the **sf** function `st_filter()` which was [created](https://github.com/r-spatial/sf/issues/1148) to increase compatibility between `sf` objects and **dplyr** data manipulation code:
 
 
-```r
+``` r
 canterbury_height3 = nz_height |>
   st_filter(y = canterbury, .predicate = st_intersects)
 ```
@@ -156,7 +186,7 @@ To see how topological relations work in practice, let's create a simple reprodu
 Note that to create tabular data representing coordinates (x and y) of the polygon vertices, we use the base R function `cbind()` to create a matrix representing coordinates points, a `POLYGON`, and finally an `sfc` object, as described in Chapter \@ref(spatial-class):
 
 
-```r
+``` r
 polygon_matrix = cbind(
   x = c(0, 0, 1, 1,   0),
   y = c(0, 1, 1, 0.5, 0)
@@ -168,12 +198,7 @@ We will create additional geometries to demonstrate spatial relations with the f
 Note the use of the function `st_as_sf()` and the argument `coords` to efficiently convert from a data frame containing columns representing coordinates to an `sf` object containing points:
 
 
-```r
-line_sfc = st_sfc(st_linestring(cbind(
-  x = c(0.4, 1),
-  y = c(0.2, 0.5)
-)))
-# create points
+``` r
 point_df = data.frame(
   x = c(0.2, 0.7, 0.4),
   y = c(0.1, 0.2, 0.8)
@@ -191,7 +216,7 @@ The question can be answered by inspection (points 1 and 3 are touching and with
 This question can be answered with the spatial predicate `st_intersects()` as follows:
 
 
-```r
+``` r
 st_intersects(point_sf, polygon_sfc)
 #> Sparse geometry binary predicate... `intersects'
 #>  1: 1
@@ -206,7 +231,7 @@ This *sparse matrix* output only registers a relation if one exists, reducing th
 As we saw in the previous section, a *dense matrix* consisting of `TRUE` or `FALSE` values is returned when `sparse = FALSE`.
 
 
-```r
+``` r
 st_intersects(point_sf, polygon_sfc, sparse = FALSE)
 #>       [,1]
 #> [1,]  TRUE
@@ -222,7 +247,7 @@ More restrictive questions include which points lie within the polygon, and whic
 These can be answered as follows (results not shown):
 
 
-```r
+``` r
 st_within(point_sf, polygon_sfc)
 st_touches(point_sf, polygon_sfc)
 ```
@@ -231,7 +256,7 @@ Note that although the first point *touches* the boundary polygon, it is not wit
 The opposite of `st_intersects()` is `st_disjoint()`, which returns only objects that do not spatially relate in any way to the selecting object (note `[, 1]` converts the result into a vector).
 
 
-```r
+``` r
 st_disjoint(point_sf, polygon_sfc, sparse = FALSE)[, 1]
 #> [1] FALSE  TRUE FALSE
 ```
@@ -241,7 +266,7 @@ It can be used to set how close target objects need to be before they are select
 The 'is within distance' binary spatial predicate is demonstrated in the code chunk below, the results of which show that every point is within 0.2 units of the polygon.
 
 
-```r
+``` r
 st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 #> [1] TRUE TRUE TRUE
 ```
@@ -271,7 +296,7 @@ This is illustrated in the code chunk below, which finds the distance between th
 \index{vector!distance relations}
 
 
-```r
+``` r
 nz_highest = nz_height |> slice_max(n = 1, order_by = elevation)
 canterbury_centroid = st_centroid(canterbury)
 st_distance(nz_highest, canterbury_centroid)
@@ -289,7 +314,7 @@ This second feature hints at another useful feature of `st_distance()`, its abil
 This is illustrated in the command below, which finds the distances between the first three features in `nz_height` and the Otago and Canterbury regions of New Zealand represented by the object `co`.
 
 
-```r
+``` r
 co = filter(nz, grepl("Canter|Otag", Name))
 st_distance(nz_height[1:3, ], co)
 #> Units: [m]
@@ -304,7 +329,7 @@ This demonstrates the fact that distances between points and polygons refer to t
 The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
 
 
-```r
+``` r
 plot(st_geometry(co)[2])
 plot(st_geometry(nz_height)[2:3], add = TRUE)
 ```
@@ -353,7 +378,7 @@ These three components, when concatenated, create the string `212`, `FF1`, and `
 This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how other geometries in Figure \@ref(fig:relations) were created):
 
 
-```r
+``` r
 xy2sfc = function(x, y) st_sfc(st_polygon(list(cbind(x, y))))
 x = xy2sfc(x = c(0, 0, 1, 1, 0), y = c(0, 1, 1, 0.5, 0))
 y = xy2sfc(x = c(0.7, 0.7, 0.9, 0.7), y = c(0.8, 0.5, 0.5, 0.8))
@@ -368,7 +393,7 @@ The help page `?st_relate` contains function definitions for 'queen' and 'rook' 
 These are implemented as follows:
 
 
-```r
+``` r
 st_queen = function(x, y) st_relate(x, y, pattern = "F***T****")
 st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
 ```
@@ -376,11 +401,14 @@ st_rook = function(x, y) st_relate(x, y, pattern = "F***1****")
 Building on the object `x` created previously, we can use the newly created functions to find out which elements in the grid are a 'queen' and 'rook' in relation to the middle square of the grid as follows:
 
 
-```r
+``` r
 grid = st_make_grid(x, n = 3)
 grid_sf = st_sf(grid)
 grid_sf$queens = lengths(st_queen(grid, grid[5])) > 0
 plot(grid, col = grid_sf$queens)
+```
+
+``` r
 grid_sf$rooks = lengths(st_rook(grid, grid[5])) > 0
 plot(grid, col = grid_sf$rooks)
 ```
@@ -408,11 +436,14 @@ Implementing this idea in a [reproducible example](https://github.com/geocompx/g
 The starting point is to create points that are randomly scattered over the Earth's surface.
 
 
-```r
+``` r
 set.seed(2018) # set seed for reproducibility
 (bb = st_bbox(world)) # the world's bounds
 #>   xmin   ymin   xmax   ymax 
 #> -180.0  -89.9  180.0   83.6
+```
+
+``` r
 random_df = data.frame(
   x = runif(n = 10, min = bb[1], max = bb[3]),
   y = runif(n = 10, min = bb[2], max = bb[4])
@@ -427,10 +458,13 @@ The output is the `random_joined` object which is illustrated in Figure \@ref(fi
 Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (Figure \@ref(fig:spatial-join), top right panel).
 
 
-```r
+``` r
 world_random = world[random_points, ]
 nrow(world_random)
 #> [1] 4
+```
+
+``` r
 random_joined = st_join(random_points, world["name_long"])
 ```
 
@@ -452,7 +486,7 @@ Plotting them shows that they are often closely related but they do not touch, a
 \index{join!non-overlapping}
 
 
-```r
+``` r
 plot(st_geometry(cycle_hire), col = "blue")
 plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 ```
@@ -460,7 +494,7 @@ plot(st_geometry(cycle_hire_osm), add = TRUE, pch = 3, col = "red")
 We can check if any points are the same using `st_intersects()` as shown below:
 
 
-```r
+``` r
 any(st_intersects(cycle_hire, cycle_hire_osm, sparse = FALSE))
 #> [1] FALSE
 ```
@@ -483,7 +517,7 @@ The simplest method is to use the binary predicate `st_is_within_distance()`, as
 One can set the threshold distance in metric units also for unprojected data (e.g., lon/lat CRSs such as WGS84), if the spherical geometry engine (S2) is enabled, as it is in **sf** by default (see Section \@ref(s2)).
 
 
-```r
+``` r
 sel = st_is_within_distance(cycle_hire, cycle_hire_osm, 
                             dist = units::set_units(20, "m"))
 summary(lengths(sel) > 0)
@@ -496,11 +530,14 @@ How to retrieve the *values* associated with the respective `cycle_hire_osm` poi
 The solution is again with `st_join()`, but with an additional `dist` argument (set to 20 m below):
 
 
-```r
+``` r
 z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance, 
             dist = units::set_units(20, "m"))
 nrow(cycle_hire)
 #> [1] 742
+```
+
+``` r
 nrow(z)
 #> [1] 762
 ```
@@ -510,7 +547,7 @@ This is because some cycle hire stations in `cycle_hire` have multiple matches i
 To aggregate the values for the overlapping points and return the mean, we can use the aggregation methods learned in Chapter \@ref(attr), resulting in an object with the same number of rows as the target.
 
 
-```r
+``` r
 z = z |> 
   group_by(id) |> 
   summarize(capacity = mean(capacity))
@@ -521,7 +558,7 @@ nrow(z) == nrow(cycle_hire)
 The capacity of nearby stations can be verified by comparing a plot of the capacity of the source `cycle_hire_osm` data with the results in this new object (plots not shown):
 
 
-```r
+``` r
 plot(cycle_hire_osm["capacity"])
 plot(z["capacity"])
 ```
@@ -539,7 +576,7 @@ Returning to the example of New Zealand, imagine you want to find out the averag
 This can be done in a single line of code with base R's `aggregate()` method.
 
 
-```r
+``` r
 nz_agg = aggregate(x = nz_height, by = nz, FUN = mean)
 ```
 
@@ -547,13 +584,27 @@ The result of the previous command is an `sf` object with the same geometry as t
 The result of the previous operation is illustrated in Figure \@ref(fig:spatial-aggregation), which shows the average value of features in `nz_height` within each of New Zealand's 16 regions.
 The same result can also be generated by piping the output from `st_join()` into the 'tidy' functions `group_by()` and `summarize()` as follows:
 
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.08  1.68
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/spatial-aggregation-1.png" alt="Average height of the top 101 high points across the regions of New Zealand." width="50%" />
 <p class="caption">(\#fig:spatial-aggregation)Average height of the top 101 high points across the regions of New Zealand.</p>
 </div>
 
 
-```r
+``` r
 nz_agg2 = st_join(x = nz, y = nz_height) |>
   group_by(Name) |>
   summarize(elevation = mean(elevation, na.rm = TRUE))
@@ -590,11 +641,14 @@ The simplest useful method for this is *area weighted* spatial interpolation, wh
 This is implemented in `st_interpolate_aw()`, as demonstrated in the code chunk below.
 
 
-```r
+``` r
 iv = incongruent["value"] # keep only the values to be transferred
 agg_aw = st_interpolate_aw(iv, aggregating_zones, extensive = TRUE)
 #> Warning in st_interpolate_aw.sf(iv, aggregating_zones, extensive = TRUE):
 #> st_interpolate_aw assumes attributes are constant or uniform over areas of x
+```
+
+``` r
 agg_aw$value
 #> [1] 19.6 25.7
 ```
@@ -609,7 +663,7 @@ This section builds on Section \@ref(manipulating-raster-objects), which highlig
 For the reader's convenience, these datasets can be also found in the **spData** package.
 
 
-```r
+``` r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 ```
@@ -625,7 +679,7 @@ Both methods are demonstrated below to find the value of the cell that covers a 
 \index{spatial!subsetting}
 
 
-```r
+``` r
 id = cellFromXY(elev, xy = matrix(c(0.1, 0.1), ncol = 2))
 elev[id]
 # the same as
@@ -635,7 +689,7 @@ terra::extract(elev, matrix(c(0.1, 0.1), ncol = 2))
 Raster objects can also be subset with another raster object, as demonstrated in the code chunk below:
 
 
-```r
+``` r
 clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
             resolution = 0.3, vals = rep(1, 9))
 elev[clip]
@@ -655,7 +709,7 @@ This can be done by setting the `drop` argument of the `[` operator to `FALSE`.
 The code below returns the first two cells of `elev`, i.e., the first two cells of the top row, as a raster object (only the first 2 lines of the output is shown):
 
 
-```r
+``` r
 elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
 #> class       : SpatRaster 
 #> dimensions  : 1, 2, 1  (nrow, ncol, nlyr)
@@ -668,7 +722,7 @@ Another common use case of spatial subsetting is when a raster with `logical` (o
 In this case, the `[` and `mask()` functions can be used (results not shown).
 
 
-```r
+``` r
 # create raster mask
 rmask = elev
 values(rmask) = sample(c(NA, TRUE), 36, replace = TRUE)
@@ -679,7 +733,7 @@ Next, we want to keep those values of `elev` which are `TRUE` in `rmask`.
 In other words, we want to mask `elev` with `rmask`.
 
 
-```r
+``` r
 # spatial subsetting
 elev[rmask, drop = FALSE]           # with [ operator
 # we can also use mask
@@ -689,7 +743,7 @@ elev[rmask, drop = FALSE]           # with [ operator
 The above approach can be also used to replace some values (e.g., expected to be wrong) with NA. 
 
 
-```r
+``` r
 elev[elev < 20] = NA
 ```
 
@@ -734,7 +788,7 @@ Raster algebra also allows logical operations such as finding all raster cells t
 The **terra** package supports all these operations and more, as demonstrated below (Figure \@ref(fig:04-local-operations)):
 
 
-```r
+``` r
 elev + elev
 elev^2
 log(elev)
@@ -751,7 +805,7 @@ Using the `classify()` command, we need first to construct a reclassification ma
 The third column represents the new value for the specified ranges in column one and two.
 
 
-```r
+``` r
 rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
 rcl
 #>      [,1] [,2] [,3]
@@ -763,7 +817,7 @@ rcl
 Here, we assign the raster values in the ranges 0--12, 12--24 and 24--36 are *reclassified* to take values 1, 2 and 3, respectively.
 
 
-```r
+``` r
 recl = classify(elev, rcl = rcl)
 ```
 
@@ -791,7 +845,7 @@ $$
 Let's calculate NDVI for the multispectral satellite file of the Zion National Park.
 
 
-```r
+``` r
 multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 ```
@@ -801,7 +855,7 @@ Importantly, Landsat level-2 products are stored as integers to save disk space,
 For that purpose, we need to apply a scaling factor (0.0000275) and add an offset (-0.2) to the original values.^[You can read more about it at https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products.]
 
 
-```r
+``` r
 multi_rast = (multi_rast * 0.0000275) - 0.2
 ```
 
@@ -809,14 +863,14 @@ The proper values now should be in a range between 0 and 1.
 This is not the case here, probably due to the presence of clouds and other atmospheric effects, thus we need to replace below 0 to 0.
 
 
-```r
+``` r
 multi_rast[multi_rast < 0] = 0
 ```
 
 The next step should be to implement the NDVI formula into an R function:
 
 
-```r
+``` r
 ndvi_fun = function(nir, red){
   (nir - red) / (nir + red)
 }
@@ -828,7 +882,7 @@ We just need to remember that our function expects two bands (not four from the 
 That is why we subset the input raster with `multi_rast[[c(4, 3)]]` before doing any calculations.
 
 
-```r
+``` r
 ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 ```
 
@@ -860,7 +914,7 @@ Secondly, the `fun` parameter lets us specify the function we wish to apply to t
 Here, we choose the minimum, but any other summary function, including `sum()`, `mean()`, or `var()` can be used.
 
 
-```r
+``` r
 r_focal = focal(elev, w = matrix(1, nrow = 3, ncol = 3), fun = min)
 ```
 
@@ -900,7 +954,7 @@ This is in contrast to focal operations which return a raster object by default.
 The following code chunk uses the `zonal()` function to calculate the mean elevation associated with each grain size class.
 
 
-```r
+``` r
 z = zonal(elev, grain, fun = "mean")
 z
 #>   grain elev
@@ -950,7 +1004,7 @@ In the following code chunk we first download the SRTM elevation data for Austri
 In a second step, we merge the two rasters into one.
 
 
-```r
+``` r
 aut = geodata::elevation_30s(country = "AUT", path = tempdir())
 ch = geodata::elevation_30s(country = "CHE", path = tempdir())
 aut_ch = merge(aut, ch)
@@ -968,7 +1022,7 @@ For a more detailed introduction to remote sensing with R, see @wegmann_remote_2
 ## Exercises
 
 
-```r
+``` r
 library(sf)
 library(dplyr)
 library(spData)

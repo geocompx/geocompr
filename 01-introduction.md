@@ -154,7 +154,7 @@ This is demonstrated by the following code chunk, which creates Figure \@ref(fig
 
 
 
-```r
+``` r
 library(leaflet)
 popup = c("Robin", "Jakub", "Jannes")
 leaflet() |>

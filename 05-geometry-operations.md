@@ -7,7 +7,7 @@
 - This chapter uses the same packages as Chapter \@ref(spatial-operations) but with the addition of **spDataLarge**, which was installed in Chapter \@ref(spatial-class):
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -54,8 +54,32 @@ Figure \@ref(fig:seine-simp) illustrates simplification of a `LINESTRING` geomet
 The simplified geometry was created by the following command:
 
 
-```r
+``` r
 seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.35 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.13 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -67,9 +91,12 @@ The resulting `seine_simp` object is a copy of the original `seine` but with few
 This is apparent, with the result being visually simpler (Figure \@ref(fig:seine-simp), right) and consuming less memory than the original object, as verified below:
 
 
-```r
+``` r
 object.size(seine)
 #> 18096 bytes
+```
+
+``` r
 object.size(seine_simp)
 #> 9112 bytes
 ```
@@ -79,7 +106,7 @@ Simplification is also applicable for polygons.
 This is illustrated using `us_states`, representing the contiguous United States.
 
 
-```r
+``` r
 us_states_simp1 = st_simplify(us_states, dTolerance = 100000)  # 100 km
 ```
 
@@ -94,7 +121,7 @@ Simplification of multipolygon objects can remove small internal polygons, even 
 ]
 
 
-```r
+``` r
 # proportion of points to retain (0-1; default 0.05)
 us_states_simp2 = rmapshaper::ms_simplify(us_states, keep = 0.01,
                                           keep_shapes = TRUE)
@@ -110,12 +137,56 @@ Below is an example of using Gaussian kernel regression to smooth the borders of
 The `smoothness` argument controls the bandwidth of the Gaussian that is used to smooth the geometry and has a default value of 1.
 
 
-```r
+``` r
 us_states_simp3 = smoothr::smooth(us_states, method = "ksmooth", smoothness = 6)
 ```
 
 Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in Figure \@ref(fig:us-simp). 
 Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.35 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.13 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.25 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.89 0.285
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%" />
@@ -135,7 +206,7 @@ Geographic centroids have many uses, for example to create a simple point repres
 They can be calculated with the **sf** function `st_centroid()` as demonstrated in the code below, which generates the geographic centroids of regions in New Zealand and tributaries to the River Seine, illustrated with black points in Figure \@ref(fig:centr).
 
 
-```r
+``` r
 nz_centroid = st_centroid(nz)
 seine_centroid = st_centroid(seine)
 ```
@@ -148,9 +219,23 @@ A description of how `st_point_on_surface()` works is provided at https://gis.st
 ]
 
 
-```r
+``` r
 nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal   1.2  0.54
 ```
 
 <div class="figure" style="text-align: center">
@@ -175,9 +260,33 @@ Figure \@ref(fig:buffs) illustrates buffers of different sizes (5 and 50 km) sur
 These buffers were created with commands below, which show that the command `st_buffer()` requires at least two arguments: an input geometry and a distance, provided in the units of the CRS (in this case meters).
 
 
-```r
+``` r
 seine_buff_5km = st_buffer(seine, dist = 5000)
 seine_buff_50km = st_buffer(seine, dist = 50000)
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.21 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.32 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -211,7 +320,7 @@ For example, shifting is needed for labels placement, scaling is used in non-con
 The **sf** package implements affine transformation for objects of classes `sfg` and `sfc`.
 
 
-```r
+``` r
 nz_sfc = st_geometry(nz)
 ```
 
@@ -220,7 +329,7 @@ It could be done by adding a numerical vector to a vector object.
 For example, the code below shifts all y-coordinates by 100,000 meters to the north, but leaves the x-coordinates untouched (Figure \@ref(fig:affine-trans), left panel). 
 
 
-```r
+``` r
 nz_shift = nz_sfc + c(0, 100000)
 ```
 
@@ -238,7 +347,7 @@ Next, the sizes of the geometries are reduced by half (`* 0.5`).
 Finally, each object's centroid is moved back to the input data coordinates (`+ nz_centroid_sfc`). 
 
 
-```r
+``` r
 nz_centroid_sfc = st_centroid(nz_sfc)
 nz_scale = (nz_sfc - nz_centroid_sfc) * 0.5 + nz_centroid_sfc
 ```
@@ -257,7 +366,7 @@ It rotates points in a clockwise direction.
 The rotation matrix can be implemented in R as:
 
 
-```r
+``` r
 rotation = function(a){
   r = a * pi / 180 #degrees to radians
   matrix(c(cos(r), sin(r), -sin(r), cos(r)), nrow = 2, ncol = 2)
@@ -269,8 +378,42 @@ Rotation could be done around selected points, such as centroids (Figure \@ref(f
 See `vignette("sf3")` for more examples.
 
 
-```r
+``` r
 nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  0.57 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.669 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.755 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -285,7 +428,7 @@ nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
 Finally, the newly created geometries can replace the old ones with the `st_set_geometry()` function: 
 
 
-```r
+``` r
 nz_scale_sf = st_set_geometry(nz, nz_scale)
 ```
 
@@ -301,7 +444,7 @@ To illustrate the concept we will start with a simple example:
 two overlapping circles with a center point one unit away from each other and a radius of one (Figure \@ref(fig:points)).
 
 
-```r
+``` r
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
 plot(b, border = "grey")
@@ -319,7 +462,7 @@ Imagine you want to select not one circle or the other, but the space covered by
 This can be done using the function `st_intersection()`\index{vector!intersection}, illustrated using objects named `x` and `y` which represent the left- and right-hand circles (Figure \@ref(fig:circle-intersection)).
 
 
-```r
+``` r
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
@@ -351,7 +494,7 @@ Some points will be inside just one circle, some will be inside both and some wi
 `st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
 
 
-```r
+``` r
 bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2024)
@@ -373,7 +516,7 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3)
 
 
 
-```r
+``` r
 bb = st_bbox(st_union(x, y))
 box = st_as_sfc(bb)
 set.seed(2024)
@@ -389,7 +532,7 @@ The third approach is to create a subsetting object using the binary spatial pre
 The results are identical (except superficial differences in attribute names), but the implementation differs substantially:
 
 
-```r
+``` r
 # way #1
 p_xy1 = p[x_and_y]
 # way #2
@@ -414,7 +557,7 @@ As we saw in Section \@ref(vector-attribute-aggregation), spatial aggregation ca
 This is demonstrated in the code chunk below in which 48 US states and the District of Columbia (`us_states`) are aggregated into four regions using base and **dplyr**\index{dplyr (package)} functions (see results in Figure \@ref(fig:us-regions)):
 
 
-```r
+``` r
 regions = aggregate(x = us_states[, "total_pop_15"], by = list(us_states$REGION),
                     FUN = sum, na.rm = TRUE)
 regions2 = us_states |> 
@@ -423,6 +566,20 @@ regions2 = us_states |>
 ```
 
 
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.32  1.48
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/us-regions-1.png" alt="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states." width="100%" />
@@ -434,7 +591,7 @@ Behind the scenes, both `aggregate()` and `summarize()` combine the geometries a
 This is demonstrated in the code chunk below which creates a united western US: 
 
 
-```r
+``` r
 us_west = us_states[us_states$REGION == "West", ]
 us_west_union = st_union(us_west)
 ```
@@ -442,7 +599,7 @@ us_west_union = st_union(us_west)
 The function can take two geometries and unite them, as demonstrated in the code chunk below which creates a united western block incorporating Texas (challenge: reproduce and plot the result):
 
 
-```r
+``` r
 texas = us_states[us_states$NAME == "Texas", ]
 texas_union = st_union(us_west_union, texas)
 ```
@@ -459,22 +616,50 @@ Importantly, `st_cast()` behaves differently on single simple feature geometry (
 Let's create a multipoint to illustrate how geometry casting works on simple feature geometry (`sfg`) objects:
 
 
-```r
+``` r
 multipoint = st_multipoint(matrix(c(1, 3, 5, 1, 3, 1), ncol = 2))
 ```
 
 In this case, `st_cast()` can be useful to transform the new object into a linestring or a polygon (Figure \@ref(fig:single-cast)).
 
 
-```r
+``` r
 linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
 ```
 
 
 ```
-#> -- tmap v3 code detected --
-#> [v3->v4] tm_polygons(): use 'fill' for the fill color of polygons/symbols (instead of 'col'), and 'col' for the outlines (instead of 'border.col')
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.41 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.41 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.15 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -489,11 +674,14 @@ Conversion from multipoint or linestring to polygon is often used to calculate a
 The transformation process can be also reversed using `st_cast()`:
 
 
-```r
+``` r
 multipoint_2 = st_cast(linestring, "MULTIPOINT")
 multipoint_3 = st_cast(polyg, "MULTIPOINT")
 all.equal(multipoint, multipoint_2)
 #> [1] TRUE
+```
+
+``` r
 all.equal(multipoint, multipoint_3)
 #> [1] TRUE
 ```
@@ -545,7 +733,7 @@ Note: Values like (1) represent the number of features; NA means the operation i
 Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
 
 
-```r
+``` r
 multilinestring_list = list(matrix(c(1, 4, 5, 3), ncol = 2), 
                             matrix(c(4, 4, 4, 1), ncol = 2),
                             matrix(c(2, 4, 2, 2), ncol = 2))
@@ -567,7 +755,7 @@ This restricts the number of operations that can be done, for example it prevent
 The `st_cast()` function can be used in this situation, as it separates one mutlilinestring into three linestrings.
 
 
-```r
+``` r
 linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
 linestring_sf2
 #> Simple feature collection with 3 features and 0 fields
@@ -581,6 +769,30 @@ linestring_sf2
 #> 3 LINESTRING (2 2, 4 2)
 ```
 
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.03 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.41 0.285
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/line-cast-1.png" alt="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right)." width="100%" />
 <p class="caption">(\#fig:line-cast)Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).</p>
@@ -589,7 +801,7 @@ linestring_sf2
 The newly created object allows for attributes creation (see more in Section \@ref(vec-attr-creation)) and length measurements:
 
 
-```r
+``` r
 linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
 linestring_sf2$length = st_length(linestring_sf2)
 linestring_sf2
@@ -635,7 +847,7 @@ The only difference is that we have to make clear that we would like to keep the
 This will return a raster object containing the cells whose midpoints overlap with `clip`.
 
 
-```r
+``` r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
             resolution = 0.3, vals = rep(1, 9))
@@ -665,7 +877,7 @@ In the simplest case, two images only differ with regard to their extent.
 The following code adds one row and two columns to each side of the raster while setting all new values to `NA` (Figure \@ref(fig:extend-example)).
 
 
-```r
+``` r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev_2 = extend(elev, c(1, 2))
 ```
@@ -678,7 +890,7 @@ elev_2 = extend(elev, c(1, 2))
 Performing an algebraic operation on two objects with differing extents in R, the **terra** package returns an error.
 
 
-```r
+``` r
 elev_3 = elev + elev_2
 #> Error: [+] extents do not match
 ```
@@ -689,7 +901,7 @@ Here, we extend the `elev` object to the extent of `elev_2`.
 The values of the newly added rows and columns are set to `NA`.
 
 
-```r
+``` r
 elev_4 = extend(elev, elev_2)
 ```
 
@@ -699,7 +911,7 @@ The `origin()` function returns the coordinates of the origin.
 In the example below a cell corner exists with coordinates (0, 0), but that is not necessarily the case.
 
 
-```r
+``` r
 origin(elev_4)
 #> [1] 0 0
 ```
@@ -711,7 +923,7 @@ If the origins of two raster datasets are just marginally apart, it sometimes is
 Figure \@ref(fig:origin-example) reveals the effect of changing the origin in this way.
 
 
-```r
+``` r
 # change the origin
 origin(elev_4) = c(0.25, 0.25)
 ```
@@ -738,9 +950,33 @@ As an example, we here change the spatial resolution of `dem` (found in the **sp
 Additionally, the output cell value is going to correspond to the mean of the input cells (note that one could use other functions as well, such as `median()`, `sum()`, etc.):
 
 
-```r
+``` r
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 dem_agg = aggregate(dem, fact = 5, fun = mean)
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.15 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.49 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -771,10 +1007,24 @@ The `bilinear` method uses the four nearest pixel centers of the input image (sa
 The value of the output cell is represented by a square in the upper left corner in Figure \@ref(fig:bilinear).
 
 
-```r
+``` r
 dem_disagg = disagg(dem_agg, fact = 5, method = "bilinear")
 identical(dem, dem_disagg)
 #> [1] FALSE
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.448  2.63
 ```
 
 <div class="figure" style="text-align: center">
@@ -795,6 +1045,40 @@ The above methods of aggregation and disaggregation are only suitable when we wa
 However, what to do when we have two or more rasters with different resolutions and origins?
 This is the role of resampling -- a process of computing values for new pixel locations.
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.48 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.34 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.81 0.285
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/resampl0-1.png" alt="Resampling of an original (input) raster into a target raster with custom resolution and origin." width="100%" />
@@ -824,7 +1108,7 @@ We need a raster with target spatial properties to see how the `resample()` func
 For this example, we create `target_rast`, but you would often use an already existing raster object.
 
 
-```r
+``` r
 target_rast = rast(xmin = 794650, xmax = 798250, 
                    ymin = 8931750, ymax = 8935350,
                    resolution = 300, crs = "EPSG:32717")
@@ -833,11 +1117,135 @@ target_rast = rast(xmin = 794650, xmax = 798250,
 Next, we need to provide our two raster objects as the first two arguments and one of the resampling methods described above.
 
 
-```r
+``` r
 dem_resampl = resample(dem, y = target_rast, method = "bilinear")
 ```
 
 Figure \@ref(fig:resampl) shows a comparison of different resampling methods on the `dem` object.
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.48 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.559 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.832 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.624 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.18 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.845 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.48 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.557 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.823 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.631 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.19 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.848 0.285
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/resampl-1.png" alt="Visual comparison of the original raster and five different resampling methods." width="100%" />
@@ -892,8 +1300,8 @@ How far is it from the geographic centroid of Canterbury?
 E4. Most world maps have a north-up orientation.
 A world map with a south-up orientation could be created by a reflection (one of the affine transformations not mentioned in this chapter) of the `world` object's geometry.
 Write code to do so.
-Hint: you need to use a two-element vector for this transformation.
- Bonus: create an upside-down map of your country.
+Hint: you can to use the `rotation()` function from this chapter for this transformation.
+Bonus: create an upside-down map of your country.
  
 
 

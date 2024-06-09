@@ -7,7 +7,7 @@
 - This chapter requires the following packages:
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -63,7 +63,7 @@ This is detailed in a [100+ page document](https://portal.opengeospatial.org/fil
 The WKT representation of the WGS84 CRS, which has the **identifier** `EPSG:4326` is as follows:
 
 
-```r
+``` r
 st_crs("EPSG:4326")
 #> Coordinate Reference System:
 #>   User input: EPSG:4326 
@@ -112,7 +112,7 @@ Other authorities can be used in CRS identifiers.
 `ESRI:54030`, for example, refers to ESRI's implementation of the Robinson projection, which has the following WKT string (only first 8 lines shown):
 
 
-```r
+``` r
 st_crs("ESRI:54030")
 #> Coordinate Reference System:
 #>   User input: ESRI:54030 
@@ -147,7 +147,7 @@ Let's look at how CRSs are stored in R spatial objects and how they can be queri
 First we will look at getting and setting CRSs in **vector** geographic data objects, starting with the following example:
 
 
-```r
+``` r
 vector_filepath = system.file("shapes/world.gpkg", package = "spData")
 new_vector = read_sf(vector_filepath)
 ```
@@ -156,7 +156,7 @@ Our new object, `new_vector`, is a data frame of class `sf` that represents coun
 The CRS can be retrieved with the **sf** function `st_crs()`.
 
 
-```r
+``` r
 st_crs(new_vector) # get CRS
 #> Coordinate Reference System:
 #>   User input: WGS 84 
@@ -189,7 +189,7 @@ For example, try to run:
 In cases when a coordinate reference system (CRS) is missing or the wrong CRS is set, the `st_set_crs()` function can be used (in this case the WKT string remains unchanged because the CRS was already set correctly when the file was read-in):
 
 
-```r
+``` r
 new_vector = st_set_crs(new_vector, "EPSG:4326") # set CRS
 ```
 
@@ -200,7 +200,7 @@ Getting and setting CRSs works in a similar way for raster geographic data objec
 The `crs()` function in the `terra` package accesses CRS information from a `SpatRaster` object (note the use of the `cat()` function to print it nicely).
 
 
-```r
+``` r
 raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 my_rast = rast(raster_filepath)
 cat(crs(my_rast)) # get CRS
@@ -217,7 +217,7 @@ The output is the WKT string representation of CRS.
 The same function, `crs()`, can be also used to set a CRS for raster objects.
 
 
-```r
+``` r
 crs(my_rast) = "EPSG:26912" # set CRS
 ```
 
@@ -230,7 +230,7 @@ Their role is only to set a metadata information about the object CRS.
 In some cases the CRS of a geographic object is unknown, as is the case in the `london` dataset created in the code chunk below, building on the example of London introduced in Section \@ref(vector-data):
 
 
-```r
+``` r
 london = data.frame(lon = -0.1, lat = 51.5) |> 
   st_as_sf(coords = c("lon", "lat"))
 st_is_longlat(london)
@@ -244,7 +244,7 @@ Datasets without a specified CRS can cause problems: all geographic coordinates 
 Thus, again, it is important to always check the CRS of a dataset and to set it if it is missing.
 
 
-```r
+``` r
 london_geo = st_set_crs(london, "EPSG:4326")
 st_is_longlat(london_geo)
 #> [1] TRUE
@@ -268,7 +268,7 @@ Before diving into the code, it may be worth skipping briefly ahead to peek at F
 The first stage is to create three buffers around the `london` and `london_geo` objects created above with boundary distances of 1 degree and 100 km  (or 100,000 m, which can be expressed as `1e5` in scientific notation) from central London:
 
 
-```r
+``` r
 london_buff_no_crs = st_buffer(london, dist = 1)   # incorrect: no CRS
 london_buff_s2 = st_buffer(london_geo, dist = 100000) # silent use of s2
 london_buff_s2_100_cells = st_buffer(london_geo, dist = 100000, max_cells = 100) 
@@ -280,13 +280,19 @@ To highlight the impact of **sf**'s use of the S2\index{S2} geometry engine for 
 Like `london_buff_no_crs`, the new `london_geo` object is a geographic abomination: it has units of degrees, which makes no sense in the vast majority of cases:
 
 
-```r
+``` r
 sf::sf_use_s2(FALSE)
 #> Spherical geometry (s2) switched off
+```
+
+``` r
 london_buff_lonlat = st_buffer(london_geo, dist = 1) # incorrect result
 #> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
 #> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data
 #> dist is assumed to be in decimal degrees (arc_degrees).
+```
+
+``` r
 sf::sf_use_s2(TRUE)
 #> Spherical geometry (s2) switched on
 ```
@@ -307,7 +313,7 @@ But for operations involving distances such as buffering, the only way to ensure
 This is done in the code chunk below.
 
 
-```r
+``` r
 london_proj = data.frame(x = 530000, y = 180000) |> 
   st_as_sf(coords = c("x", "y"), crs = "EPSG:27700")
 ```
@@ -316,7 +322,7 @@ The result is a new object that is identical to `london`, but created using a su
 We can verify that the CRS has changed using `st_crs()` as follows (some of the output has been replaced by `...,`):
 
 
-```r
+``` r
 st_crs(london_proj)
 #> Coordinate Reference System:
 #>   User input: EPSG:27700 
@@ -338,7 +344,7 @@ Buffer operations on the `london_proj` will use GEOS and results will be returne
 The following line of code creates a buffer around *projected* data of exactly 100 km:
 
 
-```r
+``` r
 london_buff_projected = st_buffer(london_proj, 100000)
 ```
 
@@ -379,7 +385,7 @@ In some cases transformation to a geographic CRS is essential, such as when publ
 Another case is when two objects with different CRSs must be compared or combined, as shown when we try to find the distance between two `sf` objects with different CRSs:
 
 
-```r
+``` r
 st_distance(london_geo, london_proj)
 # > Error: st_crs(x) == st_crs(y) is not TRUE
 ```
@@ -420,7 +426,7 @@ UTM EPSG codes run sequentially from 32601 to 32660 for northern hemisphere loca
 To show how the system works, let's create a function, `lonlat2UTM()` to calculate the EPSG code associated with any point on the planet as [follows](https://stackoverflow.com/a/9188972/): 
 
 
-```r
+``` r
 lonlat2UTM = function(lonlat) {
   utm = (floor((lonlat[1] + 180) / 6) %% 60) + 1
   if (lonlat[2] > 0) {
@@ -436,9 +442,12 @@ The following command uses this function to identify the UTM zone and associated
 
 
 
-```r
+``` r
 lonlat2UTM(c(174.7, -36.9))
 #> [1] 32760
+```
+
+``` r
 lonlat2UTM(st_coordinates(london))
 #> [1] 32630
 ```
@@ -494,7 +503,7 @@ Reprojecting vectors thus consists of transforming the coordinates of these poin
 Section \@ref(whenproject) contains an example in which at least one `sf` object must be transformed into an equivalent object with a different CRS to calculate the distance between two objects.
 
 
-```r
+``` r
 london2 = st_transform(london_geo, "EPSG:27700")
 ```
 
@@ -510,7 +519,7 @@ Use `as.numeric()` to coerce the result into a regular number.
 ]
 
 
-```r
+``` r
 st_distance(london2, london_proj)
 #> Units: [m]
 #>      [,1]
@@ -522,7 +531,7 @@ The CRS of `sf` objects can be queried, and as we learned in Section \@ref(repro
 The output is printed as multiple lines of text containing information about the coordinate system:
 
 
-```r
+``` r
 st_crs(cycle_hire_osm)
 #> Coordinate Reference System:
 #>   User input: EPSG:4326 
@@ -536,10 +545,13 @@ st_crs(cycle_hire_osm)
 As we saw in Section \@ref(crs-setting), the main CRS components, `User input` and `wkt`, are printed as a single entity. The output of `st_crs()` is in fact a named list of class `crs` with two elements, single character strings named `input` and `wkt`, as shown in the output of the following code chunk:
 
 
-```r
+``` r
 crs_lnd = st_crs(london_geo)
 class(crs_lnd)
 #> [1] "crs"
+```
+
+``` r
 names(crs_lnd)
 #> [1] "input" "wkt"
 ```
@@ -547,11 +559,17 @@ names(crs_lnd)
 Additional elements can be retrieved with the `$` operator, including `Name`, `proj4string` and `epsg` (see [`?st_crs`](https://r-spatial.github.io/sf/reference/st_crs.html) and the CRS and tranformation tutorial on the GDAL [website](https://gdal.org/tutorials/osr_api_tut.html#querying-coordinate-reference-system) for details):
 
 
-```r
+``` r
 crs_lnd$Name
 #> [1] "WGS 84"
+```
+
+``` r
 crs_lnd$proj4string
 #> [1] "+proj=longlat +datum=WGS84 +no_defs"
+```
+
+``` r
 crs_lnd$epsg
 #> [1] 4326
 ```
@@ -563,7 +581,7 @@ Both `wkt` and `User Input` elements of the CRS are changed when the object's CR
 In the code chunk below, we create a new version of `cycle_hire_osm` with a projected CRS (only the first 4 lines of the CRS output are shown for brevity).
 
 
-```r
+``` r
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
 st_crs(cycle_hire_osm_projected)
 #> Coordinate Reference System:
@@ -578,13 +596,19 @@ But how do we find out more details about this EPSG code, or any code?
 One option is to search for it online, another is to look at the properties of the CRS object:
 
 
-```r
+``` r
 crs_lnd_new = st_crs("EPSG:27700")
 crs_lnd_new$Name
 #> [1] "OSGB36 / British National Grid"
+```
+
+``` r
 crs_lnd_new$proj4string
 #> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000
 +y_0=-100000 +ellps=airy +units=m +no_defs"
+```
+
+``` r
 crs_lnd_new$epsg
 #> [1] 27700
 ```
@@ -627,7 +651,7 @@ Land cover data are usually represented by categorical maps.
 The `nlcd.tif` file provides information for a small area in Utah, USA obtained from [National Land Cover Database 2011](https://www.mrlc.gov/data/nlcd-2011-land-cover-conus) in the NAD83 / UTM zone 12N CRS, as shown in the output of the code chunk below (only first line of output shown).
 
 
-```r
+``` r
 cat_raster = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 crs(cat_raster)
 #> PROJCRS["NAD83 / UTM zone 12N",
@@ -637,7 +661,7 @@ crs(cat_raster)
 In this region, 8 land cover classes were distinguished (a full list of NLCD2011 land cover classes can be found at [mrlc.gov](https://www.mrlc.gov/data/legends/national-land-cover-database-2011-nlcd2011-legend)):
 
 
-```r
+``` r
 unique(cat_raster)
 #>       levels
 #> 1      Water
@@ -657,7 +681,7 @@ The first step is to obtain the definition of this CRS.
 The second step is to reproject the raster with the `project()` function which, in the case of categorical data, uses the nearest neighbor method (`near`).
 
 
-```r
+``` r
 cat_raster_wgs84 = project(cat_raster, "EPSG:4326", method = "near")
 ```
 
@@ -678,7 +702,7 @@ Reprojecting numeric rasters (with `numeric` or in this case `integer` values) f
 This is demonstrated below with `srtm.tif` in **spDataLarge** from [the Shuttle Radar Topography Mission (SRTM)](https://www2.jpl.nasa.gov/srtm/), which represents height in meters above sea level (elevation) with the WGS84 CRS:
 
 
-```r
+``` r
 con_raster = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
 cat(crs(con_raster))
 #> GEOGCRS["WGS 84",
@@ -699,7 +723,7 @@ the closer the input cell is to the center of the output cell, the greater its w
 The following commands create a text string representing WGS 84 / UTM zone 12N, and reproject the raster into this CRS, using the `bilinear` method (output not shown). 
 
 
-```r
+``` r
 con_raster_ea = project(con_raster, "EPSG:32612", method = "bilinear")
 cat(crs(con_raster_ea))
 ```
@@ -739,7 +763,7 @@ One is to take an existing WKT definition of a CRS, modify some of its elements,
 This can be done for spatial vectors with `st_crs()` and `st_transform()`, and for spatial rasters with `crs()` and `project()`, as demonstrated in the following example which transforms the `zion` object to a custom azimuthal equidistant (AEQD) CRS.
 
 
-```r
+``` r
 zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 ```
 
@@ -747,7 +771,7 @@ Using a custom AEQD CRS requires knowing the coordinates of the center point of 
 In our case, this information can be extracted by calculating a centroid of the `zion` area and transforming it into WGS84.
 
 
-```r
+``` r
 zion_centr = st_centroid(zion)
 zion_centr_wgs84 = st_transform(zion_centr, "EPSG:4326")
 st_as_text(st_geometry(zion_centr_wgs84))
@@ -758,7 +782,7 @@ Next, we can use the newly obtained values to update the WKT definition of the a
 Notice that we modified just two values below -- `"Central_Meridian"` to the longitude and `"Latitude_Of_Origin"` to the latitude of our centroid.
 
 
-```r
+``` r
 my_wkt = 'PROJCS["Custom_AEQD",
  GEOGCS["GCS_WGS_1984",
   DATUM["WGS_1984",
@@ -774,7 +798,7 @@ my_wkt = 'PROJCS["Custom_AEQD",
 This approach's last step is to transform our original object (`zion`) to our new custom CRS (`zion_aeqd`).
 
 
-```r
+``` r
 zion_aeqd = st_transform(zion, my_wkt)
 ```
 
@@ -791,7 +815,7 @@ When mapping the world while preserving area relationships, the Mollweide projec
 To use this projection, we need to specify it using the proj-string element, `"+proj=moll"`, in the `st_transform` function:
 
 
-```r
+``` r
 world_mollweide = st_transform(world, crs = "+proj=moll")
 ```
 
@@ -807,7 +831,7 @@ This projection is used, among others, by the National Geographic Society.
 The result was created with the following command:
 
 
-```r
+``` r
 world_wintri = st_transform(world, crs = "+proj=wintri")
 ```
 
@@ -826,7 +850,7 @@ Moreover, proj-string parameters can be modified in most CRS definitions, for ex
 The below code transforms the coordinates to the Lambert azimuthal equal-area projection centered on the longitude and latitude of New York City (Figure \@ref(fig:laeaproj2)).
 
 
-```r
+``` r
 world_laea2 = st_transform(world,
                            crs = "+proj=laea +x_0=0 +y_0=0 +lon_0=-74 +lat_0=40")
 ```

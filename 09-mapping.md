@@ -9,7 +9,7 @@
 - This chapter requires the following packages that we have already been using:
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -21,7 +21,7 @@ library(spDataLarge)
 We recommend you to install its development version from the [r-universe](https://r-universe.dev/) repository, which is updated more frequently than the CRAN version:
 
 
-```r
+``` r
 install.packages("tmap", repos = c("https://r-tmap.r-universe.dev",
                                    "https://cloud.r-project.org"))
 ```
@@ -29,7 +29,7 @@ install.packages("tmap", repos = c("https://r-tmap.r-universe.dev",
 - It uses the following visualization packages (also install **shiny** if you want to develop interactive mapping applications):
 
 
-```r
+``` r
 library(tmap)    # for static and interactive maps
 library(leaflet) # for interactive maps
 library(ggplot2) # tidyverse data visualization package
@@ -38,7 +38,7 @@ library(ggplot2) # tidyverse data visualization package
 - You also need to read in a couple of datasets as follows for Section \@ref(spatial-ras):
 
 
-```r
+``` r
 nz_elev = rast(system.file("raster/nz_elev.tif", package = "spDataLarge"))
 ```
 
@@ -101,7 +101,7 @@ The basic building block is `tm_shape()` (which defines input data: a vector or 
 This layering is demonstrated in the chunk below, which generates the maps presented in Figure \@ref(fig:tmshape):
 
 
-```r
+``` r
 # Add fill layer to nz shape
 tm_shape(nz) +
   tm_fill() 
@@ -149,7 +149,7 @@ A useful feature of **tmap** is its ability to store *objects* representing maps
 The code chunk below demonstrates this by saving the last plot in Figure \@ref(fig:tmshape) as an object of class `tmap` (note the use of `tm_polygons()` which condenses `tm_fill()  + tm_borders()` into a single function):
 
 
-```r
+``` r
 map_nz = tm_shape(nz) + tm_polygons()
 class(map_nz)
 #> [1] "tmap"
@@ -163,7 +163,7 @@ When a new shape is added in this way, all subsequent aesthetic functions refer 
 This syntax allows the creation of maps with multiple shapes and layers, as illustrated in the next code chunk which uses the function `tm_raster()` to plot a raster layer (with `col_alpha` set to make the layer semi-transparent):
 
 
-```r
+``` r
 map_nz1 = map_nz +
   tm_shape(nz_elev) + tm_raster(col_alpha = 0.7)
 ```
@@ -172,7 +172,7 @@ Building on the previously created `map_nz` object, the preceding code creates a
 More shapes and layers can be added, as illustrated in the code chunk below which creates `nz_water`, representing New Zealand's [territorial waters](https://en.wikipedia.org/wiki/Territorial_waters), and adds the resulting lines to an existing map object.
 
 
-```r
+``` r
 nz_water = st_union(nz) |>
   st_buffer(22200) |> 
   st_cast(to = "LINESTRING")
@@ -185,7 +185,7 @@ The final map illustrated in Figure \@ref(fig:tmlayers) is created by adding a l
 The resulting map, which has four layers, is illustrated in the right-hand panel of Figure \@ref(fig:tmlayers):
 
 
-```r
+``` r
 map_nz3 = map_nz2 +
   tm_shape(nz_height) + tm_symbols()
 ```
@@ -195,8 +195,68 @@ A useful and little known feature of **tmap** is that multiple map objects can b
 This is demonstrated in the code chunk below which plots `map_nz1` to `map_nz3`, resulting in Figure \@ref(fig:tmlayers).
 
 
-```r
+``` r
 tmap_arrange(map_nz1, map_nz2, map_nz3)
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.825  1.68
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.825  1.68
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.825  1.68
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.08  1.29
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.08  1.29
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.08  1.29
 ```
 
 <div class="figure" style="text-align: center">
@@ -234,7 +294,7 @@ If there is a clash between a fixed value and a column name, the column name tak
 The impact of setting these with fixed values is illustrated in Figure \@ref(fig:tmstatic).
 
 
-```r
+``` r
 ma1 = tm_shape(nz) + tm_polygons(fill = "red")
 ma2 = tm_shape(nz) + tm_polygons(fill = "red", fill_alpha = 0.3)
 ma3 = tm_shape(nz) + tm_polygons(col = "blue")
@@ -254,7 +314,7 @@ Like base R plots, arguments defining aesthetics can also receive values that va
 Unlike the base R code below (which generates the left panel in Figure \@ref(fig:tmcol)), **tmap** aesthetic arguments will not accept a numeric vector:
 
 
-```r
+``` r
 plot(st_geometry(nz), col = nz$Land_area)  # works
 tm_shape(nz) + tm_fill(fill = nz$Land_area) # fails
 #> Error: palette should be a character value
@@ -264,8 +324,32 @@ Instead `fill` (and other aesthetics that can vary such as `lwd` for line layers
 Thus, one would achieve the desired result as follows (Figure \@ref(fig:tmcol), right panel):
 
 
-```r
+``` r
 tm_shape(nz) + tm_fill(fill = "Land_area")
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.22  1.29
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.22  1.29
 ```
 
 <div class="figure" style="text-align: center">
@@ -296,7 +380,7 @@ This figure shows four ways of coloring regions in New Zealand depending on medi
 - `values` defines the color scheme, for example, `BuGn`
 
 
-```r
+``` r
 tm_shape(nz) + tm_polygons(fill = "Median_income")
 tm_shape(nz) + tm_polygons(fill = "Median_income",
                         fill.scale = tm_scale(breaks = c(0, 30000, 40000, 50000)))
@@ -304,6 +388,50 @@ tm_shape(nz) + tm_polygons(fill = "Median_income",
                            fill.scale = tm_scale(n = 10))
 tm_shape(nz) + tm_polygons(fill = "Median_income",
                            fill.scale = tm_scale(values = "BuGn"))
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  1.48
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22 0.897
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  2.27
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
+#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  1.48
 ```
 
 <div class="figure" style="text-align: center">
@@ -344,6 +472,50 @@ In case of variables with skewed distribution you can also use its variants -- `
 \index{tmap (package)!categorical scale}
 Finally, `tm_scale_categorical()` was designed to represent categorical values and assures that each category receives a unique color (Figure \@ref(fig:concat), right panel).
 
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.57 0.257
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.69 0.257
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.57 0.257
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.69 0.257
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/concat-1.png" alt="Illustration of continuous and categorical scales in tmap." width="100%" />
 <p class="caption">(\#fig:concat)Illustration of continuous and categorical scales in tmap.</p>
@@ -371,7 +543,7 @@ These follow a gradient, for example from light to dark colors (light colors oft
 Sequential palettes can be single (`greens` goes from light to dark green, for example) or multi-color/hue (`yl_gn_bu` is gradient from light yellow to blue via green, for example), as demonstrated in the code chunk below --- output not shown, run the code yourself to see the results!
 
 
-```r
+``` r
 tm_shape(nz) + 
   tm_polygons("Median_income", fill.scale = tm_scale(values = "greens"))
 tm_shape(nz) + 
@@ -383,7 +555,7 @@ Their main purpose is to visualize the difference from an important reference po
 The reference point's value can be adjusted in **tmap** using the `midpoint` argument.
 
 
-```r
+``` r
 tm_shape(nz) + 
   tm_polygons("Median_income",
               fill.scale = tm_scale_continuous(values = "pu_gn_div", 
@@ -414,7 +586,7 @@ In general, a map legend title should provide two pieces of information: what th
 The following code chunk demonstrates this functionality by providing a more attractive name than the variable name `Land_area` (note the use of `expression()` to create superscript text):
 
 
-```r
+``` r
 legend_title = expression("Area (km"^2*")")
 tm_shape(nz) +
   tm_polygons(fill = "Land_area", fill.legend = tm_legend(title = legend_title))
@@ -424,7 +596,7 @@ The default legend orientation in **tmap** is `"portrait"`, however, an alternat
 Other than that, we can also customize the location of the legend using the `position` argument.
 
 
-```r
+``` r
 tm_shape(nz) +
   tm_polygons(fill = "Land_area",
               fill.legend = tm_legend(title = legend_title,
@@ -454,12 +626,22 @@ Both may result in subtle changes that can have an equally large impact on the i
 Additional map elements such as graticules \index{tmap (package)!graticules}, north arrows\index{tmap (package)!north arrows}, scale bars\index{tmap (package)!scale bars} and map titles have their own functions: `tm_graticules()`, `tm_compass()`, `tm_scalebar()`, and `tm_title()` (Figure \@ref(fig:na-sb)).^[Another additional map elements include `tm_grid()`, `tm_logo()` and `tm_credits()`.]
 
 
-```r
+``` r
 map_nz + 
   tm_graticules() +
   tm_compass(type = "8star", position = c("left", "top")) +
   tm_scalebar(breaks = c(0, 100, 200), text.size = 1, position = c("left", "top")) +
   tm_title("New Zealand")
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     3
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.39 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -470,7 +652,7 @@ map_nz +
 **tmap** also allows a wide variety of layout settings to be changed, some of which, produced using the following code (see `args(tm_layout)` or `?tm_layout` for a full list), are illustrated in Figure \@ref(fig:layout1).
 
 
-```r
+``` r
 map_nz + tm_layout(scale = 4)
 map_nz + tm_layout(bg.color = "lightblue")
 map_nz + tm_layout(frame = FALSE)
@@ -510,7 +692,7 @@ However, facets can also represent shifting geometries such as the evolution of 
 This use case of faceted plot is illustrated in Figure \@ref(fig:urban-facet).
 
 
-```r
+``` r
 urb_1970_2030 = urban_agglomerations |> 
   filter(year %in% c(1970, 1990, 2010, 2030))
 
@@ -549,7 +731,7 @@ Our inset map will show where the main map is in relation to the whole New Zeala
 The first step is to define the area of interest, which can be done by creating a new spatial object, `nz_region`.
 
 
-```r
+``` r
 nz_region = st_bbox(c(xmin = 1340000, xmax = 1450000,
                       ymin = 5130000, ymax = 5210000),
                     crs = st_crs(nz_height)) |> 
@@ -560,7 +742,7 @@ In the second step, we create a base map showing the New Zealand's Southern Alps
 This is a place where the most important message is stated. 
 
 
-```r
+``` r
 nz_height_map = tm_shape(nz_elev, bbox = nz_region) +
   tm_raster(col.scale = tm_scale_continuous(values = "YlGn"),
             col.legend = tm_legend(position = c("left", "top"))) +
@@ -573,7 +755,7 @@ It gives a context and helps to locate the area of interest.
 Importantly, this map needs to clearly indicate the location of the main map, for example by stating its borders.
 
 
-```r
+``` r
 nz_map = tm_shape(nz) + tm_polygons() +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.1) + 
   tm_shape(nz_region) + tm_borders(lwd = 3) +
@@ -585,7 +767,7 @@ Thus, in this case, we need to calculate the aspect ratios of our two main datas
 The following function, `norm_dim()` returns the normalized width (`"w"`) and height (`"h"`) of the object (as `"snpc"` units understood by the graphic device).
 
 
-```r
+``` r
 library(grid)
 norm_dim = function(obj){
     bbox = st_bbox(obj)
@@ -604,7 +786,7 @@ A viewport is part of a graphics device we use to draw the graphical elements at
 The viewport of our main map is just the representation of its aspect ratio.
 
 
-```r
+``` r
 main_vp = viewport(width = main_dim[1], height = main_dim[2])
 ```
 
@@ -612,7 +794,7 @@ On the other hand, the viewport of the inset map needs to specify its size and l
 Here, we would make the inset map twice smaller as the main one by multiplying the width and height by 0.5, and we will locate it 0.5 cm from the bottom right of the main map frame.
 
 
-```r
+``` r
 ins_vp = viewport(width = ins_dim[1] * 0.5, height = ins_dim[2] * 0.5,
                   x = unit(1, "npc") - unit(0.5, "cm"), y = unit(0.5, "cm"),
                   just = c("right", "bottom"))
@@ -621,7 +803,7 @@ ins_vp = viewport(width = ins_dim[1] * 0.5, height = ins_dim[2] * 0.5,
 Finally, we combine the two maps by creating a new, blank canvas, printing out the main map, and then placing the inset map inside of the main map viewport.
 
 
-```r
+``` r
 grid.newpage()
 print(nz_height_map, vp = main_vp)
 pushViewport(main_vp)
@@ -641,7 +823,7 @@ It is very important to find the best projection for each individual inset in th
 We can use US National Atlas Equal Area for the map of the contiguous United States by putting its EPSG code in the `crs` argument of `tm_shape()`.
 
 
-```r
+``` r
 us_states_map = tm_shape(us_states, crs = "EPSG:9311") + 
   tm_polygons() + 
   tm_layout(frame = FALSE)
@@ -650,7 +832,7 @@ us_states_map = tm_shape(us_states, crs = "EPSG:9311") +
 The rest of our objects, `hawaii` and `alaska`, already have proper projections; therefore, we just need to create two separate maps:
 
 
-```r
+``` r
 hawaii_map = tm_shape(hawaii) +
   tm_polygons() + 
   tm_title("Hawaii") +
@@ -665,10 +847,20 @@ alaska_map = tm_shape(alaska) +
 The final map is created by combining, resizing and arranging these three maps:
 
 
-```r
+``` r
 us_states_map
 print(hawaii_map, vp = grid::viewport(0.35, 0.1, width = 0.2, height = 0.1))
 print(alaska_map, vp = grid::viewport(0.15, 0.15, width = 0.3, height = 0.3))
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.768 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -712,7 +904,7 @@ There are two differences, however, related to arguments in `tm_facets_wrap()`:
 These additional arguments are demonstrated in the subsequent code chunk^[There is also a shortcut for this approach: `tm_facets_pagewise()`.]:
 
 
-```r
+``` r
 urb_anim = tm_shape(world) + tm_polygons() + 
   tm_shape(urban_agglomerations) + tm_symbols(size = "population_millions") +
   tm_facets_wrap(by = "year", nrow = 1, ncol = 1, free.coords = FALSE)
@@ -723,7 +915,7 @@ The final stage is to combine them and save the result as a `.gif` file with `tm
 The following command creates the animation illustrated in Figure \@ref(fig:urban-animated), with a few elements missing, that we will add in during the exercises:
 
 
-```r
+``` r
 tmap_animation(urb_anim, filename = "urb_anim.gif", delay = 25)
 ```
 
@@ -757,7 +949,7 @@ Maps can be viewed interactively at any point by switching to view mode, using t
 This is demonstrated in the code below, which creates an interactive map of New Zealand based on the `tmap` object `map_nz`, created in Section \@ref(map-obj), and illustrated in Figure \@ref(fig:tmview):
 
 
-```r
+``` r
 tmap_mode("view")
 map_nz
 ```
@@ -771,7 +963,7 @@ Now that the interactive mode has been 'turned on', all maps produced with **tma
 Notable features of this interactive mode include the ability to specify the basemap  with `tm_basemap()` (or `tmap_options()`) as demonstrated below (result not shown):
 
 
-```r
+``` r
 map_nz + tm_basemap(server = "OpenTopoMap")
 ```
 
@@ -779,7 +971,7 @@ An impressive and little-known feature of **tmap**'s view mode is that it also w
 The argument `sync` in `tm_facets_wrap()` can be used in this case to produce multiple maps with synchronized zoom and pan settings, as illustrated in Figure \@ref(fig:sync), which was produced by the following code:
 
 
-```r
+``` r
 world_coffee = left_join(world, coffee_data, by = "name_long")
 facets = c("coffee_production_2016", "coffee_production_2017")
 tm_shape(world_coffee) + tm_polygons(facets) + 
@@ -794,7 +986,7 @@ tm_shape(world_coffee) + tm_polygons(facets) +
 Switch **tmap** back to plotting mode with the same function:
 
 
-```r
+``` r
 tmap_mode("plot")
 #> tmap mode set to 'plot'
 ```
@@ -803,7 +995,7 @@ If you are not proficient with **tmap**, the quickest way to create interactive 
 The following 'one liner' is a reliable way to interactively explore a wide range of geographic data formats:
 
 
-```r
+``` r
 mapview::mapview(nz)
 ```
 
@@ -821,7 +1013,7 @@ Given that **mapview** always expects a spatial object (including `sf` and `Spat
 Consider the following example where **sf** is used to intersect lines and polygons and then is visualized with **mapview** (Figure \@ref(fig:mapview2)).
 
 
-```r
+``` r
 library(mapview)
 oberfranken = subset(franconia, district == "Oberfranken")
 trails |>
@@ -861,7 +1053,7 @@ Figure \@ref(fig:mapdeck), generated by the following code chunk, visualizes roa
 
 
 
-```r
+``` r
 library(mapdeck)
 set_token(Sys.getenv("MAPBOX"))
 crash_data = read.csv("https://git.io/geocompr-mapdeck")
@@ -890,7 +1082,7 @@ Leaflet maps are created with `leaflet()`, the result of which is a `leaflet` ma
 This allows multiple map layers and control settings to be added interactively, as demonstrated in the code below which generates Figure \@ref(fig:leaflet) (see [rstudio.github.io/leaflet/](https://rstudio.github.io/leaflet/) for details).
 
 
-```r
+``` r
 pal = colorNumeric("RdYlBu", domain = cycle_hire$nbikes)
 leaflet(data = cycle_hire) |> 
   addProviderTiles(providers$CartoDB.Positron) |>
@@ -941,7 +1133,7 @@ The word 'app' in this context refers to 'web application' and should not be con
 The code below defines and launches --- with the command `shinyApp()` --- a lifeApp, which provides an interactive slider allowing users to make countries appear with progressively lower levels of life expectancy (see Figure \@ref(fig:lifeApp)):
 
 
-```r
+``` r
 library(shiny)    # for shiny apps
 library(leaflet)  # renderLeaflet function
 library(spData)   # loads the world dataset 
@@ -1021,7 +1213,7 @@ This behavior is illustrated in the subsequent code chunk which generates Figure
 `plot()` has many other options which can be explored by following links in the `?plot` help page and the fifth **sf** vignette [`sf5`](https://cran.r-project.org/package=sf/vignettes/sf5.html).
 
 
-```r
+``` r
 g = st_graticule(nz, lon = c(170, 175), lat = c(-45, -40, -35))
 plot(nz_water, graticule = g, axes = TRUE, col = "blue")
 terra::plot(nz_elev / 1000, add = TRUE, axes = FALSE)
@@ -1042,7 +1234,7 @@ The default settings for the graticules can be overridden using `scale_x_continu
 Other notable features include the use of unquoted variable names encapsulated in `aes()` to indicate which aesthetics vary and switching data sources using the `data` argument, as demonstrated in the code chunk below which creates Figure \@ref(fig:nz-gg2):
 
 
-```r
+``` r
 library(ggplot2)
 g1 = ggplot() + geom_sf(data = nz, aes(fill = Median_income)) +
   geom_sf(data = nz_height) +
@@ -1061,7 +1253,7 @@ It also accepts various spatial data classes with `layer_spatial()`.
 Thus, we are able to plot `SpatRaster` objects from **terra** using this function as seen in Figure \@ref(fig:nz-gg2).
 
 
-```r
+``` r
 library(ggspatial)
 ggplot() + 
   layer_spatial(nz_elev) +
@@ -1165,10 +1357,20 @@ Additionally, it is possible to modify the `intermax` argument - maximum number 
 For example, we could represent median income in New Zeleand's regions as a continuous cartogram (Figure \@ref(fig:cartomap1), right panel) as follows:
 
 
-```r
+``` r
 library(cartogram)
 nz_carto = cartogram_cont(nz, "Median_income", itermax = 5)
 tm_shape(nz_carto) + tm_polygons("Median_income")
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <num> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.22  1.48
 ```
 
 <div class="figure" style="text-align: center">
@@ -1182,7 +1384,7 @@ Dorling cartograms consist of circles with their area proportional to the weight
 The code chunk below demonstrates creation of non-contiguous area and Dorling cartograms of US states' population (Figure \@ref(fig:cartomap2)):
 
 
-```r
+``` r
 us_states9311 = st_transform(us_states, "EPSG:9311")
 us_states9311_ncont = cartogram_ncont(us_states9311, "total_pop_15")
 us_states9311_dorling = cartogram_dorling(us_states9311, "total_pop_15")
@@ -1199,7 +1401,7 @@ us_states9311_dorling = cartogram_dorling(us_states9311, "total_pop_15")
 These exercises rely on a new object, `africa`.
 Create it using the `world` and `worldbank_df` datasets from the **spData** package as follows:
 
-```r
+``` r
 library(spData)
 africa = world |> 
   filter(continent == "Africa", !is.na(iso_a2)) |> 
@@ -1212,7 +1414,7 @@ africa = world |>
 
 We will also use `zion` and `nlcd` datasets from **spDataLarge**:
 
-```r
+``` r
 zion = read_sf((system.file("vector/zion.gpkg", package = "spDataLarge")))
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 ```

@@ -25,13 +25,16 @@ A feature of R\index{R}, and open source software in general, is that there are 
 The code chunk below illustrates this by using three functions, covered in Chapters \@ref(attr) and \@ref(geometry-operations), to combine the 16 regions of New Zealand into a single geometry:
 
 
-```r
+``` r
 library(spData)
 nz_u1 = sf::st_union(nz)
 nz_u2 = aggregate(nz["Population"], list(rep(1, nrow(nz))), sum)
 nz_u3 = dplyr::summarise(nz, t = sum(Population))
 identical(nz_u1, nz_u2$geometry)
 #> [1] TRUE
+```
+
+``` r
 identical(nz_u1, nz_u3$geom)
 #> [1] TRUE
 ```
@@ -54,7 +57,7 @@ A common choice, for which there is no simple answer, is between **tidyverse**\i
 The following code chunk, for example, shows **tidyverse** and base R ways to extract the `Name` column from the `nz` object, as described in Chapter \@ref(attr):
 
 
-```r
+``` r
 library(dplyr)                          # attach a tidyverse package
 nz_name1 = nz["Name"]                   # base R approach
 nz_name2 = nz |>                        # tidyverse approach

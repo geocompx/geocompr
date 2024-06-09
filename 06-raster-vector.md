@@ -7,7 +7,7 @@
 - This chapter requires the following packages:
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -40,7 +40,7 @@ Both target and cropping objects must have the same projection.
 The following code chunk therefore not only reads the datasets from the **spDataLarge** package installed in Chapter \@ref(spatial-class), it also 'reprojects' `zion` (a topic covered in Chapter \@ref(reproj-geo-data)):
 
 
-```r
+``` r
 srtm = rast(system.file("raster/srtm.tif", package = "spDataLarge"))
 zion = read_sf(system.file("vector/zion.gpkg", package = "spDataLarge"))
 zion = st_transform(zion, st_crs(srtm))
@@ -51,7 +51,7 @@ The function reduces the rectangular extent of the object passed to its first ar
 This functionality is demonstrated in the command below, which generates Figure \@ref(fig:cropmask)(B).
 
 
-```r
+``` r
 srtm_cropped = crop(srtm, zion)
 ```
 
@@ -60,7 +60,7 @@ Related to `crop()` is the **terra** function `mask()`, which sets values outsid
 The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)).
 
 
-```r
+``` r
 srtm_masked = mask(srtm, zion)
 ```
 
@@ -68,7 +68,7 @@ Importantly, we want to use both `crop()` and `mask()` together in most cases.
 This combination of functions would (a) limit the raster's extent to our area of interest and then (b) replace all of the values outside of the area to NA.^[These two operations can be combined into a single step with `terra::crop(srtm, zion, mask = TRUE)`, but we prefer to keep them separate for clarity.]
 
 
-```r
+``` r
 srtm_cropped = crop(srtm, zion)
 srtm_final = mask(srtm_cropped, zion)
 ```
@@ -77,7 +77,7 @@ Changing the settings of `mask()` yields different results.
 Setting `inverse = TRUE` will mask everything *inside* the bounds of the park (see `?mask` for details) (Figure \@ref(fig:cropmask)(D)), while setting `updatevalue = 0` will set all pixels outside the national park to 0.
 
 
-```r
+``` r
 srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 ```
 
@@ -100,13 +100,29 @@ The following command extracts elevation values from `srtm` and creates a data f
 Now, we can add the resulting object to our `zion_points` dataset with the `cbind()` function: 
 
 
-```r
+``` r
 data("zion_points", package = "spDataLarge")
 elevation = terra::extract(srtm, zion_points)
 zion_points = cbind(zion_points, elevation)
 ```
 
 
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__                              comp  class cell.h cell.v
+#>    <int> <int> <int>                            <list> <char> <char> <char>
+#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
+#> 2:     1    NA    NA <tm_legend_standard_portrait[84]>    out  right center
+#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
+#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 1.222 1.597
+#> 2:   left    top     2      <NA>      <NA>       TRUE vertical 0.882 0.252
+```
 
 <div class="figure" style="text-align: center">
 <img src="figures/pointextr-1.png" alt="Locations of points used for raster extraction." width="100%" />
@@ -122,7 +138,7 @@ In this case, a better approach is to split the line into many points and then e
 To demonstrate this, the code below creates `zion_transect`, a straight line going from northwest to southeast of the Zion National Park, illustrated in Figure \@ref(fig:lineextr)(A) (see Section \@ref(vector-data) for a recap on the vector data model):
 
 
-```r
+``` r
 zion_transect = cbind(c(-113.2, -112.9), c(37.45, 37.2)) |>
   st_linestring() |> 
   st_sfc(crs = crs(srtm)) |>
@@ -138,7 +154,7 @@ The first step is to add a unique `id` for each transect.
 Next, with the `st_segmentize()` function we can add points along our line(s) with a provided density (`dfMaxLength`) and convert them into points with `st_cast()`.
 
 
-```r
+``` r
 zion_transect$id = 1:nrow(zion_transect)
 zion_transect = st_segmentize(zion_transect, dfMaxLength = 250)
 zion_transect = st_cast(zion_transect, "POINT")
@@ -148,7 +164,7 @@ Now, we have a large set of points, and we want to derive a distance between the
 In this case, we only have one transect, but the code, in principle, should work on any number of transects:
 
 
-```r
+``` r
 zion_transect = zion_transect |> 
   group_by(id) |> 
   mutate(dist = st_distance(geometry)[, 1]) 
@@ -157,7 +173,7 @@ zion_transect = zion_transect |>
 Finally, we can extract elevation values for each point in our transects and combine this information with our main object.
 
 
-```r
+``` r
 zion_elev = terra::extract(srtm, zion_transect)
 zion_transect = cbind(zion_transect, zion_elev)
 ```
@@ -177,7 +193,7 @@ This is demonstrated in the command below, which results in a data frame with co
 
 
 
-```r
+``` r
 zion_srtm_values = terra::extract(x = srtm, y = zion)
 ```
 
@@ -185,7 +201,7 @@ Such results can be used to generate summary statistics for raster values per po
 This is shown in the code below, which creates the object `zion_srtm_df` containing summary statistics for elevation values in Zion National Park (see Figure \@ref(fig:polyextr)(A)):
 
 
-```r
+``` r
 group_by(zion_srtm_values, ID) |> 
   summarize(across(srtm, list(min = min, mean = mean, max = max)))
 #> # A tibble: 1 × 4
@@ -202,7 +218,7 @@ A similar approach works for counting occurrences of categorical raster values w
 This is illustrated with a land cover dataset (`nlcd`) from the **spDataLarge** package in Figure \@ref(fig:polyextr)(B), and demonstrated in the code below:
 
 
-```r
+``` r
 nlcd = rast(system.file("raster/nlcd.tif", package = "spDataLarge"))
 zion2 = st_transform(zion, st_crs(nlcd))
 zion_nlcd = terra::extract(nlcd, zion2)
@@ -218,6 +234,30 @@ zion_nlcd |>
 #> 3     1 Forest    298299
 #> 4     1 Shrubland 203700
 #> # ℹ 3 more rows
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.95 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.95 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -257,7 +297,7 @@ Often the target resolution is imposed on the user, for example when the output 
 To demonstrate rasterization in action, we will use a template raster that has the same extent and CRS as the input vector data `cycle_hire_osm_projected` (a dataset on cycle hire points in London is illustrated in Figure \@ref(fig:vector-rasterization1)(A)) and spatial resolution of 1000 meters:
 
 
-```r
+``` r
 cycle_hire_osm = spData::cycle_hire_osm
 cycle_hire_osm_projected = st_transform(cycle_hire_osm, "EPSG:27700")
 raster_template = rast(ext(cycle_hire_osm_projected), resolution = 1000,
@@ -271,7 +311,7 @@ First, we create a raster representing the presence or absence of cycle hire poi
 In this case `rasterize()` requires no argument in addition to `x` and `y`, the aforementioned vector and raster objects (results illustrated Figure \@ref(fig:vector-rasterization1)(B)).
 
 
-```r
+``` r
 ch_raster1 = rasterize(cycle_hire_osm_projected, raster_template)
 ```
 
@@ -279,7 +319,7 @@ The `fun` argument specifies summary statistics used to convert multiple observa
 By default `fun = "last"` is used but other options such as `fun = "length"` can be used, in this case to count the number of cycle hire points in each grid cell (the results of this operation are illustrated in Figure \@ref(fig:vector-rasterization1)(C)).
 
 
-```r
+``` r
 ch_raster2 = rasterize(cycle_hire_osm_projected, raster_template, 
                        fun = "length")
 ```
@@ -289,9 +329,53 @@ The cycle hire locations have different numbers of bicycles described by the `ca
 To calculate that we must `sum` the field (`"capacity"`), resulting in output illustrated in Figure \@ref(fig:vector-rasterization1)(D), calculated with the following command (other summary functions such as `mean` could be used).
 
 
-```r
+``` r
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
                        field = "capacity", fun = sum, na.rm = TRUE)
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  0.99 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.16 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.978 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.35 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -305,7 +389,7 @@ Another dataset based on California's polygons and borders (created below) illus
 After casting the polygon objects into a multilinestring, a template raster is created with a resolution of a 0.5 degree:
 
 
-```r
+``` r
 california = dplyr::filter(us_states, NAME == "California")
 california_borders = st_cast(california, "MULTILINESTRING")
 raster_template2 = rast(ext(california), resolution = 0.5,
@@ -317,7 +401,7 @@ By default it is `FALSE`, but when changed to `TRUE` -- all cells that are touch
 Line rasterization with `touches = TRUE` is demonstrated in the code below (Figure \@ref(fig:vector-rasterization2)(A)).
 
 
-```r
+``` r
 california_raster1 = rasterize(california_borders, raster_template2,
                                touches = TRUE)
 ```
@@ -325,8 +409,32 @@ california_raster1 = rasterize(california_borders, raster_template2,
 Compare it to a polygon rasterization, with `touches = FALSE` by default, which selects only raster cells whose centroids are inside the selector polygon, as illustrated in Figure \@ref(fig:vector-rasterization2)(B).
 
 
-```r
+``` r
 california_raster2 = rasterize(california, raster_template2) 
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.02 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.38 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -349,10 +457,34 @@ The simplest form of vectorization is to convert the centroids of raster cells i
 Note, here we also used `st_as_sf()` to convert the resulting object to the `sf` class.
 
 
-```r
+``` r
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev_point = as.points(elev) |> 
   st_as_sf()
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.03 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical 0.984 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -366,7 +498,7 @@ We will use a real-world digital elevation model (DEM) because the artificial ra
 Contour lines can be created with the **terra** function `as.contour()`, which is itself a wrapper around the built-in R function `filled.contour()`, as demonstrated below (not shown):
 
 
-```r
+``` r
 dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 cl = as.contour(dem) |> 
   st_as_sf()
@@ -391,10 +523,44 @@ This can be done with `terra::as.polygons()`, which converts each raster cell in
 This is illustrated below by converting the `grain` object into polygons and subsequently dissolving borders between polygons with the same attribute values (also see the `dissolve` argument in `as.polygons()`).
 
 
-```r
+``` r
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 grain_poly = as.polygons(grain) |> 
   st_as_sf()
+```
+
+
+```
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.03 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  1.26 0.285
+#> <====================  meta.auto.margins ===============>
+#> [1] 0.4 0.4 0.4 0.4
+#> </============================================>
+#> Index: <stack_auto>
+#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
+#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
+#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
+#>    facet_row facet_col stack_auto    stack  legW  legH
+#>       <char>    <char>     <lgcl>   <char> <num> <num>
+#> 1:      <NA>      <NA>      FALSE vertical  2.41 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -413,7 +579,7 @@ Caution should therefore be taken when using the smoothed polygons for further a
 Some of the following exercises use a vector (`zion_points`) and raster dataset (`srtm`) from the **spDataLarge** package.
 They also use a polygonal 'convex hull' derived from the vector dataset (`ch`) to represent the area of interest:
 
-```r
+``` r
 library(sf)
 library(terra)
 library(spData)

@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2024-05-15'
+date: '2024-06-09'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -44,7 +44,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2024-05-15.
+This version of the book was built on GH Actions on 2024-06-09.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -79,7 +79,7 @@ To reproduce the code in the book on your own computer, you need a recent versio
 These can be installed using the [**remotes**](https://github.com/r-lib/remotes) package.
 
 
-```r
+``` r
 install.packages("remotes")
 install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 ```
@@ -89,7 +89,7 @@ To do this [download](https://github.com/geocompx/geocompr/archive/refs/heads/ma
 After opening the `geocompr.Rproj` project in [RStudio](https://posit.co/download/rstudio-desktop/#download) (or opening the folder in another IDE such as [VS Code](https://github.com/REditorSupport/vscode-R)), you should be able to reproduce the contents with the following command:
 
 
-```r
+``` r
 bookdown::serve_book(".")
 ```
 

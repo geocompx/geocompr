@@ -14,7 +14,7 @@ Packages **GGally**, **lgr**, **kernlab**, **mlr3measures**, **paradox**, **pROC
 ]
 
 
-```r
+``` r
 library(sf)
 library(terra)
 library(dplyr)
@@ -72,7 +72,7 @@ This case study is based on a dataset of landslide locations in Southern Ecuador
 A subset of the dataset used in that paper is provided in the **spDataLarge**\index{spDataLarge (package)} package, which can be loaded as follows:
 
 
-```r
+``` r
 data("lsl", "study_mask", package = "spDataLarge")
 ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
@@ -167,7 +167,7 @@ In R\index{R}, modeling functions are usually specified using formulas (see `?fo
 The following command specifies and runs a generalized linear model\index{GLM}:
 
 
-```r
+``` r
 fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
           family = binomial(),
           data = lsl)
@@ -182,9 +182,12 @@ It is worth understanding each of the three input arguments:
 The results of this model can be printed as follows (`summary(fit)` provides a more detailed account of the results):
 
 
-```r
+``` r
 class(fit)
 #> [1] "glm" "lm"
+```
+
+``` r
 fit
 #> 
 #> Call:  glm(formula = lslpts ~ slope + cplan + cprof + elev + log10_carea, 
@@ -205,7 +208,7 @@ This is done with the generic `predict()` method, which in this case calls the f
 Setting `type` to `response` returns the predicted probabilities (of landslide occurrence) for each observation in `lsl`, as illustrated below (see `?predict.glm`).
 
 
-```r
+``` r
 pred_glm = predict(object = fit, type = "response")
 head(pred_glm)
 #>      1      2      3      4      5      6 
@@ -217,7 +220,7 @@ This can be done manually or with `terra::predict()`.
 In addition to a model object (`fit`), the latter function also expects a `SpatRaster` with the predictors (raster layers) named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
 
-```r
+``` r
 # making the prediction
 pred = terra::predict(ta, model = fit, type = "response")
 ```
@@ -249,7 +252,7 @@ The following code chunk computes the AUROC\index{AUROC} value of the model with
 `auc()` returns the area under the curve.
 
 
-```r
+``` r
 pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 #> Area under the curve: 0.8216
 ```
@@ -319,7 +322,7 @@ The `coordinate_names` argument expects the names of the coordinate columns (see
 Additionally, we should indicate the used CRS (`crs`) and decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`).
 
 
-```r
+``` r
 # 1. create task
 task = mlr3spatiotempcv::as_task_classif_st(
   mlr3::as_data_backend(lsl), 
@@ -339,7 +342,7 @@ We did not convert `lsl` into an `sf`-object because `as_task_classif_st()` woul
 For a short data exploration, the `autoplot()` function of the **mlr3viz** package might come in handy since it plots the response against all predictors and all predictors against all predictors (not shown).
 
 
-```r
+``` r
 # plot response against each predictor
 mlr3viz::autoplot(task, type = "duo")
 # plot all variables against each other
@@ -352,7 +355,7 @@ All classification\index{classification} **learners** start with `classif.` and 
 To find out about learners that are able to model a binary response variable, we can run:
 
 
-```r
+``` r
 mlr3extralearners::list_mlr3learners(
   filter = list(class = "classif", properties = "twoclass"), 
   select = c("id", "mlr3_package", "required_packages")) |>
@@ -379,7 +382,7 @@ We opt for the binomial classification\index{classification} method used in Sect
 Additionally, we need to specify the `predict.type` which determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm()`).
 
 
-```r
+``` r
 # 2. specify learner
 learner = mlr3::lrn("classif.log_reg", predict_type = "prob")
 ```
@@ -387,7 +390,7 @@ learner = mlr3::lrn("classif.log_reg", predict_type = "prob")
 To access the help page of the learner and find out from which package it was taken, we can run:
 
 
-```r
+``` r
 learner$help()
 ```
 
@@ -395,7 +398,7 @@ learner$help()
 Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task. 
 
 
-```r
+``` r
 learner$train(task)
 learner$model
 ```
@@ -403,7 +406,7 @@ learner$model
 
 
 
-```r
+``` r
 fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
           data = select(lsl, -x, -y))
 identical(fit$coefficients, learner$model$coefficients)
@@ -423,7 +426,7 @@ We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}:
 
 
 
-```r
+``` r
 # 3. specify resampling
 resampling = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
@@ -435,7 +438,7 @@ To retrieve it, we use the `score()` method of the resampling result output obje
 This returns a `data.table` object with 500 rows -- one for each model.
 
 
-```r
+``` r
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
 # run spatial cross-validation and save it to resample result glm (rr_glm)
@@ -454,7 +457,7 @@ We have saved it as `extdata/12-bmr_score.rds` in the book's GitHub repository.
 If required, you can read it in as follows:
 
 
-```r
+``` r
 score = readRDS("extdata/12-bmr_score.rds")
 score_spcv_glm = dplyr::filter(score, learner_id == "classif.log_reg", 
                                resampling_id == "repeated_spcv_coords")
@@ -463,7 +466,7 @@ score_spcv_glm = dplyr::filter(score, learner_id == "classif.log_reg",
 To compute the mean AUROC over all 500 models, we run:
 
 
-```r
+``` r
 mean(score_spcv_glm$classif.auc) |>
   round(2)
 #> [1] 0.77
@@ -512,7 +515,7 @@ Setting the `type` argument to `"C-svc"` makes sure that `ksvm()` is solving a c
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-fallback).
 
 
-```r
+``` r
 lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
                      type = "C-svc")
 lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
@@ -522,7 +525,7 @@ The next stage is to specify a resampling strategy.
 Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}.
 
 
-```r
+``` r
 # performance estimation level
 perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
@@ -545,7 +548,7 @@ The range of the tuning space was chosen with values recommended in the literatu
 To find the optimal hyperparameter combination, we fit 50 models (`terminator` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
 
 
-```r
+``` r
 # five spatially disjoint partitions
 tune_level = mlr3::rsmp("spcv_coords", folds = 5)
 # define the outer limits of the randomly selected hyperparameters
@@ -561,7 +564,7 @@ tuner = mlr3tuning::tnr("random_search")
 The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `auto_tuner()`.
 
 
-```r
+``` r
 at_ksvm = mlr3tuning::auto_tuner(
   learner = lrn_ksvm,
   resampling = tune_level,
@@ -592,7 +595,7 @@ Since the former will run 125,000 models, whereas the latter only runs 500, it i
 To set up the parallelization of the inner loop, we run:
 
 
-```r
+``` r
 library(future)
 # execute the outer loop sequentially and parallelize the inner loop
 future::plan(list("sequential", "multisession"), 
@@ -614,7 +617,7 @@ It can easily run for half a day on a modern laptop.
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.
 
 
-```r
+``` r
 progressr::with_progress(expr = {
   rr_spcv_svm = mlr3::resample(task = task,
                                learner = at_ksvm, 
@@ -636,7 +639,7 @@ In case you do not want to run the code locally, we have saved [score_svm](https
 They can be loaded as follows:
 
 
-```r
+``` r
 score = readRDS("extdata/12-bmr_score.rds")
 score_spcv_svm = dplyr::filter(score, learner_id == "classif.ksvm.tuned", 
                                resampling_id == "repeated_spcv_coords")
@@ -645,7 +648,7 @@ score_spcv_svm = dplyr::filter(score, learner_id == "classif.ksvm.tuned",
 Let us have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
 
 
-```r
+``` r
 # final mean AUROC
 round(mean(score_spcv_svm$classif.auc), 2)
 #> [1] 0.74

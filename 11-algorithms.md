@@ -57,7 +57,7 @@ Saved scripts can be called and executed in their entirety from the R command li
 The output of this command shows that the comment is ignored but `print()` command is executed:
 
 
-```r
+``` r
 source("code/11-hello.R")
 #> [1] "Hello geocompr"
 ```
@@ -105,7 +105,7 @@ If statements, implemented with `if ()` in R, can be used to send messages or ru
 The following lines of code, for example, send a message to users if a certain file is missing:
 
 
-```r
+``` r
 if (!file.exists("required_geo_data.gpkg")) {
   message("No file, required_geo_data.gpkg is missing!")
 } 
@@ -117,7 +117,7 @@ This example shows that `source()` works with URLs, assuming you have an interne
 If you do not, the same script can be called with `source("code/11-centroid-alg.R")`, assuming that you have previously downloaded the [github.com/geocompx/geocompr](https://github.com/geocompx/geocompr) repository and that you are running R from the `geocompr` folder.
 
 
-```r
+``` r
 poly_mat = cbind(
   x = c(0, 9, 9, 0, 0),
   y = c(0, 0, 9, 9, 0)
@@ -170,7 +170,7 @@ In this case, we will create a polygon with five vertices in base R, building on
 
 
 
-```r
+``` r
 # generate a simple matrix representation of a polygon:
 x_coords = c(10, 20, 12, 0, 0, 10)
 y_coords = c(0, 15, 20, 10, 0, 0)
@@ -181,7 +181,7 @@ Now that we have an example dataset, we are ready to undertake step 1 outlined a
 The code below shows how this can be done by creating a single triangle (`T1`), that demonstrates the method; it also demonstrates step 2 by calculating its centroid\index{centroid} based on the [formula](https://math.stackexchange.com/a/1702606) $1/3(a + b + c)$ where $a$ to $c$ are coordinates representing the triangle's vertices:
 
 
-```r
+``` r
 # create a point representing the origin:
 Origin = poly_mat[1, ]
 # create 'triangle matrix':
@@ -207,7 +207,7 @@ Where $A$ to $C$ are the triangle's three points and $x$ and $y$ refer to the x 
 A translation of this formula into R code that works with the data in the matrix representation of a triangle `T1` is as follows (the function `abs()` ensures a positive result):
 
 
-```r
+``` r
 # calculate the area of the triangle represented by matrix T1:
 abs(T1[1, 1] * (T1[2, 2] - T1[3, 2]) +
     T1[2, 1] * (T1[3, 2] - T1[1, 2]) +
@@ -230,7 +230,7 @@ See `?lapply` for documentation and Chapter \@ref(location) for more on iteratio
 ]
 
 
-```r
+``` r
 i = 2:(nrow(poly_mat) - 2)
 T_all = lapply(i, function(x) {
   rbind(Origin, poly_mat[x:(x + 1), ], Origin)
@@ -257,7 +257,7 @@ We saw at the end of Section \@ref(scripts) how this script can calculate the ce
 The great thing about *scripting* the algorithm is that it works on the new `poly_mat` object (see exercises below to verify these results with reference to `st_centroid()`):
 
 
-```r
+``` r
 source("code/11-centroid-alg.R")
 #> [1] "The area is: 245"
 #> [1] "The coordinates of the centroid are: 8.83, 9.22"
@@ -287,7 +287,7 @@ In R, functions\index{function} are objects in their own right, that can be crea
 We can, for example, create a function that undertakes step 2 of our centroid\index{centroid} generation algorithm\index{algorithm} as follows:
 
 
-```r
+``` r
 t_centroid = function(x) {
   (x[1, ] + x[2, ] + x[3, ]) / 3
 }
@@ -304,7 +304,7 @@ You can also explicitly set the output of a function by adding `return(output)` 
 The function now works on any inputs you pass it, as illustrated in the below command which calculates the area of the 1^st^ triangle from the example polygon in the previous section (see Figure \@ref(fig:polycent)).
 
 
-```r
+``` r
 t_centroid(T1)
 #> x_coords y_coords 
 #>     14.0     11.7
@@ -313,7 +313,7 @@ t_centroid(T1)
 We can also create a function\index{function} to calculate a triangle's area, which we will name `t_area()`:
 
 
-```r
+``` r
 t_area = function(x) {
   abs(
     x[1, 1] * (x[2, 2] - x[3, 2]) +
@@ -328,7 +328,7 @@ functions are a mechanism for *generalizing* code.
 The newly created function\index{function} `t_area()` takes any object `x`, assumed to have the same dimensions as the 'triangle matrix' data structure we've been using, and returns its area, as illustrated on `T1` as follows:
 
 
-```r
+``` r
 t_area(T1)
 #> [1] 85
 ```
@@ -336,7 +336,7 @@ t_area(T1)
 We can test the generalizability of the function\index{function} by using it to find the area of a new triangle matrix, which has a height of 1 and a base of 3:
 
 
-```r
+``` r
 t_new = cbind(x = c(0, 3, 3, 0),
               y = c(0, 0, 1, 0))
 t_area(t_new)
@@ -352,7 +352,7 @@ Note that the functions we created are called iteratively in `lapply()`\index{lo
 ]
 
 
-```r
+``` r
 poly_centroid = function(poly_mat) {
   Origin = poly_mat[1, ] # create a point representing the origin
   i = 2:(nrow(poly_mat) - 2)
@@ -368,7 +368,7 @@ poly_centroid = function(poly_mat) {
 
 
 
-```r
+``` r
 poly_centroid(poly_mat)
 #> [1] 8.83 9.22
 ```
@@ -377,7 +377,7 @@ Functions\index{function}, such as `poly_centroid()`, can further be extended to
 To return the result as an object of class `sfg`, for example, a 'wrapper' function can be used to modify the output of `poly_centroid()` before returning the result:
 
 
-```r
+``` r
 poly_centroid_sfg = function(x) {
   centroid_coords = poly_centroid(x)
   sf::st_point(centroid_coords)
@@ -387,7 +387,7 @@ poly_centroid_sfg = function(x) {
 We can verify that the output is the same as the output from `sf::st_centroid()` as follows:
 
 
-```r
+``` r
 poly_sfc = sf::st_polygon(list(poly_mat))
 identical(poly_centroid_sfg(poly_mat), sf::st_centroid(poly_sfc))
 #> [1] TRUE
