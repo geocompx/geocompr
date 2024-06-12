@@ -1,17 +1,23 @@
-library(camcorder)
-library(cartogram)
-library(glue)
-library(ggtext)
-library(ggforce)
-library(MoMAColors) # dev version available on github: https://github.com/BlakeRMills/MoMAColors
-library(rnaturalearth)
-library(scico)
-library(sf)
-library(showtext)
-library(terra)
-library(tidyterra)
-library(tidyverse)
-library(od)
+remotes::install_github("BlakeRMills/MoMAColors")
+pkgs = c(
+  "camcorder",
+  "cartogram",
+  "glue",
+  "ggtext",
+  "ggforce",
+  "MoMAColors", # dev version available on github: https://github.com/BlakeRMills/MoMAColors
+  "rnaturalearth",
+  "scico",
+  "sf",
+  "showtext",
+  "terra",
+  "tidyterra",
+  "tidyverse",
+  "od"
+)
+pkgs_to_install = pkgs[!pkgs %in% installed.packages()]
+remotes::install_cran(pkgs_to_install)
+sapply(pkgs, require, character.only = TRUE)
 
 # Set fonts
 font_add_google("Raleway", "ral")
