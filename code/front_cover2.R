@@ -17,7 +17,7 @@ pkgs = c(
 )
 pkgs_to_install = pkgs[!pkgs %in% installed.packages()]
 remotes::install_cran(pkgs_to_install)
-lapply(pkgs, require, character.only = TRUE)
+sapply(pkgs, require, character.only = TRUE)
 
 # Set fonts
 font_add_google("Raleway", "ral")
