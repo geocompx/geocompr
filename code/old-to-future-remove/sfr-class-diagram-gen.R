@@ -8,7 +8,7 @@ n = gsub(pattern = "GEOMETRY", replacement = "GEOMETRY COLLECTION", n)
 n = sort(n)[c(1, 4, 3, 5, 6, 2, 7)]
 
 # see https://davetang.org/muse/2017/03/31/creating-flowchart-using-r/
-png(filename = "figures/sf-classes.png", width = 600, height = 500)
+png(filename = "images/sf-classes.png", width = 600, height = 500)
 # openplotmat()
 pos = coordinates(c(1, 3, 3))
 plot(pos, type = 'n')

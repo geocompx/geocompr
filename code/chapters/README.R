@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "figures/"
+  fig.path = "images/"
 )
 is_online = curl::has_internet()
 
@@ -32,12 +32,12 @@ contributors_text = paste0(c_rmd, collapse = ", ")
 ## ----readme-install-github, eval=FALSE--------------------------------------------------------------
 ## install.packages("remotes")
 ## # To reproduce the first Part (chapters 1 to 8):
-## remotes::install_github("geocompr/geocompkg")
+## install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 
 
 ## ----readme-install-github-2, message=FALSE, eval=FALSE, results='hide'-----------------------------
 ## # To reproduce all chapters (install lots of packages, may take some time!)
-## remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
+## remotes::install_github("geocompx/geocompkg", dependencies = TRUE)
 
 
 ## ----readme-render-book, eval=FALSE-----------------------------------------------------------------

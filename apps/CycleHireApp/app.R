@@ -1,7 +1,7 @@
 # Shiny app for cycle hire from https://github.com/geocompx/geocompr/issues/584
 # Author - Kiranmayi Vadlamudi
 # 2020-12-25
-# Last updated: 2023-02-28 by Jakub Nowosad
+# Last updated: 2023-04-19 by Jakub Nowosad
 library(shiny)
 library(sf)
 library(spData)
@@ -17,29 +17,32 @@ ui = fluidPage(
   titlePanel("CycleHireApp"),
   # Numeric Input from User
   bootstrapPage(
-    div(style="display:inline-block", numericInput("x", ("Enter x-coordinate of your location"), value = 51.5, step = 0.001)),
-    div(style="display:inline-block", numericInput("y", ("Enter y-coordinate of your location"), value = -0.1 , step = 0.001)),
-    div(style="display:inline-block",  numericInput("num", "How many cycles are you looking for?", value = 1, step = 1))
+    div(style = "display:inline-block", 
+        numericInput("x", ("Enter x-coordinate of your location"), value = 51.5, step = 0.001)),
+    div(style = "display:inline-block", 
+        numericInput("y", ("Enter y-coordinate of your location"), value = -0.1, step = 0.001)),
+    div(style = "display:inline-block", 
+        numericInput("num", "How many cycles are you looking for?", value = 1, step = 1))
     ),
   # Where leaflet map will be rendered
   fluidRow(
-    leafletOutput("map", height= 300)
+    leafletOutput("map", height = 300)
   )
 )
 
 server = function(input, output) {
-  #centring the leaflet map onto London - use if needed
+  #Centering the leaflet map onto London - use if needed
   map_centre = matrix(c(-0.2574846, 51.4948089), nrow = 1, ncol = 2, 
                       dimnames = list(c("r1"), c("X", "Y")))
   
-  #based on input coords calculating top 5 closest stations to be displayed 
+  #Based on input coords calculating top 5 closest stations to be displayed 
   
-  #making reactive object of input location coordinates
+  #Making reactive object of input location coordinates
   input_pt = reactive({
     matrix(c(input$y, input$x), nrow = 1, ncol = 2,
            dimnames = list(c("r1"), c("X", "Y")))
   })
-  #rendering the output map showing the input coordinates
+  #Rendering the output map showing the input coordinates
   output$map = renderLeaflet({
     leaflet() |> 
       addTiles() |>
@@ -62,7 +65,7 @@ server = function(input, output) {
       filter(nbikes >= input$num) |> 
       head(5) |> 
       mutate(popup = str_c(str_c("Station:", name, sep = " "),
-                     str_c("Available bikes:", nbikes, sep=" "), sep = "<br/>"))
+                     str_c("Available bikes:", nbikes, sep = " "), sep = "<br/>"))
     
   })
   #Making changes to the output leaflet map reflecting the cycle stations found above

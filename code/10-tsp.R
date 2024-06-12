@@ -53,14 +53,14 @@ execGRASS(cmd = "v.net.salesman", input = "streets_points_con",
           flags = c("overwrite"))
 
 # load output into R
-route = readVECT("shortest_route") %>%
-  st_as_sf %>%
-  st_geometry
+route = readVECT("shortest_route") |>
+  st_as_sf() |>
+  st_geometry()
 
 # make a plot
 fig = mapview(route, map.types = "OpenStreetMap.BlackAndWhite", lwd = 7) +
   mapview(points)
 
 # save it as a png
-mapshot(fig, file = "figures/09_shortest_route.png",
+mapshot(fig, file = "images/09_shortest_route.png",
         remove_controls = c("homeButton", "layersControl"))

@@ -89,7 +89,7 @@ input_ras
 
 
 ## ----census-stack, echo=FALSE, fig.cap="Gridded German census data of 2011 (see Table \\@ref(tab:census-desc) for a description of the classes).", fig.scap="Gridded German census data."----
-knitr::include_graphics("figures/08_census_stack.png")
+knitr::include_graphics("images/08_census_stack.png")
 
 
 ## ----14-location-8----------------------------------------------------
@@ -143,7 +143,7 @@ metros = polys |>
 
 
 ## ----metro-areas, echo=FALSE, out.width= "70%", fig.cap="The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.", fig.scap="The aggregated population raster."----
-knitr::include_graphics("figures/08_metro_areas.png")
+knitr::include_graphics("images/08_metro_areas.png")
 
 
 ## ----14-location-17, warning=FALSE, eval=FALSE------------------------
@@ -244,7 +244,7 @@ result = sum(reclass)
 
 ## ----bikeshop-berlin, echo=FALSE, eval=TRUE, fig.cap="Suitable areas (i.e., raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin.", fig.scap="Suitable areas for bike stores.", warning=FALSE----
 if (knitr::is_latex_output()) {
-    knitr::include_graphics("figures/bikeshop-berlin-1.png")
+    knitr::include_graphics("images/bikeshop-berlin-1.png")
 } else if (knitr::is_html_output()) {
     library(leaflet)
     # have a look at suitable bike shop locations in Berlin

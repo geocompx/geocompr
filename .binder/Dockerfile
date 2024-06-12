@@ -1,4 +1,4 @@
-FROM geocompr/geocompr:binder
+FROM ghcr.io/geocompx/docker:binder
 
 ## Declares build arguments
 ARG NB_USER

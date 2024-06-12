@@ -466,7 +466,7 @@ any(st_touches(cycle_hire, cycle_hire_osm, sparse = FALSE))
 
 ## ----cycle-hire, fig.cap="The spatial distribution of cycle hire points in London based on official data (blue) and OpenStreetMap data (red).", echo=FALSE, warning=FALSE, fig.scap="The spatial distribution of cycle hire points in London."----
 if (knitr::is_latex_output()){
-  knitr::include_graphics("figures/cycle-hire-1.png")
+  knitr::include_graphics("images/cycle-hire-1.png")
 } else if (knitr::is_html_output()){
   # library(tmap)
   # osm_tiles = tmaptools::read_osm(tmaptools::bb(cycle_hire, ext = 1.3), type =   "https://korona.geog.uni-heidelberg.de/tiles/roadsg/x={x}&y={y}&z={z}")
@@ -589,7 +589,7 @@ st_distance(nz_height[1:3, ], co)
 
 
 ## ----raster-subset, echo = FALSE, fig.cap = "Original raster (left). Raster mask (middle). Output of masking a raster (right).", fig.scap="Subsetting raster values."----
-knitr::include_graphics("figures/04_raster_subset.png")
+knitr::include_graphics("images/04_raster_subset.png")
 
 
 ## ----04-spatial-operations-36, eval=FALSE-----------------------------------------------------------
@@ -629,7 +629,7 @@ knitr::include_graphics("figures/04_raster_subset.png")
 
 
 ## ----04-local-operations, echo=FALSE, fig.cap="Examples of different local operations of the elev raster object: adding two rasters, squaring, applying logarithmic transformation, and performing a logical operation."----
-knitr::include_graphics("figures/04-local-operations.png")
+knitr::include_graphics("images/04-local-operations.png")
 
 
 ## ----04-spatial-operations-40-----------------------------------------------------------------------
@@ -657,7 +657,7 @@ ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 
 
 ## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park"----
-knitr::include_graphics("figures/04-ndvi.png")
+knitr::include_graphics("images/04-ndvi.png")
 
 
 ## ----04-spatial-operations-42, eval = FALSE---------------------------------------------------------
@@ -665,7 +665,7 @@ knitr::include_graphics("figures/04-ndvi.png")
 
 
 ## ----focal-example, echo = FALSE, fig.cap = "Input raster (left) and resulting output raster (right) due to a focal operation - finding the minimum value in 3-by-3 moving windows.", fig.scap="Illustration of a focal operation."----
-knitr::include_graphics("figures/04_focal_example.png")
+knitr::include_graphics("images/04_focal_example.png")
 
 
 ## ----04-spatial-operations-43-----------------------------------------------------------------------

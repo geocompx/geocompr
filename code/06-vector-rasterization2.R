@@ -19,41 +19,21 @@ california_raster_centr = st_as_sf(as.polygons(raster_template2))
 california_raster_centr = st_centroid(california_raster_centr)
 
 r1po = tm_shape(california_raster1) + 
-  tm_raster(legend.show = TRUE, title = "Values: ") +
+  tm_raster(col.legend = tm_legend("Values: "),
+            col.scale = tm_scale(values = "#b6d8fc")) + 
   tm_shape(california_raster_centr) +
-  tm_dots() + 
+  tm_symbols(shape = 20, col = "black", size = 0.2) + 
   tm_shape(california) + tm_borders() + 
-  tm_layout(main.title = "A. Line rasterization", main.title.size = 1, 
-            legend.show = FALSE, frame = FALSE)
+  tm_title("A. Line rasterization") + 
+  tm_layout(legend.show = FALSE, frame = FALSE)
 
 r2po = tm_shape(california_raster2) +
-  tm_raster(legend.show = TRUE, title = "Values: ") +
+  tm_raster(col.legend = tm_legend("Values: "),
+            col.scale = tm_scale(values = "#b6d8fc")) + 
   tm_shape(california_raster_centr) + 
-  tm_dots() + 
+  tm_symbols(shape = 20, col = "black", size = 0.2) + 
   tm_shape(california) + tm_borders() + 
-  tm_layout(main.title = "B. Polygon rasterization", main.title.size = 1,
-            legend.show = FALSE, frame = FALSE)
+  tm_title("B. Polygon rasterization")  + 
+  tm_layout(legend.show = FALSE, frame = FALSE)
 
 tmap_arrange(r1po, r2po, ncol = 2)
-
-if (packageVersion("tmap") >= "4.0"){
-  r1po = tm_shape(california_raster1) + 
-    tm_raster(col.legend = tm_legend("Values: "),
-              col.scale = tm_scale(values = "#b6d8fc")) + 
-    tm_shape(california_raster_centr) +
-    tm_symbols(shape = 20, col = "black", size = 0.2) + 
-    tm_shape(california) + tm_borders() + 
-    tm_title("A. Line rasterization") + 
-    tm_layout(legend.show = FALSE, frame = FALSE)
-  
-  r2po = tm_shape(california_raster2) +
-    tm_raster(col.legend = tm_legend("Values: "),
-              col.scale = tm_scale(values = "#b6d8fc")) + 
-    tm_shape(california_raster_centr) + 
-    tm_symbols(shape = 20, col = "black", size = 0.2) + 
-    tm_shape(california) + tm_borders() + 
-    tm_title("B. Polygon rasterization")  + 
-    tm_layout(legend.show = FALSE, frame = FALSE)
-  
-  tmap_arrange(r1po, r2po, ncol = 2)
-}

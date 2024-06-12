@@ -75,7 +75,7 @@ if (is_html) {
 
 ## 
 
-## <!--[![](figures/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)-->
+## <!--[![](images/editme.png)](https://github.com/Robinlovelace/geocompr/edit/main/index.Rmd)-->
 
 ## 
 
@@ -119,7 +119,7 @@ if (is_html) {
 
 ## ----index-3, message=FALSE, eval=FALSE, echo=is_html, results='hide'-------------------------------
 ## install.packages("remotes")
-## remotes::install_github("geocompr/geocompkg")
+## install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
 
 
 ## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------
@@ -148,7 +148,7 @@ if (is_html) {
 geocompkg_is_installed = "geocompkg" %in% installed.packages()
 if (!geocompkg_is_installed){
   message(
-  'geocompkg not installed, run\nremotes::install_github("geocompr/geocompkg") # to install it'
+  'geocompkg not installed, run\nremotes::install_github("geocompx/geocompkg") # to install it'
   )
 } 
 

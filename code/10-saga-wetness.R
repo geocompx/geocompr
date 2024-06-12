@@ -25,7 +25,7 @@ library(RSAGA)
 data("landslides", package = "RSAGA")
 lsl_sf = st_as_sf(landslides, coords = c("x", "y"), crs = 32717)
 write.sgrd(data = dem, file = file.path(tempdir(), "dem"), header = dem$header)
-dem = file.path(tempdir(), "dem.sdat") %>%
+dem = file.path(tempdir(), "dem.sdat") |>
                raster(crs = st_crs(lsl_sf)$proj4string)
 
 #**********************************************************
@@ -56,5 +56,5 @@ fig = tm_shape(hs, bbox = bbx) +
   tm_layout(outer.margins = c(0.04, 0.04, 0.02, 0.02), frame = FALSE) +
   tm_legend(bg.color = "white")
 # save the figure
-tmap_save(fig, filename = "figures/09_twi.png", dpi = 300, width = 9,
+tmap_save(fig, filename = "images/09_twi.png", dpi = 300, width = 9,
           height = 9.75, units = "cm")

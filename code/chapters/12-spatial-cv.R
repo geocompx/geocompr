@@ -41,9 +41,9 @@ ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 #              title.col = "Landslide: ") +
 #   tm_layout(inner.margins = 0) +
 #   tm_legend(bg.color = "white")
-# tmap::tmap_save(map, filename = "figures/lsl-map-1.png", width = 11,
+# tmap::tmap_save(map, filename = "images/lsl-map-1.png", width = 11,
 #                 height = 11, units = "cm")
-knitr::include_graphics("figures/lsl-map-1.png")
+knitr::include_graphics("images/lsl-map-1.png")
 
 
 ## ----lslsummary, echo=FALSE, warning=FALSE----------------------------------------------------------
@@ -101,9 +101,9 @@ head(pred_glm)
 # 	tm_layout(legend.position = c("left", "bottom"),
 # 	          legend.title.size = 0.9,
 # 	          inner.margins = 0)
-# tmap::tmap_save(map, filename = "figures/lsl-susc-1.png", width = 11,
+# tmap::tmap_save(map, filename = "images/lsl-susc-1.png", width = 11,
 #                 height = 11, units = "cm")
-knitr::include_graphics("figures/lsl-susc-1.png")
+knitr::include_graphics("images/lsl-susc-1.png")
 
 
 ## ----12-spatial-cv-10, message=FALSE, eval=FALSE----------------------------------------------------
@@ -112,11 +112,11 @@ knitr::include_graphics("figures/lsl-susc-1.png")
 
 
 ## ----partitioning, fig.cap="Spatial visualization of selected test and training observations for cross-validation of one repetition. Random (upper row) and spatial partitioning (lower row).", echo=FALSE, fig.scap="Spatial visualization of selected test and training observations."----
-knitr::include_graphics("figures/13_partitioning.png")
+knitr::include_graphics("images/13_partitioning.png")
 
 
 ## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr3 package."----
-knitr::include_graphics("figures/13_ml_abstraction_crop.png")
+knitr::include_graphics("images/13_ml_abstraction_crop.png")
 
 
 ## ----12-spatial-cv-11, eval=FALSE-------------------------------------------------------------------
@@ -251,7 +251,7 @@ perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 
 
 ## ----inner-outer, echo=FALSE, fig.cap="Schematic of hyperparameter tuning and performance estimation levels in CV. (Figure was taken from Schratz et al. (2019). Permission to reuse it was kindly granted.)", fig.scap="Schematic of hyperparameter tuning."----
-knitr::include_graphics("figures/13_cv.png")
+knitr::include_graphics("images/13_cv.png")
 
 
 ## ----12-spatial-cv-26, eval=FALSE-------------------------------------------------------------------

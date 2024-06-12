@@ -1,17 +1,21 @@
 library(sf)
 # centroid calculation with Python:
 dir.create("py")
-download.file("https://github.com/gisalgs/geom/archive/master.zip", "py/gisalgs.zip")
-unzip("py/gisalgs.zip", exdir = "py/")
-file.rename(from = "py/geom-master", to = "py/geom")
-file.copy("py/geom/__init__.py", "py/")
+if (!file.exists("py/__init__.py")) {
+  download.file("https://github.com/gisalgs/geom/archive/master.zip", "py/gisalgs.zip")
+  unzip("py/gisalgs.zip", exdir = "py/")
+  file.rename(from = "py/geom-master", to = "py/geom")
+  file.copy("py/geom/__init__.py", "py/__init__.py")
+}
 library(reticulate)
 reticulate::py_config()
-# use_python("/usr/bin/python3")
-res = py_run_string("x = 1 +3")
+# Test Python works
+res = py_run_string("x = 1 + 3")
 res$x
 py_run_string("import os")
-py_run_string("sys.path.append('/home/robin/repos/geocompr/py')")
+py_run_string("import sys")
+current_directory <- getwd()
+py_run_string(paste0("sys.path.append('", current_directory, "/py')"))
 py_run_string("from geom.point import *")
 res = py_run_string("p, p1, p2 = Point(10,0), Point(0,100), Point(0,1)")
 res$p1
@@ -27,6 +31,6 @@ poly_mat = t(poly_df)
 poly_sf = st_polygon(x = list(mat_points))
 plot(poly_sf)
 # access modules
-g = import_from_path(module = 'geom', '/home/robin/repos/geocompr/py')
+g = import_from_path(module = 'geom', paste0(getwd(), '/py'))
 g$point
 unlink("py", recursive = TRUE)

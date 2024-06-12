@@ -11,7 +11,7 @@ origin_osgb = st_point(c(0, 0)) %>%
   st_sf(crs = 27700, geometry = .)
 london_orign = rbind(london_osgb, origin_osgb)
 
-png("figures/vector_lonlat.png")
+png("images/vector_lonlat.png")
 globe::globeearth(eye = c(0, 0))
 gratmat = st_coordinates(st_graticule())[, 1:2]
 globe::globelines(loc = gratmat, col = "grey", lty = 3)
@@ -20,7 +20,7 @@ globe::globelines(loc = matrix(c(0, 0, -90, 90), ncol = 2))
 globe::globepoints(loc = c(-0.1, 51.5), pch = 4, cex = 2, lwd = 3, col = "red")
 globe::globepoints(loc = c(0, 0), pch = 1, cex = 2, lwd = 3, col = "blue")
 dev.off()
-png("figures/vector_projected.png")
+png("images/vector_projected.png")
 uk = rnaturalearth::ne_countries(scale = 50) %>% 
   st_as_sf() %>% 
   filter(grepl(pattern = "United Kingdom|Ire", x = name_long)) %>% 

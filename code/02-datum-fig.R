@@ -42,12 +42,12 @@ gg_loc = ggplot() +
 vp_geo = viewport(0.5, 0.5, width = 0.9 * 1.06, height = 0.9 * 1.06)
 vp_loc = viewport(0.53, 0.525, width = 0.9 * 1.06, height = 0.9 * 1.06)
 
-png("figures/02_datum_fig.png", width = 831*3, height = 425*3, res = 300)
+png("images/02_datum_fig.png", width = 831*3, height = 425*3, res = 300)
 grid.newpage()
 grid.raster(geoid, interpolate = TRUE, height = 0.9)
 print(gg_geo, vp = vp_geo)
 print(gg_loc, vp = vp_loc)
 dev.off()
 
-# system("optipng figures/02_datum_fig.png")
+# system("optipng images/02_datum_fig.png")
 
