@@ -7,6 +7,7 @@ pkgs = c(
   "ggforce",
   "MoMAColors", # dev version available on github: https://github.com/BlakeRMills/MoMAColors
   "rnaturalearth",
+  "rnaturalearthdata",
   "scico",
   "sf",
   "showtext",
