@@ -916,24 +916,6 @@ RPostgreSQL::postgresqlCloseConnection(conn)
 
 
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <int> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
-#> 2:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
-#> 3:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 1.605 0.280
-#> 2:   left    top     2      <NA>      <NA>       TRUE vertical 0.939 0.280
-#> 3:   left    top     3      <NA>      <NA>       TRUE vertical 0.980 0.312
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/postgis-1.png" alt="Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer." width="100%" />
 <p class="caption">(\#fig:postgis)Visualization of the output of previous PostGIS commands showing the highway (black line), a buffer (light yellow) and four restaurants (red points) within the buffer.</p>

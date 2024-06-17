@@ -48,19 +48,21 @@ This may sound simple and easy to achieve (which it is if you carefully maintain
 
 ## What is geocomputation?
 
-Geocomputation\index{geocomputation} is the application and development of computational methods for geographic data processing, analysis, modeling and visualization with command-line tools and scripts, focused on performance, reproducibility and modularity.
-This definition encapsulates many of the key ideas in this book, building on the short history of the word, dating back to the first conference on the subject in 1996 when it entered the lexicon.^[
+We define geocomputation as
+
+> A field of research, software development and practical application that uses geographic data to solve problems, with a focus on reproducibility, flexibility and tool development.
+
+Geocomputation\index{geocomputation!definition} is a young term, dating back to the first conference on the subject in 1996.^[
 The first 'GeoComputation' conference took place at the University of Leeds, where one of the authors (Robin) is currently based.
 In 2017 the GeoComputation conference returned to University of Leeds, providing a chance for us to work on and present the book (see www.geocomputation.org for more on the conference series, and papers/presentations spanning more than two decades).
 ]
-
 What distinguished geocomputation from the (at the time) commonly used term 'quantitative geography' was its emphasis on "creative and experimental" applications [@longley_geocomputation_1998] and the development of new tools and methods.
 In the words of Stan Openshaw, a pioneer in the field who was an advocate (and possibly originator) of the term, "GeoComputation is about using the various different types of geodata and about developing relevant geo-tools within the overall context of a 'scientific' approach" [@openshaw_geocomputation_2000].
 Building on this early definition, *Geocomputation with R* goes beyond data analysis and modeling to include the development of new tools and methods for work that is not just interesting academically but beneficial.
 
 Our approach differs from early definitions of geocomputation in one important way, however: in its emphasis on reproducibility\index{reproducibility} and collaboration.
 At the turn of the 21^st^ Century, it was unrealistic to expect readers to be able to reproduce code examples, due to barriers preventing access to the necessary hardware, software and data.
-Fast-forward two decades and things have progressed rapidly.
+Fast-forward to today and things have progressed rapidly.
 Anyone with access to a laptop with sufficient RAM (at least 8 GB recommended) can install and run software for geocomputation, and reproduce the contents of this book.
 Financial and hardware barriers to geocomputation that existed in 1990s and early 2000s, when high-performance computers were too expensive for most people, have been removed.^[
 A suitable laptop can be acquired second-hand for $100 or less in most countries today from websites such as [Ebay](https://www.ebay.com/sch/i.html?_from=R40&_nkw=laptop&_sacat=0&_oaa=1&_udhi=100&rt=nc&RAM%2520Size=4%2520GB%7C16%2520GB%7C8%2520GB&_dcat=177).
@@ -97,7 +99,7 @@ Geocomputation\index{geocomputation} implies working with geographic data in a r
 
 Early geographers used a variety of tools including barometers, compasses and [sextants](https://en.wikipedia.org/wiki/Sextant) to advance knowledge about the world [@wulf_invention_2015]. 
 It was only with the invention of the marine [chronometer](https://en.wikipedia.org/wiki/Marine_chronometer) in 1761 that it became possible to calculate longitude at sea, enabling ships to take more direct routes, for example.
-Before the turn of the century, there was an accute shortage of data and tools for geographic analysis.
+Before the turn of the century, there was an acute shortage of data and tools for geographic analysis.
 <!-- Using a sextant was a difficult-to-learn but essential tool for navigation in the 18th century.
 Likewise, learning to program and write and share reproducible code can be hard, but is a key skill for modern geocomputation. -->
 <!-- Maps were predominantly hand-drawn until modern computing enabled digitisation, a process which only become widespread in the 1990s and which is still ongoing [@gold_outsidein_1996; @auffret_histmapr_2017]. -->
@@ -354,7 +356,7 @@ The **mapsf** package (successor of **cartography**) was re-written to reduce de
 
 In late 2021, the planned retirement of **rgdal**, **rgeos** and **maptools** [was announced](https://stat.ethz.ch/pipermail/r-sig-geo/2021-September/028760.html) and in October 2023 they were archived on CRAN.
 This retirement at the end of 2023 has had a large impact on existing workflows applying these packages, but also [influenced the packages that depend on them](https://geocompx.org/post/2023/rgdal-retirement/). 
-Modern R packages such as **sf** and **terra**, described in \@ref(spatial-class) provide a strong and future-proof foundation for geocomputation that we build on in this book.
+Modern R packages such as **sf** and **terra**, described in Chapter \@ref(spatial-class) provide a strong and future-proof foundation for geocomputation that we build on in this book.
 
 ## Exercises
 

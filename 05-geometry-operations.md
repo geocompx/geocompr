@@ -58,30 +58,6 @@ The simplified geometry was created by the following command:
 seine_simp = st_simplify(seine, dTolerance = 2000)  # 2000 m
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.35 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.13 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/seine-simp-1.png" alt="Comparison of the original and simplified geometry of the seine object." width="100%" />
 <p class="caption">(\#fig:seine-simp)Comparison of the original and simplified geometry of the seine object.</p>
@@ -144,50 +120,6 @@ us_states_simp3 = smoothr::smooth(us_states, method = "ksmooth", smoothness = 6)
 Finally, the visual comparison of the original dataset with the simplified and smoothed versions is shown in Figure \@ref(fig:us-simp). 
 Differences can be observed between the outputs of the Douglas-Peucker (`st_simplify`), Visvalingam (`ms_simplify`), and Gaussian kernel regression (`smooth(method=ksmooth`) algorithms.
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.35 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.13 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.25 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.89 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/us-simp-1.png" alt="Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages." width="100%" />
 <p class="caption">(\#fig:us-simp)Polygon simplification in action, comparing the original geometry of the contiguous United States with simplified versions, generated with functions from sf (top-right), rmapshaper (bottom-left), and smoothr (bottom-right) packages.</p>
@@ -224,20 +156,6 @@ nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal   1.2  0.54
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/centr-1.png" alt="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets." width="100%" />
 <p class="caption">(\#fig:centr)Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets.</p>
@@ -263,30 +181,6 @@ These buffers were created with commands below, which show that the command `st_
 ``` r
 seine_buff_5km = st_buffer(seine, dist = 5000)
 seine_buff_50km = st_buffer(seine, dist = 50000)
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.21 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.32 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -380,40 +274,6 @@ See `vignette("sf3")` for more examples.
 
 ``` r
 nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  0.57 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.669 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.755 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -567,20 +427,6 @@ regions2 = us_states |>
 
 
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.32  1.48
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/us-regions-1.png" alt="Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states." width="100%" />
 <p class="caption">(\#fig:us-regions)Spatial aggregation on contiguous polygons, illustrated by aggregating the population of US states into regions, with population represented by color. Note the operation automatically dissolves boundaries between states.</p>
@@ -626,40 +472,6 @@ In this case, `st_cast()` can be useful to transform the new object into a lines
 ``` r
 linestring = st_cast(multipoint, "LINESTRING")
 polyg = st_cast(multipoint, "POLYGON")
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.41 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.41 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.15 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -767,30 +579,6 @@ linestring_sf2
 #> 1 LINESTRING (1 5, 4 3)
 #> 2 LINESTRING (4 4, 4 1)
 #> 3 LINESTRING (2 2, 4 2)
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.03 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.41 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -955,30 +743,6 @@ dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 dem_agg = aggregate(dem, fact = 5, fun = mean)
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.15 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.49 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/aggregate-example-1.png" alt="Original raster (left). Aggregated raster (right)." width="100%" />
 <p class="caption">(\#fig:aggregate-example)Original raster (left). Aggregated raster (right).</p>
@@ -1013,20 +777,6 @@ identical(dem, dem_disagg)
 #> [1] FALSE
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.448  2.63
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/bilinear-1.png" alt="The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation." width="100%" />
 <p class="caption">(\#fig:bilinear)The distance-weighted average of the four closest input cells determine the output when using the bilinear method for disaggregation.</p>
@@ -1045,40 +795,6 @@ The above methods of aggregation and disaggregation are only suitable when we wa
 However, what to do when we have two or more rasters with different resolutions and origins?
 This is the role of resampling -- a process of computing values for new pixel locations.
 In short, this process takes the values of our original raster and recalculates new values for a target raster with custom resolution and origin (Figure \@ref(fig:resampl0)).
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.48 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.34 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.81 0.285
-```
 
 <div class="figure" style="text-align: center">
 <img src="figures/resampl0-1.png" alt="Resampling of an original (input) raster into a target raster with custom resolution and origin." width="100%" />
@@ -1122,130 +838,6 @@ dem_resampl = resample(dem, y = target_rast, method = "bilinear")
 ```
 
 Figure \@ref(fig:resampl) shows a comparison of different resampling methods on the `dem` object.
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.48 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.559 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.832 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.624 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.18 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.845 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.48 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.557 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.823 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.631 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.19 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.848 0.285
-```
 
 <div class="figure" style="text-align: center">
 <img src="figures/resampl-1.png" alt="Visual comparison of the original raster and five different resampling methods." width="100%" />

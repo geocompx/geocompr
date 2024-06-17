@@ -321,50 +321,6 @@ tanzania_neigh = read_sf(f, wkt_filter = tanzania_buf_wkt)
 
 Our result, shown in Figure \@ref(fig:readsfquery):B, contains Tanzania and every country within its 50 km buffer.
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.936 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     3
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.26 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.935 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     3
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.24 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/readsfquery-1.png" alt="Reading a subset of the vector data using a query (A) and a wkt filter (B)." width="100%" />
 <p class="caption">(\#fig:readsfquery)Reading a subset of the vector data using a query (A) and a wkt filter (B).</p>

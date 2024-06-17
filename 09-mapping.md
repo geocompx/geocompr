@@ -197,66 +197,6 @@ This is demonstrated in the code chunk below which plots `map_nz1` to `map_nz3`,
 
 ``` r
 tmap_arrange(map_nz1, map_nz2, map_nz3)
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.825  1.68
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.825  1.68
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 0.825  1.68
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.08  1.29
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.08  1.29
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[81]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.08  1.29
 ```
 
 <div class="figure" style="text-align: center">
@@ -326,30 +266,6 @@ Thus, one would achieve the desired result as follows (Figure \@ref(fig:tmcol), 
 
 ``` r
 tm_shape(nz) + tm_fill(fill = "Land_area")
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.22  1.29
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.22  1.29
 ```
 
 <div class="figure" style="text-align: center">
@@ -390,50 +306,6 @@ tm_shape(nz) + tm_polygons(fill = "Median_income",
                            fill.scale = tm_scale(values = "BuGn"))
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  1.48
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22 0.897
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  2.27
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out center bottom
-#>     pos.h  pos.v     z facet_row facet_col stack_auto      stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>     <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE horizontal  1.22  1.48
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/tmpal-1.png" alt="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette." width="100%" />
 <p class="caption">(\#fig:tmpal)Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.</p>
@@ -471,50 +343,6 @@ The `tm_scale_continuous()` function presents a continuous color field and is pa
 In case of variables with skewed distribution you can also use its variants -- `tm_scale_continuous_log()` and `tm_scale_continuous_log1p()`.
 \index{tmap (package)!categorical scale}
 Finally, `tm_scale_categorical()` was designed to represent categorical values and assures that each category receives a unique color (Figure \@ref(fig:concat), right panel).
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.57 0.257
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.69 0.257
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.57 0.257
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.69 0.257
-```
 
 <div class="figure" style="text-align: center">
 <img src="figures/concat-1.png" alt="Illustration of continuous and categorical scales in tmap." width="100%" />
@@ -632,16 +460,6 @@ map_nz +
   tm_compass(type = "8star", position = c("left", "top")) +
   tm_scalebar(breaks = c(0, 100, 200), text.size = 1, position = c("left", "top")) +
   tm_title("New Zealand")
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     3
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.39 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -851,16 +669,6 @@ The final map is created by combining, resizing and arranging these three maps:
 us_states_map
 print(hawaii_map, vp = grid::viewport(0.35, 0.1, width = 0.2, height = 0.1))
 print(alaska_map, vp = grid::viewport(0.15, 0.15, width = 0.3, height = 0.3))
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.768 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -1361,16 +1169,6 @@ For example, we could represent median income in New Zeleand's regions as a cont
 library(cartogram)
 nz_carto = cartogram_cont(nz, "Median_income", itermax = 5)
 tm_shape(nz_carto) + tm_polygons("Median_income")
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <num> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[80]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical  1.22  1.48
 ```
 
 <div class="figure" style="text-align: center">
@@ -1428,7 +1226,8 @@ E1. Create a map showing the geographic distribution of the Human Development In
 
 
 E2. Extend the **tmap** created for the previous exercise so the legend has three bins: "High" (`HDI` above 0.7), "Medium" (`HDI` between 0.55 and 0.7) and "Low" (`HDI` below 0.55).
-    - Bonus: improve the map aesthetics, for example by changing the legend title, class labels and color palette.
+
+- Bonus: improve the map aesthetics, for example by changing the legend title, class labels and color palette.
 
 
 

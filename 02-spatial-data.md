@@ -883,30 +883,6 @@ india_buffer_without_s2 = st_buffer(india, 1) # 1 degree
 #> dist is assumed to be in decimal degrees (arc_degrees).
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.32 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.192 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/s2example-1.png" alt="Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate." width="100%" />
 <p class="caption">(\#fig:s2example)Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate.</p>
@@ -958,40 +934,6 @@ This and map algebra (Section \@ref(map-algebra)) makes raster processing much m
 In contrast to vector data, the cell of one raster layer can only hold a single value.^[Thus to store many values for a single location we need to have many raster layers.]
 The value might be continuous or categorical (Figure \@ref(fig:raster-intro-plot):C).
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.16 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.44 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.83 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%" />
 <p class="caption">(\#fig:raster-intro-plot)Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.</p>
@@ -1001,30 +943,6 @@ Raster maps usually represent continuous phenomena such as elevation, temperatur
 Discrete features such as soil or land-cover classes can also be represented in the raster data model.
 Both uses of raster datasets are illustrated in Figure \@ref(fig:raster-intro-plot2), which shows how the borders of discrete features may become blurred in raster datasets.
 Depending on the nature of the application, vector representations of discrete features may be more suitable.
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.96 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.96 0.285
-```
 
 <div class="figure" style="text-align: center">
 <img src="figures/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%" />

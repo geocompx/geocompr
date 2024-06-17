@@ -108,22 +108,6 @@ zion_points = cbind(zion_points, elevation)
 
 
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__                              comp  class cell.h cell.v
-#>    <int> <int> <int>                            <list> <char> <char> <char>
-#> 1:     1    NA    NA <tm_legend_standard_portrait[83]>    out  right center
-#> 2:     1    NA    NA <tm_legend_standard_portrait[84]>    out  right center
-#>     pos.h  pos.v     z facet_row facet_col stack_auto    stack  legW  legH
-#>    <char> <char> <int>    <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:   left    top     1      <NA>      <NA>       TRUE vertical 1.222 1.597
-#> 2:   left    top     2      <NA>      <NA>       TRUE vertical 0.882 0.252
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/pointextr-1.png" alt="Locations of points used for raster extraction." width="100%" />
 <p class="caption">(\#fig:pointextr)Locations of points used for raster extraction.</p>
@@ -236,30 +220,6 @@ zion_nlcd |>
 #> # ℹ 3 more rows
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.95 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.95 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/polyextr-1.png" alt="Area used for continuous (left) and categorical (right) raster extraction." width="100%" />
 <p class="caption">(\#fig:polyextr)Area used for continuous (left) and categorical (right) raster extraction.</p>
@@ -334,50 +294,6 @@ ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template,
                        field = "capacity", fun = sum, na.rm = TRUE)
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  0.99 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.16 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.978 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     2
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.35 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/vector-rasterization1-1.png" alt="Examples of point rasterization." width="100%" />
 <p class="caption">(\#fig:vector-rasterization1)Examples of point rasterization.</p>
@@ -413,30 +329,6 @@ Compare it to a polygon rasterization, with `touches = FALSE` by default, which 
 california_raster2 = rasterize(california, raster_template2) 
 ```
 
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.02 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.38 0.285
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/vector-rasterization2-1.png" alt="Examples of line and polygon rasterizations." width="100%" />
 <p class="caption">(\#fig:vector-rasterization2)Examples of line and polygon rasterizations.</p>
@@ -461,30 +353,6 @@ Note, here we also used `st_as_sf()` to convert the resulting object to the `sf`
 elev = rast(system.file("raster/elev.tif", package = "spData"))
 elev_point = as.points(elev) |> 
   st_as_sf()
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.03 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical 0.984 0.285
 ```
 
 <div class="figure" style="text-align: center">
@@ -527,40 +395,6 @@ This is illustrated below by converting the `grain` object into polygons and sub
 grain = rast(system.file("raster/grain.tif", package = "spData"))
 grain_poly = as.polygons(grain) |> 
   st_as_sf()
-```
-
-
-```
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.03 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  1.26 0.285
-#> <====================  meta.auto.margins ===============>
-#> [1] 0.4 0.4 0.4 0.4
-#> </============================================>
-#> Index: <stack_auto>
-#>    by1__ by2__ by3__           comp  class cell.h cell.v  pos.h  pos.v     z
-#>    <num> <int> <int>         <list> <char> <char> <char> <char> <char> <int>
-#> 1:     1    NA    NA <tm_title[24]>    out center    top   left    top     1
-#>    facet_row facet_col stack_auto    stack  legW  legH
-#>       <char>    <char>     <lgcl>   <char> <num> <num>
-#> 1:      <NA>      <NA>      FALSE vertical  2.41 0.285
 ```
 
 <div class="figure" style="text-align: center">
