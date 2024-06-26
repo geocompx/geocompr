@@ -5,7 +5,6 @@
 
 <!-- badges: start -->
 
-
 [![Binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
 [![RstudioCloud](images/cloud.png)](https://rstudio.cloud/project/1642300)
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
