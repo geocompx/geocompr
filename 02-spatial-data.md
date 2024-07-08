@@ -184,9 +184,6 @@ We will use the `world` dataset provided by **spData** [@R-spData], loaded at th
 ``` r
 class(world)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
-```
-
-``` r
 names(world)
 #>  [1] "iso_a2"    "name_long" "continent" "region_un" "subregion" "type"     
 #>  [7] "area_km2"  "pop"       "lifeExp"   "gdpPercap" "geom"
@@ -304,15 +301,9 @@ world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
 #> Dimension:     XY
 #> Bounding box:  xmin: -180 ymin: -89.9 xmax: 180 ymax: 83.6
 #> Geodetic CRS:  WGS 84
-```
-
-``` r
 world_tbl = read_sf(system.file("shapes/world.shp", package = "spData"))
 class(world_dfr)
 #> [1] "sf"         "data.frame"
-```
-
-``` r
 class(world_tbl)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
@@ -574,19 +565,10 @@ The function `st_point()` creates single points from numeric vectors:
 ``` r
 st_point(c(5, 2))                 # XY point
 #> POINT (5 2)
-```
-
-``` r
 st_point(c(5, 2, 3))              # XYZ point
 #> POINT Z (5 2 3)
-```
-
-``` r
 st_point(c(5, 2, 1), dim = "XYM") # XYM point
 #> POINT M (5 2 1)
-```
-
-``` r
 st_point(c(5, 2, 3, 1))           # XYZM point
 #> POINT ZM (5 2 3 1)
 ```
@@ -603,9 +585,6 @@ By contrast, use matrices in the case of multipoint (`st_multipoint()`) and line
 multipoint_matrix = rbind(c(5, 2), c(1, 3), c(3, 4), c(3, 2))
 st_multipoint(multipoint_matrix)
 #> MULTIPOINT ((5 2), (1 3), (3 4), (3 2))
-```
-
-``` r
 ## LINESTRING
 linestring_matrix = rbind(c(1, 5), c(4, 4), c(4, 1), c(2, 2), c(3, 2))
 st_linestring(linestring_matrix)
@@ -808,9 +787,6 @@ The next examples shows how **sfheaders** creates `sfg` objects from matrices an
 m = matrix(1:8, ncol = 2)
 sfheaders::sfg_linestring(obj = m)
 #> LINESTRING (1 5, 2 6, 3 7, 4 8)
-```
-
-``` r
 # data frames
 df = data.frame(x = 1:4, y = 4:1)
 sfheaders::sfg_polygon(obj = df)
@@ -874,9 +850,6 @@ An example of the consequences of turning the geometry engine off is shown below
 india_buffer_with_s2 = st_buffer(india, 1) # 1 meter
 sf_use_s2(FALSE)
 #> Spherical geometry (s2) switched off
-```
-
-``` r
 india_buffer_without_s2 = st_buffer(india, 1) # 1 degree
 #> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
 #> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data

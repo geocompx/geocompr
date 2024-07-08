@@ -377,9 +377,6 @@ st_layers("KML_Samples.kml")
 #> 2      Styles and Markup                      1     11   WGS 84
 #> 3       Highlighted Icon                      1     11   WGS 84
 ....
-```
-
-``` r
 kml = read_sf("KML_Samples.kml", layer = "Placemarks")
 ```
 

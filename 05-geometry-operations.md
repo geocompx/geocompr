@@ -70,9 +70,6 @@ This is apparent, with the result being visually simpler (Figure \@ref(fig:seine
 ``` r
 object.size(seine)
 #> 18096 bytes
-```
-
-``` r
 object.size(seine_simp)
 #> 9112 bytes
 ```
@@ -491,9 +488,6 @@ multipoint_2 = st_cast(linestring, "MULTIPOINT")
 multipoint_3 = st_cast(polyg, "MULTIPOINT")
 all.equal(multipoint, multipoint_2)
 #> [1] TRUE
-```
-
-``` r
 all.equal(multipoint, multipoint_3)
 #> [1] TRUE
 ```

@@ -162,9 +162,6 @@ The first column is the ID of the zone of origin and the second column is the zo
 ``` r
 nrow(bristol_od)
 #> [1] 2910
-```
-
-``` r
 nrow(bristol_zones)
 #> [1] 102
 ```
@@ -208,9 +205,6 @@ This is done using the joining function `left_join()` (note that `inner_join()` 
 zones_joined = left_join(bristol_zones, zones_attr, by = "geo_code")
 sum(zones_joined$all)
 #> [1] 238805
-```
-
-``` r
 names(zones_joined)
 #> [1] "geo_code"   "name"       "all"        "bicycle"    "foot"      
 #> [6] "car_driver" "train"      "geometry"
@@ -384,9 +378,6 @@ The output is the same as the input line, except it has new geometry columns rep
 ``` r
 ncol(desire_rail)
 #> [1] 9
-```
-
-``` r
 desire_rail = line_via(desire_rail, bristol_stations)
 ncol(desire_rail)
 #> [1] 12

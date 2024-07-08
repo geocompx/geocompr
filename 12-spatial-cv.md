@@ -185,9 +185,6 @@ The results of this model can be printed as follows (`summary(fit)` provides a m
 ``` r
 class(fit)
 #> [1] "glm" "lm"
-```
-
-``` r
 fit
 #> 
 #> Call:  glm(formula = lslpts ~ slope + cplan + cprof + elev + log10_carea, 

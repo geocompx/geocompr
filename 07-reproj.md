@@ -283,16 +283,10 @@ Like `london_buff_no_crs`, the new `london_geo` object is a geographic abominati
 ``` r
 sf::sf_use_s2(FALSE)
 #> Spherical geometry (s2) switched off
-```
-
-``` r
 london_buff_lonlat = st_buffer(london_geo, dist = 1) # incorrect result
 #> Warning in st_buffer.sfc(st_geometry(x), dist, nQuadSegs, endCapStyle =
 #> endCapStyle, : st_buffer does not correctly buffer longitude/latitude data
 #> dist is assumed to be in decimal degrees (arc_degrees).
-```
-
-``` r
 sf::sf_use_s2(TRUE)
 #> Spherical geometry (s2) switched on
 ```
@@ -445,9 +439,6 @@ The following command uses this function to identify the UTM zone and associated
 ``` r
 lonlat2UTM(c(174.7, -36.9))
 #> [1] 32760
-```
-
-``` r
 lonlat2UTM(st_coordinates(london))
 #> [1] 32630
 ```
@@ -549,9 +540,6 @@ As we saw in Section \@ref(crs-setting), the main CRS components, `User input` a
 crs_lnd = st_crs(london_geo)
 class(crs_lnd)
 #> [1] "crs"
-```
-
-``` r
 names(crs_lnd)
 #> [1] "input" "wkt"
 ```
@@ -562,14 +550,8 @@ Additional elements can be retrieved with the `$` operator, including `Name`, `p
 ``` r
 crs_lnd$Name
 #> [1] "WGS 84"
-```
-
-``` r
 crs_lnd$proj4string
 #> [1] "+proj=longlat +datum=WGS84 +no_defs"
-```
-
-``` r
 crs_lnd$epsg
 #> [1] 4326
 ```
@@ -600,15 +582,9 @@ One option is to search for it online, another is to look at the properties of t
 crs_lnd_new = st_crs("EPSG:27700")
 crs_lnd_new$Name
 #> [1] "OSGB36 / British National Grid"
-```
-
-``` r
 crs_lnd_new$proj4string
 #> [1] "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000
 +y_0=-100000 +ellps=airy +units=m +no_defs"
-```
-
-``` r
 crs_lnd_new$epsg
 #> [1] 27700
 ```

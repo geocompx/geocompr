@@ -95,9 +95,6 @@ These objects can be useful in their own right, for example when exploring the g
 sel_sgbp = st_intersects(x = nz_height, y = canterbury)
 class(sel_sgbp)
 #> [1] "sgbp" "list"
-```
-
-``` r
 sel_sgbp
 #> Sparse geometry binary predicate list of length 101, where the
 #> predicate was `intersects'
@@ -109,9 +106,6 @@ sel_sgbp
 #>  5: 1
 #>  6: 1
 ....
-```
-
-``` r
 sel_logical = lengths(sel_sgbp) > 0
 canterbury_height2 = nz_height[sel_logical, ]
 ```
@@ -382,9 +376,6 @@ grid = st_make_grid(x, n = 3)
 grid_sf = st_sf(grid)
 grid_sf$queens = lengths(st_queen(grid, grid[5])) > 0
 plot(grid, col = grid_sf$queens)
-```
-
-``` r
 grid_sf$rooks = lengths(st_rook(grid, grid[5])) > 0
 plot(grid, col = grid_sf$rooks)
 ```
@@ -417,9 +408,6 @@ set.seed(2018) # set seed for reproducibility
 (bb = st_bbox(world)) # the world's bounds
 #>   xmin   ymin   xmax   ymax 
 #> -180.0  -89.9  180.0   83.6
-```
-
-``` r
 random_df = data.frame(
   x = runif(n = 10, min = bb[1], max = bb[3]),
   y = runif(n = 10, min = bb[2], max = bb[4])
@@ -438,9 +426,6 @@ Before creating the joined dataset, we use spatial subsetting to create `world_r
 world_random = world[random_points, ]
 nrow(world_random)
 #> [1] 4
-```
-
-``` r
 random_joined = st_join(random_points, world["name_long"])
 ```
 
@@ -511,9 +496,6 @@ z = st_join(cycle_hire, cycle_hire_osm, st_is_within_distance,
             dist = units::set_units(20, "m"))
 nrow(cycle_hire)
 #> [1] 742
-```
-
-``` r
 nrow(z)
 #> [1] 762
 ```
@@ -608,9 +590,6 @@ iv = incongruent["value"] # keep only the values to be transferred
 agg_aw = st_interpolate_aw(iv, aggregating_zones, extensive = TRUE)
 #> Warning in st_interpolate_aw.sf(iv, aggregating_zones, extensive = TRUE):
 #> st_interpolate_aw assumes attributes are constant or uniform over areas of x
-```
-
-``` r
 agg_aw$value
 #> [1] 19.6 25.7
 ```

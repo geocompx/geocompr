@@ -32,9 +32,6 @@ nz_u2 = aggregate(nz["Population"], list(rep(1, nrow(nz))), sum)
 nz_u3 = dplyr::summarise(nz, t = sum(Population))
 identical(nz_u1, nz_u2$geometry)
 #> [1] TRUE
-```
-
-``` r
 identical(nz_u1, nz_u3$geom)
 #> [1] TRUE
 ```

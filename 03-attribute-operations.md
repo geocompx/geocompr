@@ -98,9 +98,6 @@ Let's start by using base R functions to learn about the `world` dataset from th
 ``` r
 class(world) # it's an sf object and a (tidy) data frame
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
-```
-
-``` r
 dim(world)   # it is a 2 dimensional object, with 177 rows and 11 columns
 #> [1] 177  11
 ```
@@ -114,9 +111,6 @@ The function `st_drop_geometry()` keeps only the attributes data of an `sf` obje
 world_df = st_drop_geometry(world)
 class(world_df)
 #> [1] "tbl_df"     "tbl"        "data.frame"
-```
-
-``` r
 ncol(world_df)
 #> [1] 10
 ```
@@ -167,9 +161,6 @@ i_small = world$area_km2 < 10000
 summary(i_small) # a logical vector
 #>    Mode   FALSE    TRUE 
 #> logical     170       7
-```
-
-``` r
 small_countries = world[i_small, ]
 ```
 
@@ -357,9 +348,6 @@ world_agg2 = aggregate(world["pop"], by = list(world$continent), FUN = sum,
                        na.rm = TRUE)
 class(world_agg2)
 #> [1] "sf"         "data.frame"
-```
-
-``` r
 nrow(world_agg2)
 #> [1] 8
 ```
@@ -443,9 +431,6 @@ A 'left join', which preserves the first dataset, merges `world` with `coffee_da
 ``` r
 world_coffee = left_join(world, coffee_data)
 #> Joining with `by = join_by(name_long)`
-```
-
-``` r
 class(world_coffee)
 #> [1] "sf"         "tbl_df"     "tbl"        "data.frame"
 ```
@@ -462,9 +447,6 @@ names(world_coffee)
 #>  [7] "area_km2"               "pop"                    "lifeExp"               
 #> [10] "gdpPercap"              "geom"                   "coffee_production_2016"
 #> [13] "coffee_production_2017"
-```
-
-``` r
 plot(world_coffee["coffee_production_2017"])
 ```
 
@@ -503,9 +485,6 @@ In that case an inner join can be used.
 ``` r
 world_coffee_inner = inner_join(world, coffee_data)
 #> Joining with `by = join_by(name_long)`
-```
-
-``` r
 nrow(world_coffee_inner)
 #> [1] 45
 ```
@@ -543,9 +522,6 @@ To fix this issue, we will create a new version of `coffee_data` and update the 
 coffee_data$name_long[grepl("Congo,", coffee_data$name_long)] = drc
 world_coffee_match = inner_join(world, coffee_data)
 #> Joining with `by = join_by(name_long)`
-```
-
-``` r
 nrow(world_coffee_match)
 #> [1] 46
 ```
@@ -559,9 +535,6 @@ the output of a join tends to match its first argument.
 ``` r
 coffee_world = left_join(coffee_data, world)
 #> Joining with `by = join_by(name_long)`
-```
-
-``` r
 class(coffee_world)
 #> [1] "tbl_df"     "tbl"        "data.frame"
 ```
