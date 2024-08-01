@@ -429,6 +429,13 @@ nrow(world_random)
 random_joined = st_join(random_points, world["name_long"])
 ```
 
+
+```
+#> <====================  gp$size ===============>
+#> [1] 0.8
+#> </============================================>
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/spatial-join-1.png" alt="Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting in the data represented in the final panel." width="100%" />
 <p class="caption">(\#fig:spatial-join)Illustration of a spatial join. A new attribute variable is added to random points (top left) from source world object (top right) resulting in the data represented in the final panel.</p>

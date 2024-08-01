@@ -153,6 +153,13 @@ nz_pos = st_point_on_surface(nz)
 seine_pos = st_point_on_surface(seine)
 ```
 
+
+```
+#> <====================  gp$size ===============>
+#> [1] 1
+#> </============================================>
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/centr-1.png" alt="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets." width="100%" />
 <p class="caption">(\#fig:centr)Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets.</p>

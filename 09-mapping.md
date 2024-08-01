@@ -519,6 +519,9 @@ tm_shape(world) +
   tm_shape(urb_1970_2030) +
   tm_symbols(fill = "black", col = "white", size = "population_millions") +
   tm_facets_wrap(by = "year", nrow = 2)
+#> <====================  gp$size ===============>
+#> [1] 0.507 0.717 0.878
+#> </============================================>
 ```
 
 <div class="figure" style="text-align: center">
@@ -922,7 +925,7 @@ Products in this field include [GeoDjango](https://docs.djangoproject.com/en/4.0
 Each of these is scalable, enabling maps to be served to thousands of people daily, assuming there is sufficient public interest in your maps!
 The bad news is that such server-side solutions require much skilled developer time to set-up and maintain, often involving teams of people with roles such as a dedicated geospatial database administrator ([DBA](https://wiki.gis.com/wiki/index.php/Database_administrator)).
 
-Fortunately for R programmers, web mapping applications can now be rapidly created wih **shiny**.\index{shiny (package)}
+Fortunately for R programmers, web mapping applications can now be rapidly created with **shiny**.\index{shiny (package)}
 As described in the open source book [Mastering Shiny](https://mastering-shiny.org/), **shiny** is an R package and framework for converting R code into interactive web applications [@wickham_mastering_2021].
 You can embed interactive maps in shiny apps thanks to functions such as <!--`tmap::renderTmap()` and -->[`leaflet::renderLeaflet()`](https://rstudio.github.io/leaflet/shiny.html).
 This section gives some context, teaches the basics of **shiny** from a web mapping perspective and culminates in a full-screen mapping application in less than 100 lines of code.
