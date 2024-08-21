@@ -519,9 +519,6 @@ tm_shape(world) +
   tm_shape(urb_1970_2030) +
   tm_symbols(fill = "black", col = "white", size = "population_millions") +
   tm_facets_wrap(by = "year", nrow = 2)
-#> <====================  gp$size ===============>
-#> [1] 0.507 0.717 0.878
-#> </============================================>
 ```
 
 <div class="figure" style="text-align: center">

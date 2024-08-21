@@ -108,13 +108,6 @@ zion_points = cbind(zion_points, elevation)
 
 
 
-
-```
-#> <====================  gp$size ===============>
-#> [1] 0.7
-#> </============================================>
-```
-
 <div class="figure" style="text-align: center">
 <img src="figures/pointextr-1.png" alt="Locations of points used for raster extraction." width="100%" />
 <p class="caption">(\#fig:pointextr)Locations of points used for raster extraction.</p>
@@ -299,13 +292,6 @@ To calculate that we must `sum` the field (`"capacity"`), resulting in output il
 ``` r
 ch_raster3 = rasterize(cycle_hire_osm_projected, raster_template, 
                        field = "capacity", fun = sum, na.rm = TRUE)
-```
-
-
-```
-#> <====================  gp$size ===============>
-#> [1] 0.3
-#> </============================================>
 ```
 
 <div class="figure" style="text-align: center">
