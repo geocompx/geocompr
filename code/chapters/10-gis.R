@@ -12,7 +12,7 @@ library(terra)
 ## library(gdalcubes)
 
 
-## A command-line interface is a means of interacting with computer programs in which the user issues commands via successive lines of text (command lines).
+## A command line interface is a means of interacting with computer programs in which the user issues commands via successive lines of text (command lines).
 
 ## `bash` in Linux and `PowerShell` in Windows are its common examples.
 
