@@ -1,16 +1,26 @@
-on:
-  pull_request:
-    branches:
-      - main
-name: Render-no-deploy
+name: Render Book
+
+on: [push, pull_request]
+
 jobs:
-  bookdown:
-    name: Render-Book
+  build:
     runs-on: ubuntu-latest
-    container: geocompr/geocompr:suggests
+
     steps:
       - uses: actions/checkout@v2
-      - name: Render Book
+
+      - name: Cache R packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.R
+          key: ${{ runner.os }}-R-${{ hashFiles('**/*.Rmd') }}
+          restore-keys: |
+            ${{ runner.os }}-R-
+
+      - name: Install Dependencies
         run: |
           Rscript -e 'install.packages("geocompkg", repos = c("https://geocompr.r-universe.dev", "https://cloud.r-project.org"), dependencies = TRUE, force = TRUE)'
+
+      - name: Render Book
+        run: |
           Rscript -e 'bookdown::render_book("index.Rmd")'
