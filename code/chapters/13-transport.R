@@ -7,7 +7,7 @@ library(sf)
 library(dplyr)
 library(spDataLarge)
 library(stplanr)      # for processing geographic transport data
-library(tmap)         # map making (see Chapter 9)
+library(tmap)         # map-making (see Chapter 9)
 library(ggplot2)      # data visualization package
 library(sfnetworks)   # spatial network classes and functions 
 
