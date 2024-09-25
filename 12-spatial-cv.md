@@ -507,6 +507,18 @@ The classification\index{classification} task remains the same, hence we can sim
 Learners implementing SVM can be found using the `list_mlr3learners()` command of the **mlr3extralearners**.
 
 
+``` r
+mlr3_learners = mlr3extralearners::list_mlr3learners()
+#> This will take a few seconds.
+mlr3_learners |>
+  dplyr::filter(class == "classif" & grepl("svm", id)) |>
+  dplyr::select(id, class, mlr3_package, required_packages)
+#>               id   class      mlr3_package              required_packages
+#>           <char>  <char>            <char>                         <list>
+#> 1:  classif.ksvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab
+#> 2: classif.lssvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab
+#> 3:   classif.svm classif      mlr3learners        mlr3,mlr3learners,e1071
+```
 
 Of the options, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (`"rbfdot" `) which is also the default of `ksvm()`.
@@ -517,7 +529,9 @@ To make sure that the tuning does not stop because of one failing model, we addi
 ``` r
 lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
                      type = "C-svc")
-lrn_ksvm$fallback = lrn("classif.featureless", predict_type = "prob")
+lrn_ksvm$encapsulate(method = "try", 
+                     fallback = lrn("classif.featureless", 
+                                    predict_type = "prob"))
 ```
 
 The next stage is to specify a resampling strategy.

@@ -645,17 +645,30 @@ This works for non-spatial data but is of less use for spatial data where ‘spa
 <p>Before defining spatial tuning, we will set up the <strong>mlr3</strong> building blocks, introduced in Section <a href="spatial-cv.html#glm">12.5.1</a>, for the SVM.
 The classification task remains the same, hence we can simply reuse the <code>task</code> object created in Section <a href="spatial-cv.html#glm">12.5.1</a>.
 Learners implementing SVM can be found using the <code><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners()</a></code> command of the <strong>mlr3extralearners</strong>.</p>
+<div class="sourceCode" id="cb431"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mlr3_learners</span> <span class="op">=</span> <span class="fu">mlr3extralearners</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mlr3extralearners/man/list_mlr3learners.html">list_mlr3learners</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; This will take a few seconds.</span></span>
+<span><span class="va">mlr3_learners</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">class</span> <span class="op">==</span> <span class="st">"classif"</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"svm"</span>, <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">id</span>, <span class="va">class</span>, <span class="va">mlr3_package</span>, <span class="va">required_packages</span><span class="op">)</span></span>
+<span><span class="co">#&gt;               id   class      mlr3_package              required_packages</span></span>
+<span><span class="co">#&gt;           &lt;char&gt;  &lt;char&gt;            &lt;char&gt;                         &lt;list&gt;</span></span>
+<span><span class="co">#&gt; 1:  classif.ksvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab</span></span>
+<span><span class="co">#&gt; 2: classif.lssvm classif mlr3extralearners mlr3,mlr3extralearners,kernlab</span></span>
+<span><span class="co">#&gt; 3:   classif.svm classif      mlr3learners        mlr3,mlr3learners,e1071</span></span></code></pre></div>
 <p>Of the options, we will use <code>ksvm()</code> from the <strong>kernlab</strong> package <span class="citation">(<a href="references.html#ref-karatzoglou_kernlab_2004">Karatzoglou et al. 2004</a>)</span>.
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (<code>"rbfdot"</code>) which is also the default of <code>ksvm()</code>.
 Setting the <code>type</code> argument to <code>"C-svc"</code> makes sure that <code>ksvm()</code> is solving a classification task.
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to <a href="https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-fallback" class="uri">https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-fallback</a>).</p>
-<div class="sourceCode" id="cb431"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb432"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lrn_ksvm</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.ksvm"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span>, kernel <span class="op">=</span> <span class="st">"rbfdot"</span>,</span>
 <span>                     type <span class="op">=</span> <span class="st">"C-svc"</span><span class="op">)</span></span>
-<span><span class="va">lrn_ksvm</span><span class="op">$</span><span class="va">fallback</span> <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.featureless"</span>, predict_type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">lrn_ksvm</span><span class="op">$</span><span class="fu">encapsulate</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"try"</span>, </span>
+<span>                     fallback <span class="op">=</span> <span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">lrn</a></span><span class="op">(</span><span class="st">"classif.featureless"</span>, </span>
+<span>                                    predict_type <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The next stage is to specify a resampling strategy.
 Again we will use a 100-repeated 5-fold spatial CV.</p>
-<div class="sourceCode" id="cb432"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb433"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># performance estimation level</span></span>
 <span><span class="va">perf_level</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"repeated_spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span>, repeats <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
 <p>Note that this is the exact same code as used for the resampling for the GLM in Section <a href="spatial-cv.html#glm">12.5.1</a>; we have simply repeated it here as a reminder.</p>
@@ -673,7 +686,7 @@ FIGURE 12.6: Schematic of hyperparameter tuning and performance estimation level
 The random selection of values C and Sigma is additionally restricted to a predefined tuning space (<code>search_space</code> object).
 The range of the tuning space was chosen with values recommended in the literature <span class="citation">(<a href="references.html#ref-schratz_hyperparameter_2019">Schratz et al. 2019</a>)</span>.
 To find the optimal hyperparameter combination, we fit 50 models (<code>terminator</code> object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.</p>
-<div class="sourceCode" id="cb433"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb434"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># five spatially disjoint partitions</span></span>
 <span><span class="va">tune_level</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/mlr_sugar.html">rsmp</a></span><span class="op">(</span><span class="st">"spcv_coords"</span>, folds <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co"># define the outer limits of the randomly selected hyperparameters</span></span>
@@ -685,7 +698,7 @@ To find the optimal hyperparameter combination, we fit 50 models (<code>terminat
 <span><span class="va">terminator</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://bbotk.mlr-org.com/reference/trm.html">trm</a></span><span class="op">(</span><span class="st">"evals"</span>, n_evals <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
 <span><span class="va">tuner</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://mlr3tuning.mlr-org.com/reference/tnr.html">tnr</a></span><span class="op">(</span><span class="st">"random_search"</span><span class="op">)</span></span></code></pre></div>
 <p>The next stage is to modify the learner <code>lrn_ksvm</code> in accordance with all the characteristics defining the hyperparameter tuning with <code><a href="https://mlr3tuning.mlr-org.com/reference/auto_tuner.html">auto_tuner()</a></code>.</p>
-<div class="sourceCode" id="cb434"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb435"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">at_ksvm</span> <span class="op">=</span> <span class="fu">mlr3tuning</span><span class="fu">::</span><span class="fu"><a href="https://mlr3tuning.mlr-org.com/reference/auto_tuner.html">auto_tuner</a></span><span class="op">(</span></span>
 <span>  learner <span class="op">=</span> <span class="va">lrn_ksvm</span>,</span>
 <span>  resampling <span class="op">=</span> <span class="va">tune_level</span>,</span>
@@ -712,7 +725,7 @@ To decrease model runtime, <strong>mlr3</strong> offers the possibility to use p
 Since we are about to run a nested cross-validation, we can decide if we would like to parallelize the inner or the outer loop (see lower left part of Figure <a href="spatial-cv.html#fig:inner-outer">12.6</a>).
 Since the former will run 125,000 models, whereas the latter only runs 500, it is quite obvious that we should parallelize the inner loop.
 To set up the parallelization of the inner loop, we run:</p>
-<div class="sourceCode" id="cb435"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb436"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org">future</a></span><span class="op">)</span></span>
 <span><span class="co"># execute the outer loop sequentially and parallelize the inner loop</span></span>
 <span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html">plan</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"sequential"</span>, <span class="st">"multisession"</span><span class="op">)</span>, </span>
@@ -729,7 +742,7 @@ Finally, we save the output object (<code>result</code>) to disk in case we woul
 Before running the subsequent code, be aware that it is time-consuming since it will run the spatial cross-validation with 125,500 models.
 It can easily run for half a day on a modern laptop.
 Note that runtime depends on many aspects: CPU speed, the selected algorithm, the selected number of cores and the dataset.</p>
-<div class="sourceCode" id="cb436"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb437"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">progressr</span><span class="fu">::</span><span class="fu"><a href="https://progressr.futureverse.org/reference/with_progress.html">with_progress</a></span><span class="op">(</span>expr <span class="op">=</span> <span class="op">{</span></span>
 <span>  <span class="va">rr_spcv_svm</span> <span class="op">=</span> <span class="fu">mlr3</span><span class="fu">::</span><span class="fu"><a href="https://mlr3.mlr-org.com/reference/resample.html">resample</a></span><span class="op">(</span>task <span class="op">=</span> <span class="va">task</span>,</span>
 <span>                               learner <span class="op">=</span> <span class="va">at_ksvm</span>, </span>
@@ -747,12 +760,12 @@ Note that runtime depends on many aspects: CPU speed, the selected algorithm, th
 <span>                               <span class="va">resampling_id</span>, <span class="va">classif.auc</span><span class="op">)</span></span></code></pre></div>
 <p>In case you do not want to run the code locally, we have saved <a href="https://github.com/geocompx/geocompr/blob/main/extdata/12-bmr_score.rds">score_svm</a> in the book’s GitHub repository.
 They can be loaded as follows:</p>
-<div class="sourceCode" id="cb437"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb438"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">score</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/serialize.html">readRDS</a></span><span class="op">(</span><span class="st">"extdata/12-bmr_score.rds"</span><span class="op">)</span></span>
 <span><span class="va">score_spcv_svm</span> <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">score</span>, <span class="va">learner_id</span> <span class="op">==</span> <span class="st">"classif.ksvm.tuned"</span>, </span>
 <span>                               <span class="va">resampling_id</span> <span class="op">==</span> <span class="st">"repeated_spcv_coords"</span><span class="op">)</span></span></code></pre></div>
 <p>Let us have a look at the final AUROC: the model’s ability to discriminate the two classes.</p>
-<div class="sourceCode" id="cb438"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb439"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># final mean AUROC</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/math-generics.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summarize-generics.html">mean</a></span><span class="op">(</span><span class="va">score_spcv_svm</span><span class="op">$</span><span class="va">classif.auc</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.74</span></span></code></pre></div>

@@ -442,7 +442,7 @@ Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperpar
 
 ``` r
 # hyperparameter tuning
-set.seed(08012024)
+set.seed(24092024)
 autotuner_rf$train(task)
 ```
 
@@ -450,14 +450,12 @@ autotuner_rf$train(task)
 
 
 
-<!-- TODO: evaluate this when issue fixed upstream -->
-
 
 ``` r
 autotuner_rf$tuning_result
 #>     mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse
 #>    <int>           <num>         <int>             <list>    <list>     <num>
-#> 1:     4           0.878             7          <list[4]> <list[3]>     0.368
+#> 1:     4           0.784            10          <list[4]> <list[3]>     0.382
 ```
 
 ### Predictive mapping
@@ -469,6 +467,15 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 ``` r
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
+#> <PredictionRegr> for 84 observations:
+#>  row_ids  truth response
+#>        1 -1.084   -1.176
+#>        2 -0.975   -1.176
+#>        3 -0.912   -1.168
+#>      ---    ---      ---
+#>       82  0.814    0.594
+#>       83  0.814    0.746
+#>       84  0.808    0.807
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
