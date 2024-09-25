@@ -16,7 +16,7 @@ library(terra)
 library(dplyr)
 library(data.table)        # fast data frame manipulation (used by mlr3)
 library(mlr3)              # machine learning (see Chapter 12)
-library(mlr3spatiotempcv)  # spatio-temporal resampling 
+library(mlr3spatiotempcv)  # spatiotemporal resampling 
 library(mlr3tuning)        # hyperparameter tuning package
 library(mlr3learners)      # interface to most important machine learning pkgs
 library(paradox)           # defining hyperparameter spaces

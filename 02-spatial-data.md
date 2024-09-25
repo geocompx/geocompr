@@ -143,7 +143,7 @@ Simple features is an [open standard](http://portal.opengeospatial.org/files/?ar
 Simple features is a hierarchical data model that represents a wide range of geometry types.
 Of 18 geometry types supported by the specification, only 7 are used in the vast majority of geographic research (see Figure \@ref(fig:sf-ogc));
 these core geometry types are fully supported by the R package **sf** [@pebesma_simple_2018].^[
-The full OGC standard includes rather exotic geometry types including 'surface' and 'curve' geometry types, which currently have limited application in real world applications.
+The full OGC standard includes rather exotic geometry types including 'surface' and 'curve' geometry types, which currently have limited application in real-world applications.
 You can find the whole list of possible feature types in [the PostGIS manual ](http://postgis.net/docs/using_postgis_dbmanagement.html).
 All 18 types can be represented with the **sf** package, although at the time of writing (2024) plotting only works for the 'core 7'.
 ]
@@ -312,13 +312,13 @@ As described in Chapter \@ref(attr), which shows how to manipulate `sf` objects 
 **spatstat**, a package ecosystem which provides numerous functions for spatial statistics, and **terra** both have vector geographic data classes, but neither have the same level of uptake as **sf** does for working with vector data.
 Many popular packages build on **sf**, as shown by the rise in its popularity in terms of number of downloads per day, as shown in Section \@ref(r-ecosystem) in the previous chapter.
 
-### Basic map making {#basic-map}
+### Basic map-making {#basic-map}
 
 Basic maps are created in **sf** with `plot()`.
 By default this creates a multi-panel plot, one sub-plot for each variable of the object, as illustrated in the left-hand panel in Figure \@ref(fig:sfplot).
 A legend or 'key' with a continuous color is produced if the object to be plotted has a single variable (see the right-hand panel).
 Colors can also be set with `col = `, although this will not create a continuous palette or a legend. 
-\index{map making!basic}
+\index{map-making!basic}
 
 
 ``` r
@@ -360,12 +360,12 @@ plot(asia, add = TRUE, col = "red")
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Adding layers in this way can be used to verify the geographic correspondence between layers: 
 the `plot()` function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
-For more advanced map making we recommend using dedicated visualization packages such as **tmap** [@tmap2018] (see Chapter \@ref(adv-map)).</div>\EndKnitrBlock{rmdnote}
+For more advanced map-making we recommend using dedicated visualization packages such as **tmap** [@tmap2018] (see Chapter \@ref(adv-map)).</div>\EndKnitrBlock{rmdnote}
 
 There are various ways to modify maps with **sf**'s `plot()` method.
 Because **sf** extends base R plotting methods, `plot()`'s arguments work with `sf` objects (see `?graphics::plot` and `?par` for information on arguments such as `main =`).^[
 Note: many plot arguments are ignored in facet maps, when more than one `sf` column is plotted.] 
-\index{base plot|see {map making}}\index{map making!base plotting} Figure \@ref(fig:contpop) illustrates this flexibility by overlaying circles, whose diameters (set with `cex =`) represent country populations, on a map of the world.
+\index{base plot|see {map-making}}\index{map-making!base plotting} Figure \@ref(fig:contpop) illustrates this flexibility by overlaying circles, whose diameters (set with `cex =`) represent country populations, on a map of the world.
 An unprojected version of this figure can be created with the following commands (see exercises at the end of this chapter and the script [`02-contplot.R`](https://github.com/geocompx/geocompr/blob/main/code/02-contpop.R) to reproduce Figure \@ref(fig:contpop)):
 
 
@@ -742,7 +742,7 @@ Every core **sfheaders** function has a corresponding C++ implementation, as des
 For most people, the R functions will be more than sufficient to benefit from the computational speed of the package.
 **sfheaders** was developed separately from **sf**, but aims to be fully compatible, creating valid `sf` objects of the type described in preceding sections.
 
-The simplest use-case for **sfheaders** is demonstrated in the code chunks below with examples of building `sfg`, `sfc`, and `sf` objects showing:
+The simplest use case for **sfheaders** is demonstrated in the code chunks below with examples of building `sfg`, `sfc`, and `sf` objects showing:
 
 - A vector converted to `sfg_POINT`
 - A matrix converted to `sfg_LINESTRING`
@@ -926,7 +926,7 @@ Depending on the nature of the application, vector representations of discrete f
 
 Over the last two decades, several packages for reading and processing raster datasets have been developed.
 \index{raster (package)}\index{terra (package)}\index{stars (package)}
-As outlined in Section \@ref(the-history-of-r-spatial), chief among them was **raster**, which led to a step change in R's raster capabilities when it was launched in 2010 and the premier package in the space until the development of **terra** and **stars**.
+As outlined in Section \@ref(history-of-r-spatial), chief among them was **raster**, which led to a step change in R's raster capabilities when it was launched in 2010 and the premier package in the space until the development of **terra** and **stars**.
 Both more recently developed packages provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possible use cases.
 In this book we focus on **terra**, which replaces the older and (in most cases) slower **raster**.
 Before learning about the how **terra**'s class system works, this section describes similarities and differences between **terra** and **stars**; this knowledge will help decide which is most appropriate in different situations.
@@ -996,10 +996,10 @@ Dedicated functions report each component: `dim()` returns the number of rows, c
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">`help("terra-package")` returns a full list of all available **terra** functions.</div>\EndKnitrBlock{rmdnote}
 
-### Basic map making {#basic-map-raster}
+### Basic map-making {#basic-map-raster}
 
 Similar to the **sf** package, **terra** also provides `plot()` methods for its own classes.
-\index{map making!basic raster}
+\index{map-making!basic raster}
 
 
 ``` r
@@ -1261,7 +1261,7 @@ E1. Use `summary()` on the geometry column of the `world` data object that is in
     
 
 
-E2. Run the code that 'generated' the map of the world in Section 2.2.3 (Basic map making).
+E2. Run the code that 'generated' the map of the world in Section 2.2.3 (Basic map-making).
 Find two similarities and two differences between the image on your computer and that in the book.
 
 - What does the `cex` argument do (see `?plot`)?

@@ -68,7 +68,7 @@ R continues this tradition with interfaces to numerous languages, notably C++\in
 
 Although R was not designed as a command line GIS, its ability to interface with dedicated GISs gives it astonishing geospatial capabilities.
 With GIS bridges, R can replicate more diverse workflows, with the additional reproducibility, scalability and productity benefits of controlling them from a programming environment and a consistent CLI.
-Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
+Furthermore, R outperforms GISs in some areas of geocomputation\index{geocomputation}, including interactive/animated map-making (see Chapter \@ref(adv-map)) and spatial statistical modeling (see Chapter \@ref(spatial-cv)).
 
 This chapter focuses on 'bridges' to three mature open source GIS products, summarized in Table \@ref(tab:gis-comp):
 
@@ -801,7 +801,7 @@ The most important open source spatial database\index{spatial database} is PostG
 SQLite/SpatiaLite are certainly also important but implicitly we have already introduced this approach since GRASS GIS\index{GRASS GIS} is using SQLite in the background (see Section \@ref(grass)).
 ]
 R bridges to spatial DBMSs such as PostGIS\index{PostGIS} are important, allowing access to huge data stores without loading several gigabytes of geographic data into RAM, and likely crashing the R session.
-The remainder of this section shows how PostGIS can be called from R, based on "Hello real world" from *PostGIS in Action, Second Edition* [@obe_postgis_2015].^[
+The remainder of this section shows how PostGIS can be called from R, based on "Hello real-world" from *PostGIS in Action, Second Edition* [@obe_postgis_2015].^[
 Thanks to Manning Publications, Regina Obe and Leo Hsu for permission to use this example.
 ]
 

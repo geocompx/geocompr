@@ -111,7 +111,7 @@ There are many resources on these topics, including a [discussion on remote sens
 
 We focused on machine learning rather than spatial statistical inference\index{statistical inference} in Chapters \@ref(spatial-cv) and \@ref(eco) because of the abundance of quality resources on the topic.
 These resources include @zuur_mixed_2009, @zuur_beginners_2017 which focus on ecological use cases, and freely available teaching material and code on *Geostatistics & Open-source Statistical Computing* hosted at [css.cornell.edu/faculty/dgr2](https://css.cornell.edu/faculty/dgr2/teach/).
-[*R for Geographic Data Science*](https://sdesabbata.github.io/r-for-geographic-data-science/) provides an introduction to R for geographic data science and modelling.
+[*R for Geographic Data Science*](https://sdesabbata.github.io/r-for-geographic-data-science/) provides an introduction to R for geographic data science and modeling.
 
 We have largely omitted geocomputation on 'big data'\index{big data} by which we mean datasets that do not fit on a high-spec laptop.
 This decision is justified by the fact that the majority of geographic datasets that are needed for common research or policy applications *do* fit on consumer hardware, large high resolution remote sensing datasets being a notable exception (see Section \@ref(cloud)).
@@ -279,7 +279,7 @@ Reproducibility\index{reproducibility}:
 
 - Encourages *creativity* by shifting the focus away from the basics (which are readily available through shared code) and towards applications
 - Discourages people from 'reinventing the wheel': there is no need to re-do what others have done if their methods can be used by others
-- Makes research more conducive to real world applications, by enabling anyone in any sector to apply your methods in new areas
+- Makes research more conducive to real-world applications, by enabling anyone in any sector to apply your methods in new areas
 
 If reproducibility is the defining asset of geocomputation (or command line GIS) it is worth considering what makes it reproducible.
 This brings us to the 'open source approach', which has three main components:
