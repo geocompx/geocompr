@@ -120,7 +120,7 @@ There is more to CRSs, as described in Section \@ref(crs-intro) and Chapter \@re
 <p class="caption">(\#fig:vectorplots)Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.</p>
 </div>
 
-The **sf** package provides classes for geographic vector data and a consistent command-line interface to important low level libraries for geocomputation:
+The **sf** package provides classes for geographic vector data and a consistent command line interface to important low level libraries for geocomputation:
 
 - [GDAL](https://gdal.org/)\index{GDAL}, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter \@ref(read-write)
 - [PROJ](https://proj.org/), a powerful library for coordinate system transformations, which underlies the content covered in Chapter \@ref(reproj-geo-data)

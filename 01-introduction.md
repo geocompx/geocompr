@@ -5,18 +5,18 @@
 
 
 This book is about using the power of computers to *do things* with geographic data.
-It teaches a range of spatial skills, including: reading, writing and manipulating geographic file formats; making static and interactive maps; and applying geocomputation\index{geocomputation} to support more evidence-based decision making related to a range of geographic phenomena, from transport systems to ecosystems.
+It teaches a range of spatial skills, including: reading, writing and manipulating geographic file formats; making static and interactive maps; and applying geocomputation\index{geocomputation} to support more evidence-based decision-making related to a range of geographic phenomena, from transport systems to ecosystems.
 By demonstrating how various geographic operations can be linked, in 'code chunks' that intersperse the prose, the book also teaches reproducible, open and thus scientific workflows.
 
 The book is not just about using the wealth of *existing tools* for geocomputation: it's also about understanding the geographic data structures and software needed to build *new tools*.
 The approach we teach throughout, and programming techniques covered in Chapter \@ref(algorithms)\index{algorithm} in particular, can remove constraints on your creativity imposed by software.
-After reading the book and completing the exercises you should be ready to tackle real-world problems, communicate your work in maps and code, and contribute to the open source communities developing tools and documentation for reproducible geocomputation.
+After reading the book and completing the exercises, you should be ready to tackle real-world problems, communicate your work in maps and code, and contribute to the open source communities developing tools and documentation for reproducible geocomputation.
 
-Over the last few decades free and open source software for geospatial (FOSS4G\index{FOSS4G}) has progressed at an astonishing rate.
+Over the last few decades, free and open source software for geospatial (FOSS4G\index{FOSS4G}) has progressed at an astonishing rate.
 Thanks to organizations such as OSGeo, advanced geographic techniques are no longer the preserve of those with expensive hardware and software: anyone can now download and run high-performance software for geocomputation.
 Open source Geographic Information Systems (GIS\index{GIS}), such as [QGIS](https://qgis.org/en/site/)\index{QGIS}, have made geographic analysis accessible worldwide.
-GIS software products are powerful, but tend to emphasize a graphical user interface\index{graphical user interface} (GUI) approach over the command-line interface (CLI) approach advocated in this book.
-The 'GUI-focus' of many GIS products has unintended consequence of disabling many users from making their work full reproducible\index{reproducibility}, a problem that can be overcome by calling 'geoalgorithms' contained in GIS software from the command line, as we'll see in Chapter \@ref(gis).
+GIS software products are powerful, but they tend to emphasize a graphical user interface\index{graphical user interface} (GUI) approach over the command-line interface (CLI) approach advocated in this book.
+The 'GUI focus' of many GIS products has the unintended consequence of disabling many users from making their work fully reproducible\index{reproducibility}, a problem that can be overcome by calling 'geoalgorithms' contained in GIS software from the command line, as we'll see in Chapter \@ref(gis).
 A simplistic comparison between the different approaches is illustrated in Table \@ref(tab:gdsl).
 
 
@@ -36,14 +36,13 @@ Other command environments with powerful geographic capabilities exist, includin
 However, R has advantages that make it a good language for learning geocomputation and for many geocomputation tasks, especially for statistics, modelling and visualization, as outlined in Section \@ref(why-open-source).
 
 This book is also motivated by the importance of reproducibility\index{reproducibility} for scientific research.
-It aims to make reproducible geographic data analysis\index{geographic data analysis} workflows more accessible, and demonstrate the power of open geospatial software available from the command-line.
+It aims to make reproducible geographic data analysis\index{geographic data analysis} workflows more accessible, and demonstrate the power of open geospatial software available from the command line.
 R provides ways to interface with other languages [@eddelbuettel_extending_2018], enabling numerous spatial software libraries to be called from R, as explained in Section \@ref(why-use-r-for-geocomputation) and demonstrated in Chapter \@ref(gis).
 Before going into the details of the software, however, it is worth taking a step back and thinking about what we mean by geocomputation\index{geocomputation}.
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Reproducibility is a major advantage of command-line interfaces, but what does it mean in practice?
-We define it as follows: "A process in which the same results can be generated by others using publicly accessible code."
-
-This may sound simple and easy to achieve (which it is if you carefully maintain your R code in script files), but has profound implications for teaching and the scientific process [@pebesma_r_2012].</div>\EndKnitrBlock{rmdnote}
+We define it as follows: "A process in which the same results can be generated by others using publicly accessible code".
+This may sound simple and easy to achieve (which it is if you carefully maintain your R code in script files), but it has profound implications for teaching and the scientific process [@pebesma_r_2012].</div>\EndKnitrBlock{rmdnote}
 \index{reproducibility}
 
 ## What is geocomputation?
@@ -80,9 +79,9 @@ Unlike early users of the term, however, we do not seek to imply that there is a
 
 Geocomputation is a recent term but is influenced by old ideas.
 It can be seen as a part of Geography\index{geography}, which has a 2000+ year history [@talbert_ancient_2014];
-and an extension of *Geographic Information Systems* (GIS\index{GIS}) [@neteler_open_2008], which emerged in the 1960s [@coppock_history_1991].
+and an extension of GIS\index{GIS} [@neteler_open_2008], which emerged in the 1960s [@coppock_history_1991].
 
-Geography\index{geography} has played an important role in explaining and influencing humanity's relationship with the natural world long before the invention of the computer, however.
+Geography\index{geography} has played an important role in explaining and influencing humanity's relationship with the natural world long before the invention of the computer.
 The famous explorer, early geographer and pioneering polymath Alexander von Humboldt\index{von Humboldt} (who has dozens of species, geographic features, places and even universities named after him, such was his influence) illustrates this role:
 not only did his travels to South America in the early 1800s and resulting observations lay the foundations for physical geography and ecology, they also paved the way towards policies to protect the natural world [@wulf_invention_2015].
 This book aims to contribute to the still-evolving 'Geographic Tradition' [@livingstone_geographical_1992] by harnessing the power of modern computers and open source software.
@@ -90,12 +89,12 @@ This book aims to contribute to the still-evolving 'Geographic Tradition' [@livi
 The book's links to older disciplines were reflected in suggested titles for the book: *Geography with R* and *R for GIS*.
 Each has advantages.
 The former conveying the applied nature of the content, about more than where something is on the map.
-The latter communicates that this is a book about using R as powerful command-line geographic information system, to perform spatial operations on *geographic data*.
+The latter communicates that this is a book about using R as a powerful command-line geographic information system, to perform spatial operations on *geographic data*.
 However, the term GIS has connotations which fail to communicate some of R's\index{R} greatest strengths:
 its abilities to seamlessly switch between geographic and non-geographic data processing, modeling and visualization tasks while enabling reproducibility go far beyond the capabilities of GIS.
 Geocomputation\index{geocomputation} implies working with geographic data in a reproducible code-driven environment and programming new results, methods and tools, which is what this book is all about.\index{GIS!connotations}
 
-## Why open source tools for geocomputation? {#why-open-source}
+## Why use open source tools for geocomputation? {#why-open-source}
 
 Early geographers used a variety of tools including barometers, compasses and [sextants](https://en.wikipedia.org/wiki/Sextant) to advance knowledge about the world [@wulf_invention_2015]. 
 It was only with the invention of the marine [chronometer](https://en.wikipedia.org/wiki/Marine_chronometer) in 1761 that it became possible to calculate longitude at sea, enabling ships to take more direct routes, for example.
@@ -104,25 +103,25 @@ Before the turn of the century, there was an acute shortage of data and tools fo
 Likewise, learning to program and write and share reproducible code can be hard, but is a key skill for modern geocomputation. -->
 <!-- Maps were predominantly hand-drawn until modern computing enabled digitisation, a process which only become widespread in the 1990s and which is still ongoing [@gold_outsidein_1996; @auffret_histmapr_2017]. -->
 
-Nowadays, researchers and practitioners have no such limitations and in some cases face the opposite problem: too much data; too many tools.
+Nowadays, researchers and practitioners have no such limitations and in some cases face the opposite problem: too much data and too many tools.
 Most phones now have a global positioning (GPS\index{GPS}) receiver.
 Sensors ranging from satellites and semi-autonomous vehicles to citizen scientists incessantly measure every part of the world.
-The rate of data produced can be overwhelming, with emerging technologies such as autonomous vehicles generating hundreds or even thousands of GB of data daily.
+The rate of data produced can be overwhelming, with emerging technologies such as autonomous vehicles generating hundreds or even thousands of gigabytes of data daily.
 Remote sensing\index{remote sensing} datasets from satellites are too large to analyze with a single computer, as outlined in Chapter \@ref(gis).
 This 'geodata revolution' drives demand for high performance computer hardware and efficient, scalable software to handle and extract signal from the noise.
-Evolving open source tools can import and process subsets from the vast geographic data stores directly, via APIs and via interfaces to databases. \index{spatial database}
+Evolving open source tools can import and process subsets from the vast geographic data stores directly, via application programming interfaces (APIs) and via interfaces to databases. \index{spatial database}
 
 With the rapidly changing hardware, software and data landscapes, it's important to choose tools that are future-proof.
 A major advantage of open source software is its **rate of development and longevity**, with thousands of potential contributors.
-Hundreds of people submit bug reports and suggest new features as well as documentation improvements to open source projects every day - a rate of evolution that most proprietary solutions simply cannot keep up with.
+Hundreds of people submit bug reports and suggest new features as well as documentation improvements to open source projects every day --- a rate of evolution that most proprietary solutions simply cannot keep up with.
 
 A linked advantage is **interoperability**.
 While proprietary products tend to be monolithic 'empires' that are difficult to maintain (linked to the previously mentioned advantage), open source software is more like a 'federation' of modular tools that can be combined in different ways.
-This has allowed open source data science languages such as R to rapidly incorporate new developments such as interfaces to high performance visualisation libraries and file formats, while proprietary solutions struggle to keep up.
+This has allowed open source data science languages such as R to rapidly incorporate new developments such as interfaces to high performance visualization libraries and file formats, while proprietary solutions struggle to keep up.
 
 Another major advantage is **reproducibility**.
 Being able to replicate findings is vital for scientific research, and open source software removes an important barrier of reproducibility by enabling others to check your findings or applying your methods in new contexts using the same tools.
-The combination of using tools that can be accessed by anyone for free with the ability to share code and data means that the results of your work can be checked and built upon by others, a huge advantage if you want your work to be used and cited.
+The combination of using tools that can be accessed by anyone for free with the ability to share code and data means that the results of your work can be checked and built upon by others, which is a huge advantage if you want your work to be used and cited.
 
 The biggest advantage of open source software combined with sharing of reproducible code for many people, however, is the **community**.
 The community enables you to get support far quicker and often of higher quality than is possible with a centralized and budget-limited support team associated with proprietary software.
@@ -212,7 +211,7 @@ Equally important, R has unparalleled support for statistics\index{statistics}, 
 The major advantage of Python is that it is a *general-purpose* programming language.
 It is used in many domains, including desktop software, computer games, websites and data science\index{data science}.
 Python\index{Python} is often the only shared language between different (geocomputation) communities and can be seen as the 'glue' that holds many GIS\index{GIS} programs together.
-Many geoalgorithms\index{geoalgorithm}, including those in QGIS\index{QGIS} and ArcMap, can be accessed from the Python command line, making it well-suited as a starter language for command-line GIS.^[
+Many geoalgorithms\index{geoalgorithm}, including those in QGIS\index{QGIS} and ArcMap, can be accessed from the Python command line, making it well suited as a starter language for command line GIS.^[
 Python modules providing access to geoalgorithms\index{geoalgorithm} include `grass.script` for GRASS GIS\index{GRASS GIS},
 `saga-python` for SAGA-GIS\index{SAGA},
 `processing` for QGIS\index{QGIS} and `arcpy` for ArcGIS\index{ArcGIS}.
@@ -344,7 +343,7 @@ Major updates to the PROJ library\index{PROJ} beginning in 2018 forced the repla
 
 \index{rayshader (package)}
 Since the publication of the first version of Geocomputation with R in 2018, several packages for spatial data visualization have been developed and improved.
-The **rayshader** package, for example, enables the development of striking and easy-to-animate 3D visualisations via raytracing and multiple hill-shading methods [@morganwall_rayshader_2021].
+The **rayshader** package, for example, enables the development of striking and easy-to-animate 3D visualizations via raytracing and multiple hill-shading methods [@morganwall_rayshader_2021].
 \index{ggplot2 (package)}
 The very popular **ggplot2** package gained new spatial capabilities, thanks to work on the **ggspatial** package, which provides scale bars and north arrows [@dunnington_ggspatial_2021].
 **gganimate** enables smooth and customizable spatial animations [@pedersen_gganimate_2020].

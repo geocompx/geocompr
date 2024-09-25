@@ -450,6 +450,8 @@ autotuner_rf$train(task)
 
 
 
+<!-- TODO: evaluate this when issue fixed upstream -->
+
 
 ``` r
 autotuner_rf$tuning_result
@@ -467,15 +469,6 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 ``` r
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
-#> <PredictionRegr> for 84 observations:
-#>     row_ids  truth response
-#>           1 -1.084   -1.090
-#>           2 -0.975   -1.051
-#>           3 -0.912   -1.022
-#> ---                        
-#>          82  0.814    0.639
-#>          83  0.814    0.802
-#>          84  0.808    0.837
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.

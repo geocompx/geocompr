@@ -57,7 +57,7 @@ In this context, *agents*\index{agent-based modeling} are usually point entities
 Transport systems are dynamic [@xie_evolving_2011].
 While the focus of this chapter is the *geographic* analysis of a transport systems, it provides insights into how the approach can be used to simulate scenarios of change, in Section \@ref(prioritizing-new-infrastructure). 
 The purpose of geographic transport modeling can be interpreted as simplifying the complexity of these spatio-temporal systems in ways that capture their essence.
-Selecting appropriate levels of geographic analysis can help simplify this complexity without losing its most important features and variables, enabling better decision making and more effective interventions [@hollander_transport_2016].
+Selecting appropriate levels of geographic analysis can help simplify this complexity without losing its most important features and variables, enabling better decision-making and more effective interventions [@hollander_transport_2016].
 
 Typically, models are designed to tackle a particular problem, such as how to improve safety or the environmental performance of transport systems.
 For this reason, this chapter is based around a policy scenario, introduced in the next section, that asks: how to increase cycling in the city of Bristol?
@@ -444,7 +444,7 @@ Options include [**sfnetworks**](https://luukvdmeer.github.io/sfnetworks/)\index
 
 While fast and flexible, native R routing options are generally harder to set-up than dedicated routing engines for realistic route calculation.
 Routing is a hard problem and many hundreds of hours have been put into open source routing engines that can be downloaded and hosted locally.
-On the other hand, R-based routing engines may be well-suited to model experiments and the statistical analysis of the impacts of changes on the network.
+On the other hand, R-based routing engines may be well suited to model experiments and the statistical analysis of the impacts of changes on the network.
 Changing route network characteristics (or weights associated with different route segment types), re-calculating routes, and analyzing results under many scenarios in a single language has benefits for research applications.
 
 ### Locally hosted dedicated routing engines {#localengine}
