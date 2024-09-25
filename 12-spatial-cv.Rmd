@@ -297,7 +297,7 @@ For spatial CV, we need to provide a few extra arguments.
 The `coordinate_names` argument expects the names of the coordinate columns (see Section \@ref(intro-cv) and Figure \@ref(fig:partitioning)).
 Additionally, we should indicate the used CRS (`crs`) and decide if we want to use the coordinates as predictors in the modeling (`coords_as_features`).
 
-```{r 12-spatial-cv-11, eval=FALSE}
+```{r 12-spatial-cv-11, eval=TRUE}
 # 1. create task
 task = mlr3spatiotempcv::as_task_classif_st(
   mlr3::as_data_backend(lsl), 
@@ -358,7 +358,7 @@ This yields all learners able to model two-class problems (landslide yes or no).
 We opt for the binomial classification\index{classification} method used in Section \@ref(conventional-model) and implemented as `classif.log_reg` in **mlr3learners**.
 Additionally, we need to specify the `predict.type` which determines the type of the prediction with `prob` resulting in the predicted probability for landslide occurrence between 0 and 1 (this corresponds to `type = response` in `predict.glm()`).
 
-```{r 12-spatial-cv-13, eval=FALSE}
+```{r 12-spatial-cv-13, eval=TRUE}
 # 2. specify learner
 learner = mlr3::lrn("classif.log_reg", predict_type = "prob")
 ```
@@ -402,7 +402,7 @@ We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}:
     In the meantime, its functionality was integrated into the **mlr3** ecosystem which is the reason why we are using **mlr3** [@schratz_hyperparameter_2019]. The **tidymodels** framework is another umbrella-package for streamlined modeling in R; however, it only recently integrated support for spatial cross validation via **spatialsample** which so far only supports one spatial resampling method.
 
 
-```{r 12-spatial-cv-18, eval=FALSE}
+```{r 12-spatial-cv-18, eval=TRUE}
 # 3. specify resampling
 resampling = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
@@ -489,7 +489,7 @@ Before defining spatial tuning, we will set up the **mlr3**\index{mlr3 (package)
 The classification\index{classification} task remains the same, hence we can simply reuse the `task` object created in Section \@ref(glm).
 Learners implementing SVM can be found using the `list_mlr3learners()` command of the **mlr3extralearners**.
 
-```{r 12-spatial-cv-23, eval=FALSE, echo=FALSE}
+```{r 12-spatial-cv-23, eval=TRUE, echo=TRUE}
 mlr3_learners = mlr3extralearners::list_mlr3learners()
 mlr3_learners |>
   dplyr::filter(class == "classif" & grepl("svm", id)) |>
@@ -531,7 +531,7 @@ The random selection of values C and Sigma is additionally restricted to a prede
 The range of the tuning space was chosen with values recommended in the literature [@schratz_hyperparameter_2019].
 To find the optimal hyperparameter combination, we fit 50 models (`terminator` object in the code chunk below) in each of these subfolds with randomly selected values for the hyperparameters C and Sigma.
 
-```{r 12-spatial-cv-26, eval=FALSE}
+```{r 12-spatial-cv-26, eval=TRUE}
 # five spatially disjoint partitions
 tune_level = mlr3::rsmp("spcv_coords", folds = 5)
 # define the outer limits of the randomly selected hyperparameters
@@ -546,7 +546,7 @@ tuner = mlr3tuning::tnr("random_search")
 
 The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `auto_tuner()`.
 
-```{r 12-spatial-cv-27, eval=FALSE}
+```{r 12-spatial-cv-27, eval=TRUE}
 at_ksvm = mlr3tuning::auto_tuner(
   learner = lrn_ksvm,
   resampling = tune_level,
