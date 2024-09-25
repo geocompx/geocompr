@@ -37,7 +37,7 @@ knitr::kable(x = d,
 ##              popup = popup)
 
 
-## ----interactive, fig.cap="The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the popups.", out.width="100%", fig.scap="Where the authors are from.", echo=FALSE----
+## ----interactive, fig.cap="The blue markers indicate where the authors are from. The basemap is a tiled image of the Earth at night provided by NASA. Interact with the online version at geocompr.robinlovelace.net, for example by zooming in and clicking on the pop-ups.", out.width="100%", fig.scap="Where the authors are from.", echo=FALSE----
 if (knitr::is_latex_output()){
     knitr::include_graphics("images/interactive.png")   
 } else if (knitr::is_html_output()){
