@@ -118,7 +118,7 @@ canterbury_height2 = nz_height[sel_logical, ]
 The above code chunk creates an object of class `sgbp` (a sparse geometry binary predicate, a list of length `x` in the spatial operation) and then converts it into a logical vector `sel_logical` (containing only `TRUE` and `FALSE` values, something that can also be used by **dplyr**'s filter function).
 \index{binary predicate|see {topological relations}}
 The function `lengths()` identifies which features in `nz_height` intersect with *any* objects in `y`.
-In this case 1 is the greatest possible value, but for more complex operations one could use the method to subset only features that intersect with, for example, 2 or more features from the source object.
+In this case, 1 is the greatest possible value, but for more complex operations one could use the method to subset only features that intersect with, for example, 2 or more features from the source object.
 
 ```{block2 04-spatial-operations-7, type='rmdnote'}
 Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical to `sel_logical`.
@@ -340,7 +340,7 @@ st_distance(nz_height[1:3, ], co)
 ```
 
 Note that the distance between the second and third features in `nz_height` and the second feature in `co` is zero.
-This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*:
+This demonstrates the fact that distances between points and polygons refer to the distance to *any part of the polygon*.
 The second and third points in `nz_height` are *in* Otago, which can be verified by plotting them (result not shown):
 
 ```{r 04-spatial-operations-33, eval=FALSE}
@@ -352,7 +352,7 @@ plot(st_geometry(nz_height)[2:3], add = TRUE)
 
 Underlying the binary predicates demonstrated in the previous section is the Dimensionally Extended 9-Intersection Model (DE-9IM)\index{topological relations!DE-9IM}.
 As the cryptic name suggests, this is not an easy topic to understand, but it is worth knowing about because it underlies many spatial operations and enables the creation of custom spatial predicates.
-The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but is now referred to as DE-9IM [@shen_classification_2018].
+The model was originally labelled "DE + 9IM" by its inventors, referring to the "dimension of the intersections of boundaries, interiors, and exteriors of two features" [@clementini_comparison_1995], but it is now referred to as DE-9IM [@shen_classification_2018].
 DE-9IM is applicable to two-dimensional objects (points, lines and polygons) in Euclidean space, meaning that the model (and software implementing it such as GEOS) assumes you are working with data in a projected coordinate reference system, described in Chapter \@ref(reproj-geo-data).
 
 ```{r de-9im, echo=FALSE, eval=FALSE}
@@ -389,9 +389,9 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 ```
 
 To demonstrate how DE-9IM strings work, let's take a look at the various ways that the first geometry pair in Figure \@ref(fig:relations) relate.
-Figure \@ref(fig:de9imgg) illustrates the 9 intersection model (9IM) which shows the intersections between every combination of each object's interior, boundary and exterior: when each component of the first object `x` is arranged as columns and each component of `y` is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.
+Figure \@ref(fig:de9imgg) illustrates the 9-intersection model (9IM) which shows the intersections between every combination of each object's interior, boundary and exterior: when each component of the first object `x` is arranged as columns, and each component of `y` is arranged as rows, a facetted graphic is created with the intersections between each element highlighted.
 
-```{r de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g., between the boundary of object x and the interior of object y, shown in the middle top facet.", message=FALSE}
+```{r de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight two-dimensional intersections, e.g., between the boundary of object x and the interior of object y, shown in the middle top facet.", message=FALSE}
 p1_2 = st_as_sf(c(p1, p3))
 ii = st_as_sf(st_intersection(p1, p3))
 ii$Object = "Intersection"
@@ -488,7 +488,7 @@ ggplot(b9sf) +
 ```
 
 DE-9IM strings are derived from the dimension of each type of relation.
-In this case the red intersections in Figure \@ref(fig:de9imgg) have dimensions of 0 (points), 1 (lines), and 2 (polygons), as shown in Table \@ref(tab:de9emtable).
+In this case, the red intersections in Figure \@ref(fig:de9imgg) have dimensions of 0 (points), 1 (lines), and 2 (polygons), as shown in Table \@ref(tab:de9emtable).
 
 ```{r de9emtable, echo=FALSE}
 # See https://github.com/geocompx/geocompr/issues/699
@@ -504,16 +504,16 @@ matrix_de_9im = function(pattern) {
 m = matrix_de_9im(pattern)
 colnames(m) = c("Interior (x)", "Boundary (x)", "Exterior (x)")
 rownames(m) = c("Interior (y)", "Boundary (y)", "Exterior (y)")
-knitr::kable(m, caption = "Table showing relations between interiors, boundaries and exteriors of geometries x and y.")
+knitr::kable(m, caption = "Relations between interiors, boundaries and exteriors of geometries x and y.")
 ```
 
 Flattening this matrix 'row-wise' (meaning concatenating the first row, then the second, then the third) results in the string `212111212`.
 Another example will serve to demonstrate the system:
 the relation shown in Figure \@ref(fig:relations) (the third polygon pair in the third column and 1st row) can be defined in the DE-9IM system as follows:
 
-- The intersections between the *interior* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of 2, 1 and 2 respectively
-- The intersections between the *boundary* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 1 respectively, where 'F' means 'false', the objects are disjoint
-- The intersections between the *exterior* of `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 2 respectively: the exterior of the larger object does not touch the interior or boundary of `y`, but the exterior of the smaller and larger objects cover the same area
+- The intersections between the *interior* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of 2, 1 and 2, respectively
+- The intersections between the *boundary* of the larger object `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 1, respectively, where 'F' means 'false', the objects are disjoint
+- The intersections between the *exterior* of `x` and the interior, boundary and exterior of `y` have dimensions of F, F and 2, respectively: the exterior of the larger object does not touch the interior or boundary of `y`, but the exterior of the smaller and larger objects cover the same area
 
 These three components, when concatenated, create the string `212`, `FF1`, and `FF2`.
 This is the same as the result obtained from the function `st_relate()` (see the source code of this chapter to see how other geometries in Figure \@ref(fig:relations) were created):
@@ -527,7 +527,7 @@ st_relate(x, y)
 
 Understanding DE-9IM strings allows new binary spatial predicates to be developed.
 The help page `?st_relate` contains function definitions for 'queen' and 'rook' relations in which polygons share a border or only a point, respectively.
-'Queen' relations mean that 'boundary-boundary' relations (the cell in the second column and the second row in Table \@ref(tab:de9emtable), or the 5th element of the DE-9IM string) must not be empty, corresponding to the pattern `F***T****`, while for 'rook' relations the same element must be 1 (meaning a linear intersection).
+'Queen' relations mean that 'boundary-boundary' relations (the cell in the second column and the second row in Table \@ref(tab:de9emtable), or the 5th element of the DE-9IM string) must not be empty, corresponding to the pattern `F***T****`, while for 'rook' relations, the same element must be 1 (meaning a linear intersection) (see \@ref(queens)).
 These are implemented as follows:
 
 ```{r}
@@ -546,7 +546,7 @@ grid_sf$rooks = lengths(st_rook(grid, grid[5])) > 0
 plot(grid, col = grid_sf$rooks)
 ```
 
-```{r queens, fig.cap="Demonstration of custom binary spatial predicates for finding 'queen' (left) and 'rook' (right) relations to the central square in a grid with 9 geometries.", echo=FALSE, warning=FALSE}
+```{r queens, fig.cap="Demonstration of custom binary spatial predicates for finding queen (left) and rook (right) relations to the central square in a grid with 9 geometries.", echo=FALSE, warning=FALSE}
 st_crs(grid_sf) = "EPSG:2180"
 tm_shape(grid_sf) +
   tm_fill(fill = c("queens", "rooks"), 
@@ -620,7 +620,7 @@ As with attribute data, joining adds new columns to the target object (the argum
 \index{spatial!join}
 
 The process is illustrated by the following example: imagine you have ten points randomly distributed across the Earth's surface and you ask, for the points that are on land, which countries are they in?
-Implementing this idea in a [reproducible example](https://github.com/geocompx/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data handling skills and show how spatial joins work.
+Implementing this idea in a [reproducible example](https://github.com/geocompx/geocompr/blob/main/code/04-spatial-join.R) will build your geographic data-handling skills and will showhow spatial joins work.
 The starting point is to create points that are randomly scattered over the Earth's surface.
 
 ```{r 04-spatial-operations-19}
@@ -637,7 +637,7 @@ random_points = random_df |>
 The scenario illustrated in Figure \@ref(fig:spatial-join) shows that the `random_points` object (top left) lacks attribute data, while the `world` (top right) has attributes, including country names shown for a sample of countries in the legend.
 Spatial joins are implemented with `st_join()`, as illustrated in the code chunk below.
 The output is the `random_joined` object which is illustrated in Figure \@ref(fig:spatial-join) (bottom left).
-Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify the number of country names returned in the joined dataset should be four (Figure \@ref(fig:spatial-join), top right panel).
+Before creating the joined dataset, we use spatial subsetting to create `world_random`, which contains only countries that contain random points, to verify that number of country names returned in the joined dataset should be four (Figure \@ref(fig:spatial-join), top right panel).
 
 ```{r 04-spatial-operations-20, message=FALSE}
 world_random = world[random_points, ]
@@ -652,13 +652,13 @@ source("code/04-spatial-join.R", print.eval = TRUE)
 By default, `st_join()` performs a left join, meaning that the result is an object containing all rows from `x` including rows with no match in `y` (see Section \@ref(vector-attribute-joining)), but it can also do inner joins by setting the argument `left = FALSE`.
 Like spatial subsetting, the default topological operator used by `st_join()` is `st_intersects()`, which can be changed by setting the `join` argument (see `?st_join` for details).
 The example above demonstrates the addition of a column from a polygon layer to a point layer, but the approach works regardless of geometry types.
-In such cases, for example when `x` contains polygons, each of which match multiple objects in `y`, spatial joins will result in duplicate features by creating a new row for each match in `y`.
+In such cases, for example when `x` contains polygons, each of which matches multiple objects in `y`, spatial joins will result in duplicate features by creating a new row for each match in `y`.
 
 ### Distance-based joins {#non-overlapping-joins}
 
 Sometimes two geographic datasets do not intersect but still have a strong geographic relationship due to their proximity.
 The datasets `cycle_hire` and `cycle_hire_osm`, already attached in the **spData** package, provide a good example.
-Plotting them shows that they are often closely related but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
+Plotting them shows that they are often closely related, but they do not touch, as shown in Figure \@ref(fig:cycle-hire), a base version of which is created with the following code below:
 \index{join!non-overlapping}
 
 ```{r 04-spatial-operations-21, eval=FALSE}
@@ -743,7 +743,7 @@ The result of this join has used a spatial operation to change the attribute dat
 ### Spatial aggregation {#spatial-aggr}
 
 As with attribute data aggregation, spatial data aggregation *condenses* data: aggregated outputs have fewer rows than non-aggregated inputs.
-Statistical *aggregating functions*, such as mean average or sum, summarise multiple values \index{statistics} of a variable, and return a single value per *grouping variable*.
+Statistical *aggregating functions*, such as mean average or sum, summarize multiple values \index{statistics} of a variable, and return a single value per *grouping variable*.
 Section \@ref(vector-attribute-aggregation) demonstrated how `aggregate()` and `group_by() |> summarize()` condense data based on attribute variables, this section shows how the same functions work with spatial objects.
 \index{aggregation!spatial}
 

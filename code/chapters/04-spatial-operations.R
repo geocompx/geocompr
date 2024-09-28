@@ -230,7 +230,7 @@ st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 ## text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 
 
-## ----de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet.", message=FALSE----
+## ----de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight two-dimensional intersections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet.", message=FALSE----
 p1_2 = st_as_sf(c(p1, p3))
 ii = st_as_sf(st_intersection(p1, p3))
 ii$Object = "Intersection"
@@ -340,7 +340,7 @@ matrix_de_9im = function(pattern) {
 m = matrix_de_9im(pattern)
 colnames(m) = c("Interior (x)", "Boundary (x)", "Exterior (x)")
 rownames(m) = c("Interior (y)", "Boundary (y)", "Exterior (y)")
-knitr::kable(m, caption = "Table showing relations between interiors, boundaries and exteriors of geometries x and y.")
+knitr::kable(m, caption = "Relations between interiors, boundaries and exteriors of geometries x and y.")
 
 
 ## ---------------------------------------------------------------------------------------------------

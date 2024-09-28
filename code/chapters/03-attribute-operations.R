@@ -56,7 +56,7 @@ library(spData)  # spatial data package introduced in Chapter 2
 
 ## ----03-attribute-operations-7----------------------------------------------------------------------
 class(world) # it's an sf object and a (tidy) data frame
-dim(world)   # it is a 2 dimensional object, with 177 rows and 11 columns
+dim(world)   # it is a two-dimensional object, with 177 rows and 11 columns
 
 
 ## ----03-attribute-operations-8----------------------------------------------------------------------
