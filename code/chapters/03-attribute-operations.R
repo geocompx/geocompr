@@ -447,7 +447,7 @@ elev[1, c(1, 2)] = 0
 
 ## The `force` argument makes sure that the package will be detached even if other packages depend on it.
 
-## This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.
+## This, however, may lead to a restricted usability of packages depending on the detached package, and it is therefore not recommended.
 
 
 ## ---- echo=FALSE, results='asis'--------------------------------------------------------------------
