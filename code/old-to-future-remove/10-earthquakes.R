@@ -1,6 +1,6 @@
 # Aim: create up-to-date map of Earthquakes in previous week
 
-# set-up ------------------------------------------------------------------
+# setup ------------------------------------------------------------------
 
 library(sf)
 library(spData)

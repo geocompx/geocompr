@@ -12,7 +12,7 @@ if (!exists("poly_mat")) {
   )
 }
 
-# Step 1: create sub-triangles, set-up ------------------------------------
+# Step 1: create sub-triangles, set up ------------------------------------
 
 Origin = poly_mat[1, ] # create a point representing the origin
 i = 2:(nrow(poly_mat) - 2)
