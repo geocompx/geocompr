@@ -247,8 +247,8 @@ world_agg5 = world |>
 options(scipen = 999)
 knitr::kable(
   world_agg5,
-  caption = "The top 3 most populous continents ordered by number of countries.",
-  caption.short = "Top 3 most populous continents.",
+  caption = "The top three most populous continents ordered by number of countries.",
+  caption.short = "Top three most populous continents.",
   booktabs = TRUE
 )
 
