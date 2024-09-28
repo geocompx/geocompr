@@ -54,7 +54,7 @@ T1 = rbind(Origin, poly_mat[2:3, ], Origin)
 C1 = (T1[1, , drop = FALSE] + T1[2, , drop = FALSE] + T1[3, , drop = FALSE]) / 3
 
 
-## ----polymat, echo=FALSE, fig.cap="Illustration of polygon centroid calculation problem.", fig.height="100", warning=FALSE----
+## ----polymat, echo=FALSE, fig.cap="Polygon centroid calculation problem.", fig.height="100", warning=FALSE----
 # initial plot: can probably delete this:
 old_par = par(pty = "s") 
 plot(poly_mat)

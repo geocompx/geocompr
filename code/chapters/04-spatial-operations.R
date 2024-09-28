@@ -18,7 +18,7 @@ canterbury = nz |> filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 
 
-## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).", fig.scap="Illustration of spatial subsetting.", message=FALSE----
+## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).", fig.scap="Spatial subsetting.", message=FALSE----
 library(tmap)
 p_hpnz1 = tm_shape(nz) + tm_polygons(col = "white") +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
@@ -547,7 +547,7 @@ nz_agg2 = st_join(x = nz, y = nz_height) |>
 ## # aggregate looses the name of aggregating objects
 
 
-## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.2, fig.scap="Illustration of congruent and incongruent areal units."----
+## ----areal-example, echo=FALSE, fig.cap="Congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.2, fig.scap="Congruent and incongruent areal units."----
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-areal-example.R", print.eval = TRUE)
 
 

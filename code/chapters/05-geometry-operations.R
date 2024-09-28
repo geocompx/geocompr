@@ -134,7 +134,7 @@ rotation = function(a){
 nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
 
 
-## ----affine-trans, echo=FALSE, fig.cap="Illustrations of affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE, fig.scap="Illustrations of affine transformations."----
+## ----affine-trans, echo=FALSE, fig.cap="Affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE, fig.scap="Affine transformations."----
 st_crs(nz_shift) = st_crs(nz_sfc)
 st_crs(nz_scale) = st_crs(nz_sfc)
 st_crs(nz_rotate) = st_crs(nz_sfc)

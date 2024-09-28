@@ -40,7 +40,7 @@ library(spDataLarge)   # load larger geographic data
 ## source("https://github.com/Robinlovelace/geocompr/raw/main/code/02-vectorplots.R") # generate subsequent figure
 
 
-## ----vectorplots, fig.cap="Illustration of vector (point) data in which location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE, fig.scap="Illustration of vector (point) data."----
+## ----vectorplots, fig.cap="Vector (point) data in which location of London (red X) is represented with reference to an origin (blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.", out.width="49%", fig.show='hold', echo=FALSE, fig.scap="Vector (point) data."----
 knitr::include_graphics(c("images/vector_lonlat.png", "images/vector_projected.png"))
 
 
@@ -161,7 +161,7 @@ par(old_par)
 ## waldo::compare(st_geometry(world), world[0])
 
 
-## ----sfcs, echo=FALSE, fig.cap="Illustration of point, linestring and polygon geometries.", fig.asp=0.4----
+## ----sfcs, echo=FALSE, fig.cap="Point, linestring and polygon geometries.", fig.asp=0.4----
 old_par = par(mfrow = c(1, 3), pty = "s", mar = c(0, 3, 1, 0))
 plot(st_as_sfc(c("POINT(5 2)")), axes = TRUE, main = "POINT")
 plot(st_as_sfc("LINESTRING(1 5, 4 4, 4 1, 2 2, 3 2)"), axes = TRUE, main = "LINESTRING")
