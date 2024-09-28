@@ -24,7 +24,7 @@ Organize your work into [projects](https://r4ds.had.co.nz/workflow-projects.html
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Mac and Linux operating systems (OSs) have additional systems requirements, which can be found in the README of the [**sf** package](https://github.com/r-spatial/sf).
 See also OS-specific instructions such as that provided by the website [rtask.thinkr.fr](https://rtask.thinkr.fr/installation-of-r-4-2-on-ubuntu-22-04-lts-and-tips-for-spatial-packages/), which covers installing R on the open source OS Ubuntu.</div>\EndKnitrBlock{rmdnote}
 
-After you have got a good setup, it's time to run some code!
+After you have got a good set-up, it's time to run some code!
 Unless you already have these packages installed, the first thing to do is to install foundational R packages used in this chapter, with the following commands:^[
 **spDataLarge** is not on CRAN\index{CRAN}, meaning it must be installed via *r-universe* or with the following command: `remotes::install_github("Nowosad/spDataLarge")`.
 ]
@@ -39,7 +39,7 @@ install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
 
 
 
-The packages needed to reproduce Part 1 of this book can be installed with the following command: `remotes::install_github("geocompx/geocompkg")`.
+The packages needed to reproduce Part I of this book can be installed with the following command: `remotes::install_github("geocompx/geocompkg")`.
 This command uses the function `install_packages()` from the **remotes** package to install source code hosted on the GitHub code hosting, version and collaboration platform.
 The following command will install **all** dependencies required to reproduce the entire book (warning: this may take several minutes): `remotes::install_github("geocompx/geocompkg", dependencies = TRUE)`.
 
