@@ -442,7 +442,7 @@ When working with segment or leg-level data, route-level statistics can be retur
 Routing engines in R enable route networks stored as R objects *in memory* to be used as the basis of route calculation.
 Options include [**sfnetworks**](https://luukvdmeer.github.io/sfnetworks/)\index{sfnetworks (package)}, [**dodgr**](https://urbananalyst.github.io/dodgr/) and [**cppRouting**](https://github.com/vlarmet/cppRouting) packages, each of which provide their own class system to represent route networks, the topic of the next section.
 
-While fast and flexible, native R routing options are generally harder to set-up than dedicated routing engines for realistic route calculation.
+While fast and flexible, native R routing options are generally harder to set up than dedicated routing engines for realistic route calculation.
 Routing is a hard problem and many hundreds of hours have been put into open source routing engines that can be downloaded and hosted locally.
 On the other hand, R-based routing engines may be well suited to model experiments and the statistical analysis of the impacts of changes on the network.
 Changing route network characteristics (or weights associated with different route segment types), re-calculating routes, and analyzing results under many scenarios in a single language has benefits for research applications.
@@ -511,6 +511,7 @@ This is done using the publicly available OSRM service with the **stplanr** func
 ``` r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
+#> <simpleError in open.connection(con, "rb"): cannot open the connection to 'https://routing.openstreetmap.de/routed-bike/route/v1/driving/-2.62449584285587,51.5083596238341;-2.59034611794926,51.4954738583735?alternatives=false&geometries=geojson&steps=false&overview=full'>
 ```
 
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
@@ -569,7 +570,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 3850
+#> [1] 686
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
@@ -640,6 +641,11 @@ The results demonstrate that each graph edge represents a segment: the segments 
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
+```
+
+
+```
+#> [plot mode] legend/component: Some components or legends are too wide and are therefore rescaled. Set the tmap option 'component.autoscale' to FALSE to disable rescaling.
 ```
 
 <div class="figure" style="text-align: center">
