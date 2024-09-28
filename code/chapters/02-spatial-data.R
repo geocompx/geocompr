@@ -68,7 +68,7 @@ class(world)
 names(world)
 
 
-## ----world-all, fig.cap="A spatial plot of the world using the sf package, with a facet for each attribute.", warning=FALSE, fig.scap="A spatial plot of the world using the sf package."----
+## ----world-all, fig.cap="Spatialplot of the world using the sf package, with a facet for each attribute.", warning=FALSE, fig.scap="Spatialplot of the world using the sf package."----
 plot(world)
 
 
