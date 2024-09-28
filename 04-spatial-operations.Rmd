@@ -955,7 +955,7 @@ knitr::include_graphics("images/04-local-operations.png")
 
 Another good example of local operations is the classification of intervals of numeric values into groups such as grouping a digital elevation model into low (class 1), middle (class 2) and high elevations (class 3).
 Using the `classify()` command, we need first to construct a reclassification matrix, where the first column corresponds to the lower and the second column to the upper end of the class.
-The third column represents the new value for the specified ranges in column one and two.
+The third column represents the new value for the specified ranges in columns one and two.
 
 ```{r 04-spatial-operations-40}
 rcl = matrix(c(0, 12, 1, 12, 24, 2, 24, 36, 3), ncol = 3, byrow = TRUE)
@@ -981,7 +981,7 @@ Finally, the `lapp()` function allows us to apply a function to each cell using 
 The calculation of the normalized difference vegetation index (NDVI) is a well-known local (pixel-by-pixel) raster operation.
 It returns a raster with values between -1 and 1; positive values indicate the presence of living plants (mostly > 0.2).
 NDVI is calculated from red and near-infrared (NIR) bands of remotely sensed imagery, typically from satellite systems such as Landsat or Sentinel.
-Vegetation absorbs light heavily in the visible light spectrum, and especially in the red channel, while reflecting NIR light. Here's the NVDI formula:
+Vegetation absorbs light heavily in the visible light spectrum, and especially in the red channel, while reflecting NIR light. Here's the NDVI formula:
 
 $$
 \begin{split}
@@ -996,7 +996,7 @@ multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 ```
 
-Our raster object has four satellite bands from the Landsat 8 satellite — blue, green, red, and near-infrared (NIR).
+Our raster object has four satellite bands from the Landsat 8 satellite: blue, green, red, and NIR.
 Importantly, Landsat level-2 products are stored as integers to save disk space, and thus we need to convert them to floating-point numbers before doing any calculations.
 For that purpose, we need to apply a scaling factor (0.0000275) and add an offset (-0.2) to the original values.^[You can read more about it at https://www.usgs.gov/faqs/how-do-i-use-a-scale-factor-landsat-level-2-science-products.]
 
@@ -1005,7 +1005,8 @@ multi_rast = (multi_rast * 0.0000275) - 0.2
 ```
 
 The proper values now should be in a range between 0 and 1.
-This is not the case here, probably due to the presence of clouds and other atmospheric effects, thus we need to replace below 0 to 0.
+This is not the case here, probably due to the presence of clouds and other atmospheric effects, which are stored as negative values.
+We will replace these negative values with 0 as follows.
 
 ```{r}
 multi_rast[multi_rast < 0] = 0
