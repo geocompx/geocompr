@@ -18,7 +18,7 @@ canterbury = nz |> filter(Name == "Canterbury")
 canterbury_height = nz_height[canterbury, ]
 
 
-## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Illustration of spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).", fig.scap="Illustration of spatial subsetting.", message=FALSE----
+## ----nz-subset, echo=FALSE, warning=FALSE, fig.cap="Spatial subsetting with red triangles representing 101 high points in New Zealand, clustered near the central Canterbuy region (left). The points in Canterbury were created with the `[` subsetting operator (highlighted in gray, right).", fig.scap="Spatial subsetting.", message=FALSE----
 library(tmap)
 p_hpnz1 = tm_shape(nz) + tm_polygons(col = "white") +
   tm_shape(nz_height) + tm_symbols(shape = 2, col = "red", size = 0.25) +
@@ -53,7 +53,7 @@ canterbury_height2 = nz_height[sel_logical, ]
 
 ## Note: another way to return a logical output is by setting `sparse = FALSE` (meaning 'return a dense matrix not a sparse one') in operators such as `st_intersects()`. The command `st_intersects(x = nz_height, y = canterbury, sparse = FALSE)[, 1]`, for example, would return an output identical to `sel_logical`.
 
-## Note: the solution involving `sgbp` objects is more generalisable though, as it works for many-to-many operations and has lower memory requirements.
+## Note: the solution involving `sgbp` objects is more generalizable though, as it works for many-to-many operations and has lower memory requirements.
 
 
 ## ---------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ canterbury_height3 = nz_height |>
 ## waldo::compare(canterbury_height2, canterbury_height4)
 
 
-## ----relations, echo=FALSE, fig.cap="Topological relations between vector geometries, inspired by Figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue. The nature of the spatial relationship for each pair is described by the Dimensionally Extended 9-Intersection Model string.", fig.show='hold', message=FALSE, fig.asp=0.66, warning=FALSE----
+## ----relations, echo=FALSE, fig.cap="Topological relations between vector geometries, inspired by figures 1 and 2 in Egenhofer and Herring (1990). The relations for which the function(x, y) is true are printed for each geometry pair, with x represented in pink and y represented in blue. The nature of the spatial relationship for each pair is described by the Dimensionally Extended 9-Intersection Model string.", fig.show='hold', message=FALSE, fig.asp=0.66, warning=FALSE----
 # source("https://github.com/Robinlovelace/geocompr/raw/c4-v2-updates-rl/code/de_9im.R")
 source("code/de_9im.R")
 library(sf)
@@ -230,7 +230,7 @@ st_is_within_distance(point_sf, polygon_sfc, dist = 0.2, sparse = FALSE)[, 1]
 ## text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y")) # add text
 
 
-## ----de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight 2 dimensional intesections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet.", message=FALSE----
+## ----de9imgg, echo=FALSE, warning=FALSE, fig.cap="Illustration of how the Dimensionally Extended 9 Intersection Model (DE-9IM) works. Colors not in the legend represent the overlap between different components. The thick lines highlight two-dimensional intersections, e.g. between the boundary of object x and the interior of object y, shown in the middle top facet.", message=FALSE----
 p1_2 = st_as_sf(c(p1, p3))
 ii = st_as_sf(st_intersection(p1, p3))
 ii$Object = "Intersection"
@@ -340,7 +340,7 @@ matrix_de_9im = function(pattern) {
 m = matrix_de_9im(pattern)
 colnames(m) = c("Interior (x)", "Boundary (x)", "Exterior (x)")
 rownames(m) = c("Interior (y)", "Boundary (y)", "Exterior (y)")
-knitr::kable(m, caption = "Table showing relations between interiors, boundaries and exteriors of geometries x and y.")
+knitr::kable(m, caption = "Relations between interiors, boundaries and exteriors of geometries x and y.")
 
 
 ## ---------------------------------------------------------------------------------------------------
@@ -547,7 +547,7 @@ nz_agg2 = st_join(x = nz, y = nz_height) |>
 ## # aggregate looses the name of aggregating objects
 
 
-## ----areal-example, echo=FALSE, fig.cap="Illustration of congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.2, fig.scap="Illustration of congruent and incongruent areal units."----
+## ----areal-example, echo=FALSE, fig.cap="Congruent (left) and incongruent (right) areal units with respect to larger aggregating zones (translucent blue borders).", fig.asp=0.2, fig.scap="Congruent and incongruent areal units."----
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/04-areal-example.R", print.eval = TRUE)
 
 
@@ -656,7 +656,7 @@ ndvi_fun = function(nir, red){
 ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 
 
-## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park"----
+## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of Zion National Park"----
 knitr::include_graphics("images/04-ndvi.png")
 
 

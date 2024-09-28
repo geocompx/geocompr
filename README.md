@@ -63,7 +63,7 @@ changed, including:
   [\#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
 - New
   [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
-  on the dimensionally extended 9 intersection model (DE-9IM)
+  on the dimensionally extended 9-intersection model (DE-9IM)
 - New [chapter](https://r.geocompx.org/raster-vector.html) on
   raster-vector interactions split out from Chapter 5
 - New

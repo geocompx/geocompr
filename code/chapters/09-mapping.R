@@ -114,11 +114,11 @@ map_nza = tm_shape(nz) +
 ## tm_shape(nz) + tm_polygons(col = "Median_income", palette = "BuGn")
 
 
-## ----tmpal, message=FALSE, fig.cap="Illustration of settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", fig.scap="Illustration of settings that affect color settings.", echo=FALSE, fig.asp=0.56----
+## ----tmpal, message=FALSE, fig.cap="Settings that affect color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.", fig.scap="Settings that affect color settings.", echo=FALSE, fig.asp=0.56----
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/09-tmpal.R", print.eval = TRUE)
 
 
-## ----break-styles, message=FALSE, fig.cap="Illustration of different binning methods set using the style argument in tmap.", , fig.scap="Illustration of different binning methods using tmap.", echo=FALSE----
+## ----break-styles, message=FALSE, fig.cap="Different binning methods set using the style argument in tmap.", , fig.scap="Different binning methods using tmap.", echo=FALSE----
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/09-break-styles.R", print.eval = TRUE)
 
 
@@ -168,12 +168,12 @@ map_nz +
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/09-layout1.R", print.eval = TRUE)
 
 
-## ----layout2, message=FALSE, fig.cap="Illustration of selected layout options.", echo=FALSE, fig.asp=0.56----
+## ----layout2, message=FALSE, fig.cap="Selected layout options.", echo=FALSE, fig.asp=0.56----
 # todo: add more useful settings to this plot
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/09-layout2.R", print.eval = TRUE)
 
 
-## ----layout3, message=FALSE, fig.cap="Illustration of selected color-related layout options.", echo=FALSE, fig.asp=0.56----
+## ----layout3, message=FALSE, fig.cap="Selected color-related layout options.", echo=FALSE, fig.asp=0.56----
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/09-layout3.R", print.eval = TRUE)
 
 

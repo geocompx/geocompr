@@ -27,7 +27,7 @@ srtm_final = mask(srtm_cropped, zion)
 srtm_inv_masked = mask(srtm, zion, inverse = TRUE)
 
 
-## ----cropmask, echo = FALSE, fig.cap="Illustration of raster cropping and raster masking.", fig.asp=0.36, fig.width = 10, warning=FALSE----
+## ----cropmask, echo = FALSE, fig.cap="Raster cropping and raster masking.", fig.asp=0.36, fig.width = 10, warning=FALSE----
 library(tmap)
 library(rcartocolor)
 terrain_colors = carto_pal(7, "Geyser")
@@ -305,7 +305,7 @@ grain_poly = as.polygons(grain) |>
   st_as_sf()
 
 
-## ----06-raster-vector-40, echo=FALSE, fig.cap="Illustration of vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).", warning=FALSE, fig.asp=0.4, fig.scap="Illustration of vectorization."----
+## ----06-raster-vector-40, echo=FALSE, fig.cap="Vectorization of raster (left) into polygons (dissolve = FALSE; center) and aggregated polygons (dissolve = TRUE; right).", warning=FALSE, fig.asp=0.4, fig.scap="Vectorization."----
 source("https://github.com/Robinlovelace/geocompr/raw/main/code/06-raster-vectorization2.R", print.eval = TRUE)
 
 
