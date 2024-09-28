@@ -123,7 +123,7 @@ world_asia = world[world$continent == "Asia", ]
 asia = st_union(world_asia)
 
 
-## ----asia, out.width='50%', fig.cap="A plot of Asia added as a layer on top of countries worldwide.", eval=FALSE----
+## ----asia, out.width='50%', fig.cap="Plot of Asia added as a layer on top of countries worldwide.", eval=FALSE----
 ## plot(world["pop"], reset = FALSE)
 ## plot(asia, add = TRUE, col = "red")
 
