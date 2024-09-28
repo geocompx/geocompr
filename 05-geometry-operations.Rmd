@@ -20,7 +20,7 @@ library(spDataLarge)
 
 So far the book has explained the structure of geographic datasets (Chapter \@ref(spatial-class)), and how to manipulate them based on their non-geographic attributes (Chapter \@ref(attr)) and spatial relations (Chapter \@ref(spatial-operations)).
 This chapter focuses on manipulating the geographic elements of spatial objects, for example by creating buffers, simplifying and converting vector geometries, and aggregating and resampling raster data.
-After reading it --- and attempting the exercises at the end --- you should understand and have control over the geometry column in `sf` objects and the extent and geographic location of pixels represented in rasters in relation to other geographic objects.
+After reading it --- and attempting the Exercises at the end --- you should understand and have control over the geometry column in `sf` objects and the extent and geographic location of pixels represented in rasters in relation to other geographic objects.
 
 Section \@ref(geo-vec) covers transforming vector geometries with 'unary' and 'binary' operations.
 Unary operations work on a single geometry in isolation, including simplification (of lines and polygons), the creation of buffers and centroids, and shifting/scaling/rotating single geometries using 'affine transformations' (Sections \@ref(simplification) to \@ref(affine-transformations)).
@@ -51,7 +51,7 @@ Another reason for simplifying objects is to reduce the amount of memory, disk s
 it may be wise to simplify complex geometries before publishing them as interactive maps. 
 The **sf** package provides `st_simplify()`, which uses the Douglas-Peucker algorithm to reduce the vertex count.
 `st_simplify()` uses the `dTolerance` to control the level of generalization in map units [see @douglas_algorithms_1973 for details].
-Figure \@ref(fig:seine-simp) illustrates simplification of a `LINESTRING` geometry representing the river Seine and tributaries.
+Figure \@ref(fig:seine-simp) illustrates simplification of a `LINESTRING` geometry representing the River Seine and tributaries.
 The simplified geometry was created by the following command:
 
 ```{r 05-geometry-operations-2}
@@ -89,8 +89,8 @@ This means the 'topology' is lost, resulting in overlapping and 'holey' areal un
 By default it uses the Visvalingam algorithm, which overcomes some limitations of the Douglas-Peucker algorithm [@visvalingam_line_1993].
 <!-- https://bost.ocks.org/mike/simplify/ -->
 The following code chunk uses this function to simplify `us_states`.
-The result has only 1% of the vertices of the input (set using the argument `keep`) but its number of objects remains intact because we set `keep_shapes = TRUE`:^[
-Simplification of multipolygon objects can remove small internal polygons, even if the `keep_shapes` argument is set to TRUE. To prevent this, you need to set `explode = TRUE`. This option converts all mutlipolygons into separate polygons before its simplification.
+The result has only 1% of the vertices of the input (set using the argument `keep`), but its number of objects remains intact because we set `keep_shapes = TRUE`:^[
+Simplification of multipolygon objects can remove small internal polygons, even if the `keep_shapes` argument is set to TRUE. To prevent this, you need to set `explode = TRUE`. This option converts all multipolygons into separate polygons before its simplification.
 ]
 
 ```{r 05-geometry-operations-6, warning=FALSE, message=FALSE}
@@ -154,11 +154,11 @@ seine_pos = st_point_on_surface(seine)
 ```
 
 ```{r centr, warning=FALSE, echo=FALSE, fig.cap="Centroids (black points) and 'points on surface' (red points) of New Zealand's regions (left) and the Seine (right) datasets.", fig.scap="Centroid vs point on surface operations."}
-p_centr1 = tm_shape(nz) + tm_polygons(col = "grey80", fill = "grey90") +
+p_centr1 = tm_shape(nz) + tm_polygons(col = "gray80", fill = "gray90") +
   tm_shape(nz_centroid) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_shape(nz_pos) + tm_symbols(shape = 1, col = "red", size = 0.5) +
   tm_layout(scale = 1.6)
-p_centr2 = tm_shape(seine) + tm_lines(col = "grey80") +
+p_centr2 = tm_shape(seine) + tm_lines(col = "gray80") +
   tm_shape(seine_centroid) + tm_symbols(shape = 1, col = "black", size = 0.5) +
   tm_shape(seine_pos) + tm_symbols(shape = 1, col = "red", size = 0.5) +
   tm_add_legend(type = "symbols", shape = 1, col = c("black", "red"), 
@@ -168,19 +168,19 @@ tmap_arrange(p_centr1, p_centr2, ncol = 2)
 ```
 
 Other types of centroids exist, including the *Chebyshev center* and the *visual center*.
-We will not explore these here but it is possible to calculate them using R, as we'll see in Chapter \@ref(algorithms).
+We will not explore these here, but it is possible to calculate them using R, as we'll see in Chapter \@ref(algorithms).
 
 ### Buffers
 
 \index{vector!buffers} 
 Buffers are polygons representing the area within a given distance of a geometric feature:
 regardless of whether the input is a point, line or polygon, the output is a polygon.
-Unlike simplification (which is often used for visualization and reducing file size) buffering tends to be used for geographic data analysis.
+Unlike simplification (which is often used for visualization and reducing file size), buffering tends to be used for geographic data analysis.
 How many points are within a given distance of this line?
 Which demographic groups are within travel distance of this new shop?
 These kinds of questions can be answered and visualized by creating buffers around the geographic entities of interest.
 
-Figure \@ref(fig:buffs) illustrates buffers of different sizes (5 and 50 km) surrounding the river Seine and tributaries.
+Figure \@ref(fig:buffs) illustrates buffers of different sizes (5 and 50 km) surrounding the River Seine and tributaries.
 These buffers were created with commands below, which show that the command `st_buffer()` requires at least two arguments: an input geometry and a distance, provided in the units of the CRS (in this case meters).
 
 ```{r 05-geometry-operations-9}
@@ -205,8 +205,8 @@ The `st_buffer()` has a few additional arguments.
 The most important ones are:
 
 - `nQuadSegs` (when the GEOS\index{GEOS} engine is used), which means 'number of segments per quadrant' and is set by default to 30 (meaning circles created by buffers are composed of $4 \times 30 = 120$ lines).
-Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case it should be reduced) or when very high precision is needed (in which case it should be increased)
-- `max_cells` (when the S2\index{S2} engine is used), the larger the value, the more smooth the buffer will be, but the calculations will take longer
+Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case, it should be reduced) or when very high precision is needed (in which case, it should be increased)
+- `max_cells` (when the S2\index{S2} engine is used), the larger the value, the smoother the buffer will be, but the calculations will take longer
 - `endCapStyle` and `joinStyle` (when the GEOS engine is used), which control the appearance of the buffer's edges
 - `singleSide` (when the GEOS engine is used), which controls whether the buffer is created on one or both sides of the input geometry
 
@@ -300,7 +300,7 @@ rotation = function(a){
 } 
 ```
 
-The `rotation` function accepts one argument `a` - a rotation angle in degrees.
+The `rotation` function accepts one argument `a` --- a rotation angle in degrees.
 Rotation could be done around selected points, such as centroids (Figure \@ref(fig:affine-trans), right panel).
 See `vignette("sf3")` for more examples.
 
@@ -308,7 +308,7 @@ See `vignette("sf3")` for more examples.
 nz_rotate = (nz_sfc - nz_centroid_sfc) * rotation(30) + nz_centroid_sfc
 ```
 
-```{r affine-trans, echo=FALSE, fig.cap="Illustrations of affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE, fig.scap="Illustrations of affine transformations."}
+```{r affine-trans, echo=FALSE, fig.cap="Affine transformations: shift, scale and rotate.", warning=FALSE, eval=TRUE, fig.scap="Affine transformations."}
 st_crs(nz_shift) = st_crs(nz_sfc)
 st_crs(nz_scale) = st_crs(nz_sfc)
 st_crs(nz_rotate) = st_crs(nz_sfc)
@@ -352,14 +352,14 @@ Spatial clipping is a form of spatial subsetting that involves changes to the `g
 
 Clipping can only apply to features more complex than points: 
 lines, polygons and their 'multi' equivalents.
-To illustrate the concept we will start with a simple example:
+To illustrate the concept, we will start with a simple example:
 two overlapping circles with a center point one unit away from each other and a radius of one (Figure \@ref(fig:points)).
 
 ```{r points, fig.cap="Overlapping circles.", fig.asp=0.4, crop = TRUE, echo=-1}
 op = par(mar = rep(0, 4))
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
-plot(b, border = "grey")
+plot(b, border = "gray")
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 ```
 
@@ -375,8 +375,8 @@ op = par(mar = rep(0, 4))
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
-plot(b, border = "grey")
-plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting area
+plot(b, border = "gray")
+plot(x_and_y, col = "lightgray", border = "gray", add = TRUE) # intersecting area
 ```
 
 ```{r, echo=FALSE}
@@ -393,7 +393,7 @@ source("code/05-venn-clip.R")
 
 \index{vector!clipping} 
 \index{spatial!subsetting} 
-Clipping objects can change their geometry but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
+Clipping objects can change their geometry, but it can also subset objects, returning only features that intersect (or partly intersect) with a clipping/subsetting object.
 To illustrate this point, we will subset points that cover the bounding box of the circles `x` and `y` in Figure \@ref(fig:venn-clip).
 Some points will be inside just one circle, some will be inside both and some will be inside neither.
 `st_sample()` is used below to generate a *simple random* distribution of points within the extent of circles `x` and `y`, resulting in output illustrated in Figure \@ref(fig:venn-subset), raising the question: how to subset the points to only return the point that intersects with *both* `x` and `y`?
@@ -405,9 +405,9 @@ box = st_as_sfc(bb)
 set.seed(2024)
 p = st_sample(x = box, size = 10)
 p_xy1 = p[x_and_y]
-plot(box, border = "grey", lty = 2)
-plot(x, add = TRUE, border = "grey")
-plot(y, add = TRUE, border = "grey")
+plot(box, border = "gray", lty = 2)
+plot(x, add = TRUE, border = "gray")
+plot(y, add = TRUE, border = "gray")
 plot(p, add = TRUE, cex = 3.5)
 plot(p_xy1, cex = 5, col = "red", add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3)
@@ -457,7 +457,7 @@ pmulti = st_multipoint(pmat)
 box = st_convex_hull(pmulti)
 ```
 
-Although the example above is rather contrived and provided for educational rather than applied purposes, and we encourage the reader to reproduce the results to deepen your understanding for handling geographic vector objects in R, it raises an important question: which implementation to use?
+Although the example above is rather contrived and provided for educational rather than applied purposes, and we encourage the reader to reproduce the results to deepen understanding for handling geographic vector objects in R, it raises an important question: which implementation to use?
 Generally, more concise implementations should be favored, meaning the first approach above.
 We will return to the question of choosing between different implementations of the same technique or algorithm in Chapter \@ref(algorithms).
 
@@ -559,7 +559,7 @@ all.equal(multipoint, multipoint_3)
 
 ```{block2 05-geometry-operations-31, type='rmdnote'}
 For single simple feature geometries (`sfg`), `st_cast()` also provides geometry casting from non-multi-types to multi-types (e.g., `POINT` to `MULTIPOINT`) and from multi-types to non-multi-types.
-However, when casting from multi-types to non-multi-types only the first element of the old object would remain in the output object.
+However, when casting from multi-types to non-multi-types, only the first element of the old object would remain in the output object.
 ```
 
 ```{r 05-geometry-operations-32, include=FALSE}
@@ -607,10 +607,10 @@ names(sfs_st_cast)[1] = ""
 knitr::kable(sfs_st_cast, 
              caption = paste("Geometry casting on simple feature geometries", 
                              "(see Section 2.1) with input type by row and", 
-                             "output type by column"),
+                             "output type by column."),
              caption.short = "Geometry casting on simple feature geometries.",
              booktabs = TRUE) |> 
-  kableExtra::add_footnote("Note: Values like (1) represent the number of features; NA means the operation is not possible", notation = "none")
+  kableExtra::add_footnote("Note: Values in parentheses represent the number of features; NA means the operation is not available", notation = "none")
 ```
 
 Let's try to apply geometry type transformations on a new object, `multilinestring_sf`, as an example (on the left in Figure \@ref(fig:line-cast)):
@@ -626,15 +626,15 @@ multilinestring_sf
 
 You can imagine it as a road or river network. 
 The new object has only one row that defines all the lines.
-This restricts the number of operations that can be done, for example it prevents adding names to each line segment or calculating lengths of single lines.
-The `st_cast()` function can be used in this situation, as it separates one mutlilinestring into three linestrings.
+This restricts the number of operations that can be done, for example, it prevents adding names to each line segment or calculating lengths of single lines.
+The `st_cast()` function can be used in this situation, as it separates one multilinestring into three linestrings.
 
 ```{r 05-geometry-operations-34}
 linestring_sf2 = st_cast(multilinestring_sf, "LINESTRING")
 linestring_sf2
 ```
 
-```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between MULTILINESTRING (left) and LINESTRING (right).", warning=FALSE, fig.scap="Examples of type casting.", message=FALSE}
+```{r line-cast, echo=FALSE, fig.cap="Examples of type casting between multilinestring (left) and linestring (right).", warning=FALSE, fig.scap="Examples of type casting.", message=FALSE}
 p_lc1 = tm_shape(multilinestring_sf) + tm_lines(lwd = 3) +
   tm_title("MULTILINESTRING")
 linestring_sf2$name = c("Riddle Rd", "Marshall Ave", "Foulke St")
@@ -655,7 +655,7 @@ linestring_sf2
 ## Geometric operations on raster data {#geo-ras}
 
 \index{raster!manipulation} 
-Geometric raster operations include the shift, flipping, mirroring, scaling, rotation or warping of images.
+Geometric raster operations include the shifting, flipping, mirroring, scaling, rotation or warping of images.
 These operations are necessary for a variety of applications including georeferencing, used to allow images to be overlaid on an accurate map with a known CRS [@liu_essential_2009].
 A variety of georeferencing techniques exist, including:
 
@@ -689,7 +689,7 @@ clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
 elev[clip, drop = FALSE]
 ```
 
-For the same operation we can also use the `intersect()` and `crop()` command.
+For the same operation, we can also use the `intersect()` and `crop()` command.
 
 ### Extent and origin
 
@@ -779,7 +779,7 @@ dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
 dem_agg = aggregate(dem, fact = 5, fun = mean)
 ```
 
-```{r aggregate-example, fig.cap = "Original raster (left). Aggregated raster (right).", echo=FALSE}
+```{r aggregate-example, fig.cap = "Original raster (left) and aggregated raster (right).", echo=FALSE}
 p_ar1 = tm_shape(dem) +
   tm_raster(col.scale = tm_scale_continuous()) +
   tm_title("A. Original") + 
@@ -799,10 +799,10 @@ The extent was slightly adjusted to accommodate the new grid size.
 ```{r aggdf}
 #| echo: false
 agg_df = data.frame(
-  object = c("dem", "dem_agg"),
-  resolution = c("(30.85, 30.85)", "(154.25, 154.25)"),
-  dimensions = c("117 x 117", "24 x 24"),
-  extent = c("794599.1, 798208.6, 8931775, 8935384", "794599.1, 798301.1, 8931682, 8935384")
+  Object = c("dem", "dem_agg"),
+  Resolution = c("(30.85, 30.85)", "(154.25, 154.25)"),
+  Dimensions = c("117 * 117", "24 * 24"),
+  Extent = c("794599.1, 798208.6, 8931775, 8935384", "794599.1, 798301.1, 8931682, 8935384")
 )
 knitr::kable(agg_df, caption = "Properties of the original and aggregated raster.", booktabs = TRUE)
 ```
@@ -810,7 +810,7 @@ knitr::kable(agg_df, caption = "Properties of the original and aggregated raster
 \index{raster!disaggregation}
 The `disagg()` function increases the resolution of raster objects. 
 It comes with two methods on how to compute the values of the newly created cells: the default method (`method = "near"`) simply gives all output cells the value of the input cell, and hence duplicates values, which translates into a 'blocky' output.
-The `bilinear` method uses the four nearest pixel centers of the input image (salmon colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear)).
+The `bilinear` method uses the four nearest pixel centers of the input image (orange colored points in Figure \@ref(fig:bilinear)) to compute an average weighted by distance (arrows in Figure \@ref(fig:bilinear)).
 The value of the output cell is represented by a square in the upper left corner in Figure \@ref(fig:bilinear).
 
 ```{r 05-geometry-operations-41}
@@ -873,16 +873,16 @@ tmap_arrange(tm1, tm2, tm3, nrow = 1)
 There are several methods for estimating values for a raster with different resolutions/origins, as shown in Figure \@ref(fig:resampl).
 The main resampling methods include:
 
-- Nearest neighbor: assigns the value of the nearest cell of the original raster to the cell of the target one. This is a fast simple technique that is usually suitable for resampling categorical rasters
-- Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). This is the fastest method that is appropriate for continuous rasters
-- Cubic interpolation: uses values of the 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters and results in a smoother surface compared to bilinear interpolation, but is computationally more demanding
-- Cubic spline interpolation: also uses values of the 16 nearest cells of the original raster to determine the output cell value, but applies cubic splines (piecewise third-order polynomial functions). Used for continuous rasters
-- Lanczos windowed sinc resampling: uses values of the 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters^[
+- Nearest neighbor: assigns the value of the nearest cell of the original raster to the cell of the target one. This is a fast simple technique that is usually suitable for resampling categorical rasters.
+- Bilinear interpolation: assigns a weighted average of the four nearest cells from the original raster to the cell of the target one (Figure \@ref(fig:bilinear)). This is the fastest method that is appropriate for continuous rasters.
+- Cubic interpolation: uses values of the 16 nearest cells of the original raster to determine the output cell value, applying third-order polynomial functions. Used for continuous rasters and results in a smoother surface compared to bilinear interpolation but is computationally more demanding.
+- Cubic spline interpolation: also uses values of the 16 nearest cells of the original raster to determine the output cell value but applies cubic splines (piece-wise third-order polynomial functions). Used for continuous rasters.
+- Lanczos windowed sinc resampling: uses values of the 36 nearest cells of the original raster to determine the output cell value. Used for continuous rasters.^[
 More detailed explanation of this method can be found at https://gis.stackexchange.com/a/14361/20955.
 ]
 
 The above explanation highlights that only *nearest neighbor* resampling is suitable for categorical rasters, while all methods can be used (with different outcomes) for continuous rasters.
-Please note also, that the methods gain both in complexity and processing time from top to bottom.
+Please note also that the methods gain both in complexity and processing time from top to bottom.
 Moreover, resampling can be done using statistics (e.g., minimum or mode) of all contributing cells.
 
 To apply resampling, the **terra** package provides a `resample()` function.
@@ -946,12 +946,12 @@ For example, `sum` is useful when each raster cell represents a spatially extens
 As an effect of using `sum`, the resampled raster should have the same total number of people as the original one.
 
 \index{raster!resampling}
-As you will see in section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
+As you will see in Section \@ref(reproj-ras), raster reprojection is a special case of resampling when our target raster has a different CRS than the original raster.
 
 \index{GDAL}
 ```{block2 type='rmdnote'}
 Most geometry operations in **terra** are user-friendly, rather fast, and work on large raster objects.
-However, there could be some cases, when **terra** is not the most performant either for extensive rasters or many raster files, and some alternatives should be considered.
+However, there could be some cases when **terra** is not the most performant either for extensive rasters or many raster files, and some alternatives should be considered.
 
 The most established alternatives come with the GDAL library.
 It contains several utility functions, including:
@@ -961,8 +961,8 @@ It contains several utility functions, including:
 - `gdal_rasterize` - converts vector data into raster files
 - `gdalwarp` - allows for raster mosaicing, resampling, cropping, and reprojecting
 
-All of the above functions are written in C++, but can be called in R using `sf::gdal_utils()`, the **gdalUtilities** package or via system commands (see section \@ref(gdal)).
-Importantly, all of these functions expect a raster file path as an input and often return their output as a raster file (for example, `gdalUtilities::gdal_translate("my_file.tif", "new_file.tif", t_srs = "EPSG:4326")`)
+All of the above functions are written in C++, but can be called in R using `sf::gdal_utils()`, the **gdalUtilities** package, or via system commands (see Section \@ref(gdal)).
+Importantly, all of these functions expect a raster file path as an input and often return their output as a raster file (for example, `gdalUtilities::gdal_translate("my_file.tif", "new_file.tif", t_srs = "EPSG:4326")`).
 This is very different from the usual **terra** approach, which expects `SpatRaster` objects as inputs.
 ```
 
