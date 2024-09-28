@@ -56,7 +56,7 @@ library(spData)  # spatial data package introduced in Chapter 2
 
 ## ----03-attribute-operations-7----------------------------------------------------------------------
 class(world) # it's an sf object and a (tidy) data frame
-dim(world)   # it is a 2 dimensional object, with 177 rows and 11 columns
+dim(world)   # it is a two-dimensional object, with 177 rows and 11 columns
 
 
 ## ----03-attribute-operations-8----------------------------------------------------------------------
@@ -247,8 +247,8 @@ world_agg5 = world |>
 options(scipen = 999)
 knitr::kable(
   world_agg5,
-  caption = "The top 3 most populous continents ordered by number of countries.",
-  caption.short = "Top 3 most populous continents.",
+  caption = "The top three most populous continents ordered by number of countries.",
+  caption.short = "Top three most populous continents.",
   booktabs = TRUE
 )
 
@@ -447,7 +447,7 @@ elev[1, c(1, 2)] = 0
 
 ## The `force` argument makes sure that the package will be detached even if other packages depend on it.
 
-## This, however, may lead to a restricted usability of packages depending on the detached package, and is therefore not recommended.
+## This, however, may lead to a restricted usability of packages depending on the detached package, and it is therefore not recommended.
 
 
 ## ---- echo=FALSE, results='asis'--------------------------------------------------------------------

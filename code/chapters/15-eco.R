@@ -118,7 +118,7 @@ knitr::include_graphics("images/15_sa_mongon_sampling.png")
 ##   terra::rast()
 ## names(ep) = c("carea", "cslope") # assign proper names
 ## terra::origin(ep) = terra::origin(dem) # make sure rasters have the same origin
-## ep = c(dem, ndvi, ep) # add dem and ndvi to the multilayer SpatRaster object
+## ep = c(dem, ndvi, ep) # add dem and ndvi to the multi-layerSpatRaster object
 
 
 ## ----15-eco-8, eval=FALSE---------------------------------------------------------------------------
