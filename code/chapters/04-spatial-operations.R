@@ -656,7 +656,7 @@ ndvi_fun = function(nir, red){
 ndvi_rast = lapp(multi_rast[[c(4, 3)]], fun = ndvi_fun)
 
 
-## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of the Zion National Park"----
+## ----04-ndvi, echo=FALSE, fig.cap="RGB image (left) and NDVI values (right) calculated for the example satellite file of Zion National Park"----
 knitr::include_graphics("images/04-ndvi.png")
 
 
