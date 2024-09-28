@@ -234,7 +234,7 @@ install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'http
 ```
 
 Installing `geocompkg` will also install core packages required for
-reproducing **Part 1 of the book** (chapters 1 to 8). Note: you may also
+reproducing **Part I of the book** (chapters 1 to 8). Note: you may also
 need to install [system
 dependencies](https://github.com/r-spatial/sf#installing) if you’re
 running Linux (recommended) or Mac operating systems. You also need to
