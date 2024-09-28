@@ -307,8 +307,8 @@ tm_shape(nz) + tm_polygons(fill = "Median_income",
 ```
 
 <div class="figure" style="text-align: center">
-<img src="figures/tmpal-1.png" alt="Illustration of color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette." width="100%" />
-<p class="caption">(\#fig:tmpal)Illustration of color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.</p>
+<img src="figures/tmpal-1.png" alt="Color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette." width="100%" />
+<p class="caption">(\#fig:tmpal)Color settings. The results show (from left to right): default settings, manual breaks, n breaks, and the impact of changing the palette.</p>
 </div>
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">All of the above arguments (`breaks`, `n`, and `values`) also work for other types of visual variables.

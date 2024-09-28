@@ -89,7 +89,7 @@ In terms of transport, Bristol is well served by rail and road links, and has a 
 
 Like many cities, Bristol has major congestion, air quality and physical inactivity problems.
 Cycling can tackle all of these issues efficiently: it has a greater potential to replace car trips than walking, with typical [speeds](https://en.wikipedia.org/wiki/Bicycle_performance) of 15-20 km/h vs 4-6 km/h for walking.
-For this reason Bristol's [Transport Strategy](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy) has ambitious plans for cycling.
+For this reason, Bristol's [Transport Strategy](https://www.bristol.gov.uk/council-and-mayor/policies-plans-and-strategies/bristol-transport-strategy) has ambitious plans for cycling.
 
 To highlight the importance of policy considerations in transportation research, this chapter is guided by the need to provide evidence for people (transport planners, politicians and other stakeholders) tasked with getting people out of cars and onto more sustainable modes --- walking and cycling in particular.
 The broader aim is to demonstrate how geocomputation can support evidence-based transport planning.
@@ -474,8 +474,8 @@ While R users can access CycleStreets routes via the package [**cyclestreets**](
 ### Contraction hierarchies and traffic assigment
 
 Contraction hierarchies and traffic assignment are advanced but important topics in transport modeling worth being aware of, especially if you want your code to scale to large networks.
-Calculating many routes is computationally resource intensive and can take hours, leading to the development of several algorithms to speed-up routing calculations.
-**Contraction hierarchies** is a well-known algorithm that can lead to a substantial (1000x+ in some cases) speed-up in routing tasks, depending on network size.
+Calculating many routes is computationally resource intensive and can take hours, leading to the development of several algorithms to speed up routing calculations.
+**Contraction hierarchies** is a well-known algorithm that can lead to a substantial (1000x+ in some cases) speed up in routing tasks, depending on network size.
 Contraction hierarchies are used behind the scenes in the routing engines mentioned in the previous sections.
 
 Traffic assignment is a problem that is closely related to routing: in practice, the shortest path between two points is not always the fastest, especially if there is congestion.
@@ -570,7 +570,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 2206
+#> [1] 812
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
@@ -641,11 +641,6 @@ The results demonstrate that each graph edge represents a segment: the segments 
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
-```
-
-
-```
-#> [plot mode] legend/component: Some components or legends are too wide and are therefore rescaled. Set the tmap option 'component.autoscale' to FALSE to disable rescaling.
 ```
 
 <div class="figure" style="text-align: center">

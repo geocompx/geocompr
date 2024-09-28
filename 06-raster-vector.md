@@ -57,7 +57,7 @@ srtm_cropped = crop(srtm, zion)
 
 \index{raster!masking} 
 Related to `crop()` is the **terra** function `mask()`, which sets values outside of the bounds of the object passed to its second argument to `NA`.
-The following command therefore masks every cell outside of the Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)).
+The following command therefore masks every cell outside of Zion National Park boundaries (Figure \@ref(fig:cropmask)(C)).
 
 
 ``` r
@@ -95,7 +95,7 @@ The reverse of raster extraction --- assigning raster cell values based on vecto
 
 \index{raster!extraction points} 
 The basic example is of extracting the value of a raster cell at specific **points**.
-For this purpose, we will use `zion_points`, which contain a sample of 30 locations within the Zion National Park (Figure \@ref(fig:pointextr)). 
+For this purpose, we will use `zion_points`, which contain a sample of 30 locations within Zion National Park (Figure \@ref(fig:pointextr)). 
 The following command extracts elevation values from `srtm` and creates a data frame with points' IDs (one value per vector's row) and related `srtm` values for each point.
 Now, we can add the resulting object to our `zion_points` dataset with the `cbind()` function: 
 

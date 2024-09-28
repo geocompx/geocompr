@@ -167,7 +167,7 @@ The answer likely depends on your domain of application:</p>
 <li>Vector data tends to dominate the social sciences because human settlements tend to have discrete borders</li>
 <li>Raster dominates many environmental sciences partially because of the reliance on remote sensing data</li>
 </ul>
-<p>There is much overlap in some fields and raster and vector datasets can be used together:
+<p>Both raster and vector datasets are used in many fields and raster and vector datasets can be used together:
 ecologists and demographers, for example, commonly use both vector and raster data.
 Furthermore, it is possible to convert between the two forms (see Chapter <a href="raster-vector.html#raster-vector">6</a>).
 Whether your work involves more use of vector or raster datasets, it is worth understanding the underlying data model before using them, as discussed in subsequent chapters.
@@ -179,31 +179,32 @@ This book uses <strong>sf</strong> and <strong>terra</strong> packages to work w
 </h2>
 
 <div class="rmdnote">
-Take care when using the word ‘vector’ as it can have two meanings in this book:
+Take care when using the word ‘vector’, as it can have two meanings in this book:
 geographic vector data and the <code>vector</code> class (note the <code>monospace</code> font) in R.
 The former is a data model, the latter is an R class just like <code>data.frame</code> and <code>matrix</code>.
 Still, there is a link between the two: the spatial coordinates which are at the heart of the geographic vector data model can be represented in R using <code>vector</code> objects.
 </div>
 <p>The geographic vector data model is based on points located within a coordinate reference system (CRS).
 Points can represent self-standing features (e.g., the location of a bus stop) or they can be linked together to form more complex geometries such as lines and polygons.
-Most point geometries contain only two dimensions (much less prominent 3-dimensional geometries contain an additional <span class="math inline">\(z\)</span> value, typically representing height above sea level).</p>
+Most point geometries contain only two dimensions (much less prominent three-dimensional geometries contain an additional <span class="math inline">\(z\)</span> value, typically representing height above sea level).</p>
 <p>In this system, for example, London can be represented by the coordinates <code>c(-0.1, 51.5)</code>.
-This means that its location is -0.1 degrees east and 51.5 degrees north of the origin.
-The origin in this case is at 0 degrees longitude (the Prime Meridian) and 0 degrees latitude (the Equator) in a geographic (‘lon/lat’) CRS (Figure <a href="spatial-class.html#fig:vectorplots">2.1</a>, left panel).
+This means that its location is <span class="math inline">\(-0.1\)</span> degrees east and <span class="math inline">\(51.5\)</span> degrees north of the origin.
+The origin in this case is at 0 degrees longitude (Prime Meridian) and 0 degrees latitude (Equator) in a geographic (‘lon/lat’) CRS (Figure <a href="spatial-class.html#fig:vectorplots">2.1</a>, left panel).
 The same point could also be approximated in a projected CRS with ‘Easting/Northing’ values of <code>c(530000, 180000)</code> in the <a href="https://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid">British National Grid</a>, meaning that London is located 530 km <em>East</em> and 180 km <em>North</em> of the <span class="math inline">\(origin\)</span> of the CRS.
 This can be verified visually: slightly more than 5 ‘boxes’ — square areas bounded by the gray grid lines 100 km in width — separate the point representing London from the origin (Figure <a href="spatial-class.html#fig:vectorplots">2.1</a>, right panel).</p>
-<p>The location of National Grid’s origin, in the sea beyond South West Peninsular, ensures that all locations in the UK have positive Easting and Northing values.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
+<p>The location of National Grid’s origin, in the sea beyond the South West peninsula, ensures that all locations in the UK have positive Easting and Northing values.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
 The origin we are referring to, depicted in blue in Figure &lt;a href="spatial-class.html#fig:vectorplots"&gt;2.1&lt;/a&gt;, is in fact the ‘false’ origin.
 The ‘true’ origin, the location at which distortions are at a minimum, is located at 2° W and 49° N.
 This was selected by the Ordnance Survey to be roughly in the center of the British landmass longitudinally.&lt;/p&gt;'><sup>6</sup></a>
-There is more to CRSs, as described in Section <a href="spatial-class.html#crs-intro">2.4</a> and Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a> but, for the purposes of this section, it is sufficient to know that coordinates consist of two numbers representing distance from an origin, usually in <span class="math inline">\(x\)</span> then <span class="math inline">\(y\)</span> dimensions.</p>
+There is more to CRSs, as described in Section <a href="spatial-class.html#crs-intro">2.4</a> and Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>,
+For this section, it is sufficient to know that coordinates consist of two numbers representing distance from an origin, usually in <span class="math inline">\(x\)</span> then <span class="math inline">\(y\)</span> dimensions.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:vectorplots"></span>
-<img src="images/vector_lonlat.png" alt="Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%"><img src="images/vector_projected.png" alt="Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%"><p class="caption">
-FIGURE 2.1: Illustration of vector (point) data in which the location of London (the red X) is represented with reference to an origin (the blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.
+<img src="images/vector_lonlat.png" alt="Vector (point) data in which the location of London (red X) is represented with reference to an origin (blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%"><img src="images/vector_projected.png" alt="Vector (point) data in which the location of London (red X) is represented with reference to an origin (blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula." width="49%"><p class="caption">
+FIGURE 2.1: Vector (point) data in which the location of London (red X) is represented with reference to an origin (blue circle). The left plot represents a geographic CRS with an origin at 0° longitude and latitude. The right plot represents a projected CRS with an origin located in the sea west of the South West Peninsula.
 </p>
 </div>
-<p>The <strong>sf</strong> package provides classes for geographic vector data and a consistent command line interface to important low level libraries for geocomputation:</p>
+<p>The <strong>sf</strong> package provides classes for geographic vector data and a consistent command line interface to important low-level libraries for geocomputation:</p>
 <ul>
 <li>
 <a href="https://gdal.org/">GDAL</a>, for reading, writing and manipulating a wide range of geographic data formats, covered in Chapter <a href="read-write.html#read-write">8</a>
@@ -219,22 +220,22 @@ FIGURE 2.1: Illustration of vector (point) data in which the location of London 
 </li>
 </ul>
 <p>Information about these interfaces is printed by <strong>sf</strong> the first time the package is loaded: the message that appears below the <code><a href="https://r-spatial.github.io/sf/">library(sf)</a></code> command at the beginning of this chapter tells us the versions of linked GEOS, GDAL and PROJ libraries (these vary between computers and over time) and whether or not the S2 interface is turned on.
-Nowadays, we take it for granted, however, only the tight integration with different geographic libraries makes reproducible geocomputation possible in the first place.</p>
+We may these low-level libraries for granted, but without their tight integration with languages such as R much reproducible geocomputation would be impossible.</p>
 <p>A neat feature of <strong>sf</strong> is that you can change the default geometry engine used on unprojected data: ‘switching off’ S2 can be done with the command <code>sf::sf_use_s2(FALSE)</code>, meaning that the planar geometry engine GEOS will be used by default for all geometry operations, including geometry operations on unprojected data.
-As we will see in Section <a href="spatial-class.html#s2">2.2.9</a>, planar geometry is based on 2 dimensional space.
-Planar geometry engines such as GEOS assume ‘flat’ (projected) coordinates while spherical geometry engines such as S2 assume unprojected (lon/lat) coordinates.</p>
+As we will see in Section <a href="spatial-class.html#s2">2.2.9</a>, planar geometry is based on two-dimensional space.
+Planar geometry engines such as GEOS assume ‘flat’ (projected) coordinates, while spherical geometry engines such as S2 assume unprojected (lon/lat) coordinates.</p>
 <p>This section introduces <strong>sf</strong> classes in preparation for subsequent chapters (Chapters <a href="geometry-operations.html#geometry-operations">5</a> and <a href="read-write.html#read-write">8</a> cover the GEOS and GDAL interface, respectively).</p>
 <div id="intro-sf" class="section level3" number="2.2.1">
 <h3>
-<span class="header-section-number">2.2.1</span> An introduction to simple features<a class="anchor" aria-label="anchor" href="#intro-sf"><i class="fas fa-link"></i></a>
+<span class="header-section-number">2.2.1</span> Introduction to simple features<a class="anchor" aria-label="anchor" href="#intro-sf"><i class="fas fa-link"></i></a>
 </h3>
-<p>Simple features is an <a href="http://portal.opengeospatial.org/files/?artifact_id=25355">open standard</a> developed and endorsed by the Open Geospatial Consortium (OGC), a not-for-profit organization whose activities we will revisit in a later chapter (in Section <a href="read-write.html#file-formats">8.2</a>).
+<p>Simple features is an <a href="http://portal.opengeospatial.org/files/?artifact_id=25355">open standard</a> developed and endorsed by the Open Geospatial Consortium (OGC), a not-for-profit organization whose activities we will revisit in a later chapter (Section <a href="read-write.html#file-formats">8.2</a>).
 Simple features is a hierarchical data model that represents a wide range of geometry types.
-Of 18 geometry types supported by the specification, only 7 are used in the vast majority of geographic research (see Figure <a href="spatial-class.html#fig:sf-ogc">2.2</a>);
+Of 18 geometry types supported by the specification, only seven are used in the vast majority of geographic research (see Figure <a href="spatial-class.html#fig:sf-ogc">2.2</a>);
 these core geometry types are fully supported by the R package <strong>sf</strong> <span class="citation">(<a href="references.html#ref-pebesma_simple_2018">Pebesma 2018</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
 The full OGC standard includes rather exotic geometry types including ‘surface’ and ‘curve’ geometry types, which currently have limited application in real-world applications.
-You can find the whole list of possible feature types in &lt;a href="http://postgis.net/docs/using_postgis_dbmanagement.html"&gt;the PostGIS manual&lt;/a&gt;.
-All 18 types can be represented with the &lt;strong&gt;sf&lt;/strong&gt; package, although at the time of writing (2024) plotting only works for the ‘core 7’.&lt;/p&gt;'><sup>7</sup></a></p>
+You can find the whole list of possible feature types in the &lt;a href="http://postgis.net/docs/using_postgis_dbmanagement.html"&gt;PostGIS manual&lt;/a&gt;.
+All 18 types can be represented with the &lt;strong&gt;sf&lt;/strong&gt; package, although at the time of writing (2024), plotting only works for the ‘core 7’.&lt;/p&gt;'><sup>7</sup></a></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:sf-ogc"></span>
 <img src="images/sf-classes.png" alt="Simple feature types fully supported by sf." width="60%"><p class="caption">
@@ -244,12 +245,12 @@ FIGURE 2.2: Simple feature types fully supported by sf.
 <p><strong>sf</strong> can represent all common vector geometry types (raster data classes are not supported by <strong>sf</strong>): points, lines, polygons and their respective ‘multi’ versions (which group together features of the same type into a single feature).
 <strong>sf</strong> also supports geometry collections, which can contain multiple geometry types in a single object.
 <strong>sf</strong> provides the same functionality (and more) previously provided in three packages — <strong>sp</strong> for data classes <span class="citation">(<a href="references.html#ref-R-sp">Pebesma and Bivand 2023a</a>)</span>, <strong>rgdal</strong> for data read/write via an interface to GDAL and PROJ <span class="citation">(<a href="references.html#ref-R-rgdal">Bivand, Keitt, and Rowlingson 2023</a>)</span> and <strong>rgeos</strong> for spatial operations via an interface to GEOS <span class="citation">(<a href="references.html#ref-R-rgeos">Bivand and Rundel 2023</a>)</span>.</p>
-<p>To re-iterate the message from Chapter 1, geographic R packages have a long history of interfacing with lower level libraries, and <strong>sf</strong> continues this tradition with a unified interface to recent versions of GEOS for geometry operations, the GDAL library for reading and writing geographic data files, and the PROJ library for representing and transforming projected coordinate reference systems.
+<p>To reiterate the message from Chapter 1, geographic R packages have a long history of interfacing with lower level libraries, and <strong>sf</strong> continues this tradition with a unified interface to recent versions of GEOS for geometry operations, the GDAL library for reading and writing geographic data files, and the PROJ library for representing and transforming projected CRSs.
 Through <strong>s2</strong>, an R interface to Google’s spherical geometry library, <a href="https://s2geometry.io/"><code>s2</code></a>, <strong>sf</strong> also has access to fast and accurate “measurements and operations on non-planar geometries” <span class="citation">(<a href="references.html#ref-bivand_progress_2021">Bivand 2021</a>)</span>.
 Since <strong>sf</strong> version 1.0.0, launched in <a href="https://cran.r-project.org/src/contrib/Archive/sf/">June 2021</a>, <strong>s2</strong> functionality is now used by <a href="https://r-spatial.org/r/2020/06/17/s2.html">default</a> on geometries with geographic (longitude/latitude) coordinate systems, a unique feature of <strong>sf</strong> that differs from spatial libraries that only support GEOS for geometry operations such as the Python package <a href="geopandas/geopandas/issues/2098">GeoPandas</a>.
 We will discuss <strong>s2</strong> in subsequent chapters.</p>
 <p><strong>sf</strong>’s ability to integrate multiple powerful libraries for geocomputation into a single framework is a notable achievement that reduces ‘barriers to entry’ into the world of reproducible geographic data analysis with high-performance libraries.
-<strong>sf</strong>’s functionality is well documented on its website at <a href="https://r-spatial.github.io/sf/index.html">r-spatial.github.io/sf/</a> which contains 7 vignettes.
+<strong>sf</strong>’s functionality is well documented on its website at <a href="https://r-spatial.github.io/sf/index.html">r-spatial.github.io/sf/</a> which contains seven vignettes.
 These can be viewed offline as follows:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/vignette.html">vignette</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span> <span class="co"># see which vignettes are available</span></span>
@@ -272,8 +273,8 @@ Although part of R’s default installation (base R), <code><a href="https://rsp
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:world-all"></span>
-<img src="figures/world-all-1.png" alt="A spatial plot of the world using the sf package, with a facet for each attribute." width="100%"><p class="caption">
-FIGURE 2.3: A spatial plot of the world using the sf package, with a facet for each attribute.
+<img src="figures/world-all-1.png" alt="Map of the world using the sf package, with a facet for each attribute." width="100%"><p class="caption">
+FIGURE 2.3: Map of the world using the sf package, with a facet for each attribute.
 </p>
 </div>
 <p>Note that instead of creating a single map by default for geographic objects, as most GIS programs do, <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code>ing <code>sf</code> objects results in a map for each variable in the datasets.
@@ -291,7 +292,7 @@ The commonly used <code><a href="https://rspatial.github.io/terra/reference/summ
 <span><span class="co">#&gt;  Max.   :83.6                      </span></span>
 <span><span class="co">#&gt;  NA's   :10</span></span></code></pre></div>
 <p>Although we have only selected one variable for the <code><a href="https://rspatial.github.io/terra/reference/summary.html">summary()</a></code> command, it also outputs a report on the geometry.
-This demonstrates the ‘sticky’ behavior of the geometry columns of <strong>sf</strong> objects, meaning the geometry is kept unless the user deliberately removes them, as we’ll see in Section <a href="attr.html#vector-attribute-manipulation">3.2</a>.
+This demonstrates the ‘sticky’ behavior of the geometry columns of <strong>sf</strong> objects: they are kept unless the user deliberately removes them, as we’ll see in Section <a href="attr.html#vector-attribute-manipulation">3.2</a>.
 The result provides a quick summary of both the non-spatial and spatial data contained in <code>world</code>: the mean average life expectancy is 71 years (ranging from less than 51 to more than 83 years with a median of 73 years) across all countries.</p>
 
 <div class="rmdnote">
@@ -322,7 +323,7 @@ These geometry columns are ‘list columns’ of class <code>sfc</code> (see Sec
 In turn, <code>sfc</code> objects are composed of one or more objects of class <code>sfg</code>: simple feature geometries that we describe in Section <a href="spatial-class.html#sfg">2.2.6</a>.
 </p>
 <p>To understand how the spatial components of simple features work, it is vital to understand simple feature geometries.
-For this reason we cover each currently supported simple features geometry type in Section <a href="spatial-class.html#geometry">2.2.4</a> before moving on to describe how these can be represented in R using <code>sf</code> objects, which are based on <code>sfg</code> and <code>sfc</code> objects.</p>
+For this reason, we cover each currently supported simple features geometry type in Section <a href="spatial-class.html#geometry">2.2.4</a> before moving on to describe how these can be represented in R using <code>sf</code> objects, which are based on <code>sfg</code> and <code>sfc</code> objects.</p>
 
 <div class="rmdnote">
 The preceding code chunk uses <code>=</code> to create a new object called <code>world_mini</code> in the command <code>world_mini = world[1:2, 1:3]</code>.
@@ -339,7 +340,7 @@ Which to use is largely a matter of preference as long as you’re consistent (p
 <p>Simple features is a widely supported data model that underlies data structures in many GIS applications including QGIS and PostGIS.
 A major advantage of this is that using the data model ensures your work is cross-transferable to other setups, for example importing from and exporting to spatial databases.
 </p>
-<p>A more specific question from an R perspective is “why use the <strong>sf</strong> package”?
+<p>A more specific question from an R perspective is “why use the <strong>sf</strong> package?”
 There are many reasons (linked to the advantages of the simple features model):</p>
 <ul>
 <li>Fast reading and writing of data</li>
@@ -369,17 +370,17 @@ This is demonstrated below:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">world_tbl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "sf"         "tbl_df"     "tbl"        "data.frame"</span></span></code></pre></div>
 <p>As described in Chapter <a href="attr.html#attr">3</a>, which shows how to manipulate <code>sf</code> objects with <strong>tidyverse</strong> functions, <strong>sf</strong> is now the go-to package for analysis of spatial vector data in R.
-<strong>spatstat</strong>, a package ecosystem which provides numerous functions for spatial statistics, and <strong>terra</strong> both have vector geographic data classes, but neither have the same level of uptake as <strong>sf</strong> does for working with vector data.
+<strong>spatstat</strong>, a package ecosystem which provides numerous functions for spatial statistics, and <strong>terra</strong> both have vector geographic data classes, but neither has the same level of uptake as <strong>sf</strong> does for working with vector data.
 Many popular packages build on <strong>sf</strong>, as shown by the rise in its popularity in terms of number of downloads per day, as shown in Section <a href="intro.html#r-ecosystem">1.5</a> in the previous chapter.</p>
 </div>
 <div id="basic-map" class="section level3" number="2.2.3">
 <h3>
-<span class="header-section-number">2.2.3</span> Basic map-making<a class="anchor" aria-label="anchor" href="#basic-map"><i class="fas fa-link"></i></a>
+<span class="header-section-number">2.2.3</span> Basic maps<a class="anchor" aria-label="anchor" href="#basic-map"><i class="fas fa-link"></i></a>
 </h3>
-<p>Basic maps are created in <strong>sf</strong> with <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code>.
-By default this creates a multi-panel plot, one sub-plot for each variable of the object, as illustrated in the left-hand panel in Figure <a href="spatial-class.html#fig:sfplot">2.4</a>.
+<p>Basic geographic visualizations (maps) are created in <strong>sf</strong> with base R’s <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> function.
+By default, this creates a multi-panel plot, one sub-plot for each variable of the object, as illustrated in the left-hand panel in Figure <a href="spatial-class.html#fig:sfplot">2.4</a>.
 A legend or ‘key’ with a continuous color is produced if the object to be plotted has a single variable (see the right-hand panel).
-Colors can also be set with <code>col =</code>, although this will not create a continuous palette or a legend.
+You can also set fixed colors in <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> commands with <code>col</code> and <code>border</code> arguments.
 </p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">world</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span><span class="op">)</span></span>
@@ -405,14 +406,14 @@ If the first plot has a key, <code>reset = FALSE</code> must be used:</p>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">asia</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, col <span class="op">=</span> <span class="st">"red"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:asia"></span>
-<img src="figures/asia-1.png" alt="A plot of Asia added as a layer on top of countries worldwide." width="50%"><p class="caption">
-FIGURE 2.5: A plot of Asia added as a layer on top of countries worldwide.
+<img src="figures/asia-1.png" alt="Plot of Asia added as a layer on top of countries worldwide." width="50%"><p class="caption">
+FIGURE 2.5: Plot of Asia added as a layer on top of countries worldwide.
 </p>
 </div>
 
 <div class="rmdnote">
 Adding layers in this way can be used to verify the geographic correspondence between layers:
-the <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> function is fast to execute and requires few lines of code, but does not create interactive maps with a wide range of options.
+the <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> function is fast and requires few lines of code, but its functionality is limited.
 For more advanced map-making we recommend using dedicated visualization packages such as <strong>tmap</strong> <span class="citation">(<a href="references.html#ref-tmap2018">Tennekes 2018</a>)</span> (see Chapter <a href="adv-map.html#adv-map">9</a>).
 </div>
 <p>There are various ways to modify maps with <strong>sf</strong>’s <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> method.
@@ -458,14 +459,16 @@ See Section <a href="adv-map.html#static-maps">9.2</a> for other visualization t
 </h3>
 <p>Geometries are the basic building blocks of simple features.
 Simple features in R can take on one of the 18 geometry types supported by the <strong>sf</strong> package.
-In this chapter we will focus on the seven most commonly used types: <code>POINT</code>, <code>LINESTRING</code>, <code>POLYGON</code>, <code>MULTIPOINT</code>, <code>MULTILINESTRING</code>, <code>MULTIPOLYGON</code> and <code>GEOMETRYCOLLECTION</code>.</p>
+In this chapter we will focus on the seven most commonly used types: <code>POINT</code>, <code>LINESTRING</code>, <code>POLYGON</code>, <code>MULTIPOINT</code>, <code>MULTILINESTRING</code>, <code>MULTIPOLYGON</code> and <code>GEOMETRYCOLLECTION</code>.
+</p>
 <p>Generally, well-known binary (WKB) or well-known text (WKT) are the standard encoding for simple feature geometries.
 WKB representations are usually hexadecimal strings easily readable for computers.
 This is why GIS and spatial databases use WKB to transfer and store geometry objects.
 WKT, on the other hand, is a human-readable text markup description of simple features.
-Both formats are exchangeable, and if we present one, we will naturally choose the WKT representation.</p>
+Both formats are exchangeable, and if we present one, we will naturally choose the WKT representation.
+</p>
 <p>The basis for each geometry type is the point.
-A point is simply a coordinate in 2D, 3D or 4D space (see <code><a href="https://r-spatial.github.io/sf/articles/sf1.html">vignette("sf1")</a></code> for more information) such as (Figure <a href="spatial-class.html#fig:sfcs">2.8</a>, left panel):
+A point is simply a coordinate in two-, three-, or four-dimensional space (see <code><a href="https://r-spatial.github.io/sf/articles/sf1.html">vignette("sf1")</a></code> for more information) such as (Figure <a href="spatial-class.html#fig:sfcs">2.8</a>, left panel):
 </p>
 <ul>
 <li><code>POINT (5 2)</code></li>
@@ -486,8 +489,8 @@ A polygon with a hole would be, for example, &lt;code&gt;POLYGON ((1 5, 2 2, 4 1
 </ul>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:sfcs"></span>
-<img src="figures/sfcs-1.png" alt="Illustration of point, linestring and polygon geometries." width="100%"><p class="caption">
-FIGURE 2.8: Illustration of point, linestring and polygon geometries.
+<img src="figures/sfcs-1.png" alt="Point, linestring and polygon geometries." width="100%"><p class="caption">
+FIGURE 2.8: Point, linestring and polygon geometries.
 </p>
 </div>
 <p>So far we have created geometries with only one geometric entity per feature.
@@ -524,7 +527,7 @@ FIGURE 2.10: Illustration of a geometry collection.
 <span class="header-section-number">2.2.5</span> The sf class<a class="anchor" aria-label="anchor" href="#sf"><i class="fas fa-link"></i></a>
 </h3>
 <p>Simple features consist of two main parts: geometries and non-geographic attributes.
-Figure <a href="spatial-class.html#fig:02-sfdiagram">2.11</a> shows how an sf object is created – geometries come from an <code>sfc</code> object, while attributes are taken from a <code>data.frame</code> or <code>tibble</code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;To learn more about building sf geometries from scratch read the following Sections &lt;a href="spatial-class.html#sfg"&gt;2.2.6&lt;/a&gt; and &lt;a href="spatial-class.html#sfc"&gt;2.2.7&lt;/a&gt;.&lt;/p&gt;'><sup>12</sup></a></p>
+Figure <a href="spatial-class.html#fig:02-sfdiagram">2.11</a> shows how an sf object is created – geometries come from an <code>sfc</code> object, while attributes are taken from a <code>data.frame</code> or <code>tibble</code>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;To learn more about building sf geometries from scratch, see the following Sections &lt;a href="spatial-class.html#sfg"&gt;2.2.6&lt;/a&gt; and &lt;a href="spatial-class.html#sfc"&gt;2.2.7&lt;/a&gt;.&lt;/p&gt;'><sup>12</sup></a></p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:02-sfdiagram"></span>
 <img src="images/02-sfdiagram.png" alt="Building blocks of sf objects." width="100%"><p class="caption">
@@ -532,8 +535,8 @@ FIGURE 2.11: Building blocks of sf objects.
 </p>
 </div>
 <p>Non-geographic attributes represent the name of the feature or other attributes such as measured values, groups, and other things.
-To illustrate attributes, we will represent a temperature of 25°C in London on June 21<sup>st</sup>, 2023.
-This example contains a geometry (the coordinates), and three attributes with three different classes (place name, temperature and date).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
+To illustrate attributes, we will represent a temperature of 25°C in London on June 21, 2023.
+This example contains a geometry (coordinates), and three attributes with three different classes (place name, temperature and date).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
 Other attributes might include an urbanity category (city or village), or a remark if the measurement was made using an automatic station.&lt;/p&gt;"><sup>13</sup></a>
 Objects of class <code>sf</code> represent such data by combining the attributes (<code>data.frame</code>) with the simple feature geometry column (<code>sfc</code>).
 They are created with <code><a href="https://r-spatial.github.io/sf/reference/sf.html">st_sf()</a></code> as illustrated below, which creates the London example described above:</p>
@@ -572,7 +575,7 @@ Simple features are, in essence, data frames with a spatial extension.</p>
 <p>The <code>sfg</code> class represents the different simple feature geometry types in R: point, linestring, polygon (and their ‘multi’ equivalents, such as multipoints) or geometry collection.
 </p>
 <p>Usually you are spared the tedious task of creating geometries on your own since you can simply import an already existing spatial file.
-However, there are a set of functions to create simple feature geometry objects (<code>sfg</code>) from scratch if needed.
+However, there are a set of functions to create simple feature geometry objects (<code>sfg</code>) from scratch, if needed.
 The names of these functions are simple and consistent, as they all start with the <code>st_</code> prefix and end with the name of the geometry type in lowercase letters:</p>
 <ul>
 <li>A point: <code><a href="https://r-spatial.github.io/sf/reference/st.html">st_point()</a></code>
@@ -606,7 +609,7 @@ The names of these functions are simple and consistent, as they all start with t
 <span><span class="co">#&gt; POINT M (5 2 1)</span></span>
 <span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html">st_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>           <span class="co"># XYZM point</span></span>
 <span><span class="co">#&gt; POINT ZM (5 2 3 1)</span></span></code></pre></div>
-<p>The results show that XY (2D coordinates), XYZ (3D coordinates) and XYZM (3D with an additional variable, typically measurement accuracy) point types are created from vectors of length 2, 3, and 4, respectively.
+<p>The results show that XY (2D coordinates), XYZ (3D coordinates) and XYZM (3D with an additional variable, typically measurement accuracy) point types are created from vectors of lengths 2, 3, and 4, respectively.
 The XYM type must be specified using the <code>dim</code> argument (which is short for dimension).</p>
 <p>By contrast, use matrices in the case of multipoint (<code><a href="https://r-spatial.github.io/sf/reference/st.html">st_multipoint()</a></code>) and linestring (<code><a href="https://r-spatial.github.io/sf/reference/st.html">st_linestring()</a></code>) objects:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -657,7 +660,7 @@ The XYM type must be specified using the <code>dim</code> argument (which is sho
 <span class="header-section-number">2.2.7</span> Simple feature columns (sfc)<a class="anchor" aria-label="anchor" href="#sfc"><i class="fas fa-link"></i></a>
 </h3>
 <p>One <code>sfg</code> object contains only a single simple feature geometry.
-A simple feature geometry column (<code>sfc</code>) is a list of <code>sfg</code> objects, which is additionally able to contain information about the coordinate reference system in use.
+A simple feature geometry column (<code>sfc</code>) is a list of <code>sfg</code> objects, which is additionally able to contain information about the CRS in use.
 For instance, to combine two simple features into one object with two features, we can use the <code><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc()</a></code> function.
 This is important since <code>sfc</code> represents the geometry column in <strong>sf</strong> data frames:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
@@ -705,7 +708,7 @@ Equally, a geometry column of multilinestrings would result in an <code>sfc</cod
 <span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry_type.html">st_geometry_type</a></span><span class="op">(</span><span class="va">point_multilinestring_sfc</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] POINT           MULTILINESTRING</span></span>
 <span><span class="co">#&gt; 18 Levels: GEOMETRY POINT LINESTRING POLYGON MULTIPOINT ... TRIANGLE</span></span></code></pre></div>
-<p>As mentioned before, <code>sfc</code> objects can additionally store information on the coordinate reference systems (CRS).
+<p>As mentioned before, <code>sfc</code> objects can additionally store information on the CRS.
 The default value is <code>NA</code> (<em>Not Available</em>), as can be verified with <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">points_sfc</span><span class="op">)</span></span>
@@ -730,7 +733,7 @@ A CRS can be specified with the <code>crs</code> argument of <code><a href="http
 <strong>sfheaders</strong> is an R package that speeds-up the construction, conversion and manipulation of <code>sf</code> objects <span class="citation">(<a href="references.html#ref-cooley_sfheaders_2020">Cooley 2020</a>)</span>.
 It focuses on building <code>sf</code> objects from vectors, matrices and data frames, rapidly, and without depending on the <strong>sf</strong> library; and exposing its underlying C++ code through header files (hence the name, <strong>sfheaders</strong>).
 This approach enables others to extend it using compiled and fast-running code.
-Every core <strong>sfheaders</strong> function has a corresponding C++ implementation, as described in <a href="https://dcooley.github.io/sfheaders/articles/Cpp.html">the <code>Cpp</code> vignette</a>.
+Every core <strong>sfheaders</strong> function has a corresponding C++ implementation, as described in the <a href="https://dcooley.github.io/sfheaders/articles/Cpp.html"><code>Cpp</code> vignette</a>.
 For most people, the R functions will be more than sufficient to benefit from the computational speed of the package.
 <strong>sfheaders</strong> was developed separately from <strong>sf</strong>, but aims to be fully compatible, creating valid <code>sf</code> objects of the type described in preceding sections.</p>
 <p>The simplest use case for <strong>sfheaders</strong> is demonstrated in the code chunks below with examples of building <code>sfg</code>, <code>sfc</code>, and <code>sf</code> objects showing:</p>
@@ -779,7 +782,7 @@ When <strong>sf</strong> is loaded (as is the case here), the result of the abov
 <code class="sourceCode R"><span><span class="fu">sfheaders</span><span class="fu">::</span><span class="fu"><a href="https://dcooley.github.io/sfheaders/reference/sf_point.html">sf_point</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">v</span><span class="op">)</span></span>
 <span><span class="fu">sfheaders</span><span class="fu">::</span><span class="fu"><a href="https://dcooley.github.io/sfheaders/reference/sf_linestring.html">sf_linestring</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">m</span><span class="op">)</span></span>
 <span><span class="fu">sfheaders</span><span class="fu">::</span><span class="fu"><a href="https://dcooley.github.io/sfheaders/reference/sf_polygon.html">sf_polygon</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">df</span><span class="op">)</span></span></code></pre></div>
-<p>In each of these examples the CRS (coordinate reference system) is not defined.
+<p>In each of these examples, the CRS is not defined.
 If you plan on doing any calculations or geometric operations using <strong>sf</strong> functions, we encourage you to set the CRS (see Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a> for details):</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_sf</span> <span class="op">=</span> <span class="fu">sfheaders</span><span class="fu">::</span><span class="fu"><a href="https://dcooley.github.io/sfheaders/reference/sf_polygon.html">sf_polygon</a></span><span class="op">(</span>obj <span class="op">=</span> <span class="va">df</span><span class="op">)</span></span>
@@ -792,12 +795,12 @@ Benchmarks, in the package’s <a href="https://dcooley.github.io/sfheaders/arti
 <h3>
 <span class="header-section-number">2.2.9</span> Spherical geometry operations with S2<a class="anchor" aria-label="anchor" href="#s2"><i class="fas fa-link"></i></a>
 </h3>
-<p>Spherical geometry engines are based on the fact that world is round while simple mathematical procedures for geocomputation, such as calculating a straight line between two points or the area enclosed by a polygon, assume planar (projected) geometries.
+<p>Spherical geometry engines are based on the fact that the world is round, while simple mathematical procedures for geocomputation, such as calculating a straight line between two points or the area enclosed by a polygon, assume planar (projected) geometries.
 Since <strong>sf</strong> version 1.0.0, R supports spherical geometry operations ‘out of the box’ (and by default), thanks to its interface to Google’s S2 spherical geometry engine via the <strong>s2</strong> interface package
 .
 S2 is perhaps best known as an example of a Discrete Global Grid System (DGGS).
 Another example is the <a href="https://h3geo.org/">H3</a> global hexagonal hierarchical spatial index <span class="citation">(<a href="references.html#ref-bondaruk_assessing_2020">Bondaruk, Roberts, and Robertson 2020</a>)</span>.</p>
-<p>Although potentially useful for describing locations anywhere on Earth using character strings, the main benefit of <strong>sf</strong>’s interface to S2 is its provision of drop-in functions for calculations such as distance, buffer, and area calculations, as described in <strong>sf</strong>’s built in documentation which can be opened with the command <a href="https://r-spatial.github.io/sf/articles/sf7.html"><code>vignette("sf7")</code></a>.</p>
+<p>Although potentially useful for describing locations anywhere on Earth using character strings, the main benefit of <strong>sf</strong>’s interface to S2 is its provision of drop-in functions for calculations such as distance, buffer, and area calculations, as described in <strong>sf</strong>’s built-in documentation which can be opened with the command <a href="https://r-spatial.github.io/sf/articles/sf7.html"><code>vignette("sf7")</code></a>.</p>
 <p><strong>sf</strong> can run in two modes with respect to S2: on and off.
 By default the S2 geometry engine is turned on, as can be verified with the following command:</p>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
@@ -818,8 +821,8 @@ By default the S2 geometry engine is turned on, as can be verified with the foll
 FIGURE 2.12: Example of the consequences of turning off the S2 geometry engine. Both representations of a buffer around India were created with the same command but the purple polygon object was created with S2 switched on, resulting in a buffer of 1 m. The larger light green polygon was created with S2 switched off, resulting in a buffer of 1 degree, which is not accurate.
 </p>
 </div>
-<p>The right panel of Figure <a href="spatial-class.html#fig:s2example">2.12</a> is incorrect as the buffer of 1 degree does not return the equal distance around the <code>india</code> polygon (for more explanation of this issue, read Section <a href="reproj-geo-data.html#geom-proj">7.4</a>).</p>
-<p>Throughout this book we will assume that S2 is turned on, unless explicitly stated.
+<p>The right panel of Figure <a href="spatial-class.html#fig:s2example">2.12</a> is incorrect, as the buffer of 1 degree does not return the equal distance around the <code>india</code> polygon (for more explanation of this issue, see Section <a href="reproj-geo-data.html#geom-proj">7.4</a>).</p>
+<p>Throughout this book, we will assume that S2 is turned on, unless explicitly stated.
 Turn it on again with the following command.</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/s2.html">sf_use_s2</a></span><span class="op">(</span><span class="cn">TRUE</span><span class="op">)</span></span>
@@ -829,8 +832,8 @@ Turn it on again with the following command.</p>
 Although the <strong>sf</strong>’s use of S2 makes sense in many cases, in some cases there are good reasons for turning S2 off for the duration of an R session or even for an entire project.
 As documented in issue <a href="https://github.com/r-spatial/sf/issues/1771">1771</a> in <strong>sf</strong>’s GitHub repo, the default behavior can make code that would work with S2 turned off (and with older versions of <strong>sf</strong>) fail.
 These edge cases include operations on polygons that are not valid according to S2’s stricter definition.
-If you see error message such as <code>#&gt; Error in s2_geography_from_wkb ...</code> it may be worth trying the command that generated the error message again, after turning off S2.
-To turn off S2 for the entirety of a project you can create a file called .Rprofile in the root directory (the main folder) of your project containing the command <code>sf::sf_use_s2(FALSE)</code>.
+If you see error messages such as <code>#&gt; Error in s2_geography_from_wkb ...</code> it may be worth trying the command that generated the error message again, after turning off S2.
+To turn off S2 for the entirety of a project, you can create a file called .Rprofile in the root directory (the main folder) of your project containing the command <code>sf::sf_use_s2(FALSE)</code>.
 </div>
 </div>
 </div>
@@ -840,12 +843,12 @@ To turn off S2 for the entirety of a project you can create a file called .Rprof
 </h2>
 <p>The spatial raster data model represents the world with the continuous grid of cells (often also called pixels; Figure <a href="spatial-class.html#fig:raster-intro-plot">2.13</a>:A).
 This data model often refers to so-called regular grids, in which each cell has the same, constant size – and we will focus on the regular grids in this book only.
-However, several other types of grids exist, including rotated, sheared, rectilinear, and curvilinear grids (see Chapter 1 of <span class="citation">Pebesma and Bivand (<a href="references.html#ref-pebesma_spatial_2022">2023b</a>)</span> or Chapter 2 of <span class="citation">Tennekes and Nowosad (<a href="references.html#ref-tennekes_elegant_2022">2022</a>)</span>).</p>
+However, several other types of grids exist, including rotated, sheared, rectilinear, and curvilinear grids (see chapter 1 of <span class="citation">Pebesma and Bivand (<a href="references.html#ref-pebesma_spatial_2022">2023b</a>)</span> or chapter 2 of <span class="citation">Tennekes and Nowosad (<a href="references.html#ref-tennekes_elegant_2022">2022</a>)</span>).</p>
 <p>The raster data model usually consists of a raster header
 and a matrix (with rows and columns) representing equally spaced cells (often also called pixels; Figure <a href="spatial-class.html#fig:raster-intro-plot">2.13</a>:A).<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-Depending on the file format the header is part of the actual image data file, e.g., GeoTIFF, or stored in an extra header or world file, e.g., ASCII grid formats.
+Depending on the file format, the header is part of the actual image data file, e.g., GeoTIFF, or stored in an extra header or world file, e.g., ASCII grid formats.
 There is also the headerless (flat) binary raster format which should facilitate the import into various software programs.&lt;/p&gt;"><sup>14</sup></a>
-The raster header defines the coordinate reference system, the extent and the origin.
+The raster header defines the CRS, the extent and the origin.
 The origin (or starting point) is frequently the coordinate of the lower left corner of the matrix (the <strong>terra</strong> package, however, uses the upper left corner, by default (Figure <a href="spatial-class.html#fig:raster-intro-plot">2.13</a>:B)).
 The header defines the extent via the number of columns, the number of rows and the cell size resolution.</p>
 <p>The resolution can be calculated as follows:</p>
@@ -853,14 +856,14 @@ The header defines the extent via the number of columns, the number of rows and 
 \text{resolution} = \frac{\text{xmax} - \text{xmin}}{\text{ncol}}, \frac{\text{ymax} - \text{ymin}}{\text{nrow}}
 \]</span></p>
 <p>Starting from the origin, we can easily access and modify each single cell by either using the ID of a cell (Figure <a href="spatial-class.html#fig:raster-intro-plot">2.13</a>:B) or by explicitly specifying the rows and columns.
-This matrix representation avoids storing explicitly the coordinates for the four corner points (in fact it only stores one coordinate, namely the origin) of each cell corner as would be the case for rectangular vector polygons.
-This and map algebra (Section <a href="spatial-operations.html#map-algebra">4.3.2</a>) makes raster processing much more efficient and faster than vector data processing.</p>
-<p>In contrast to vector data, the cell of one raster layer can only hold a single value.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Thus to store many values for a single location we need to have many raster layers.&lt;/p&gt;"><sup>15</sup></a>
-The value might be continuous or categorical (Figure <a href="spatial-class.html#fig:raster-intro-plot">2.13</a>:C).</p>
+This matrix representation avoids storing explicitly the coordinates for the four corner points (in fact, it only stores one coordinate, namely the origin) of each cell corner as would be the case for rectangular vector polygons.
+This and map algebra (Section <a href="spatial-operations.html#map-algebra">4.3.2</a>) make raster processing much more efficient and faster than vector data processing.</p>
+<p>In contrast to vector data, the cell of one raster layer can only hold a single value.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Thus, to store many values for a single location we need to have many raster layers.&lt;/p&gt;"><sup>15</sup></a>
+The value might be continuous or categorical (Figure <a href="spatial-class.html#fig:raster-intro-plot">2.13</a>C).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:raster-intro-plot"></span>
-<img src="figures/raster-intro-plot-1.png" alt="Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map." width="100%"><p class="caption">
-FIGURE 2.13: Raster data types: (A) cell IDs, (B) cell values, (C) a colored raster map.
+<img src="figures/raster-intro-plot-1.png" alt="Raster data types." width="100%"><p class="caption">
+FIGURE 2.13: Raster data types.
 </p>
 </div>
 <p>Raster maps usually represent continuous phenomena such as elevation, temperature, population density or spectral data.
@@ -869,8 +872,8 @@ Both uses of raster datasets are illustrated in Figure <a href="spatial-class.ht
 Depending on the nature of the application, vector representations of discrete features may be more suitable.</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:raster-intro-plot2"></span>
-<img src="figures/raster-intro-plot2-1.png" alt="Examples of continuous and categorical rasters." width="100%"><p class="caption">
-FIGURE 2.14: Examples of continuous and categorical rasters.
+<img src="figures/raster-intro-plot2-1.png" alt="Examples of (A) continuous and (B) categorical rasters." width="100%"><p class="caption">
+FIGURE 2.14: Examples of (A) continuous and (B) categorical rasters.
 </p>
 </div>
 <div id="r-packages-for-working-with-raster-data" class="section level3" number="2.3.1">
@@ -879,11 +882,11 @@ FIGURE 2.14: Examples of continuous and categorical rasters.
 </h3>
 <p>Over the last two decades, several packages for reading and processing raster datasets have been developed.
 As outlined in Section <a href="intro.html#history-of-r-spatial">1.6</a>, chief among them was <strong>raster</strong>, which led to a step change in R’s raster capabilities when it was launched in 2010 and the premier package in the space until the development of <strong>terra</strong> and <strong>stars</strong>.
-Both more recently developed packages provide powerful and performant functions for working with raster datasets and there is substantial overlap between their possible use cases.
-In this book we focus on <strong>terra</strong>, which replaces the older and (in most cases) slower <strong>raster</strong>.
-Before learning about the how <strong>terra</strong>’s class system works, this section describes similarities and differences between <strong>terra</strong> and <strong>stars</strong>; this knowledge will help decide which is most appropriate in different situations.</p>
+Both more recently developed packages provide powerful and performant functions for working with raster datasets, and there is substantial overlap between their possible use cases.
+In this book, we focus on <strong>terra</strong>, which replaces the older and (in most cases) slower <strong>raster</strong>.
+Before learning about how <strong>terra</strong>’s class system works, this section describes similarities and differences between <strong>terra</strong> and <strong>stars</strong>; this knowledge will help decide which is most appropriate in different situations.</p>
 <p>First, <strong>terra</strong> focuses on the most common raster data model (regular grids), while <strong>stars</strong> also allows storing less popular models (including regular, rotated, sheared, rectilinear, and curvilinear grids).
-While <strong>terra</strong> usually handles one or multilayered rasters<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;It also has an additional class &lt;code&gt;SpatRasterDataset&lt;/code&gt; for storing many collections of datasets.&lt;/p&gt;"><sup>16</sup></a>, the <strong>stars</strong> package provides ways to store raster data cubes – a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
+While <strong>terra</strong> usually handles one or multi-layered rasters<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;It also has an additional class &lt;code&gt;SpatRasterDataset&lt;/code&gt; for storing many collections of datasets.&lt;/p&gt;"><sup>16</sup></a>, the <strong>stars</strong> package provides ways to store raster data cubes – a raster object with many layers (e.g., bands), for many moments in time (e.g., months), and many attributes (e.g., sensor type A and sensor type B).
 Importantly, in both packages, all layers or elements of a data cube must have the same spatial dimensions and extent.
 Second, both packages allow to either read all of the raster data into memory or just to read its metadata – this is usually done automatically based on the input file size.
 However, they store raster values very differently.
@@ -896,21 +899,21 @@ On the other hand, <strong>stars</strong> uses some built-in functions (usually 
 <p>Importantly, it is straightforward to convert objects from <strong>terra</strong> to <strong>stars</strong> (using <code>st_as_stars()</code>) and the other way round (using <code><a href="https://rspatial.github.io/terra/reference/rast.html">rast()</a></code>).
 We also encourage you to read <span class="citation">Pebesma and Bivand (<a href="references.html#ref-pebesma_spatial_2022">2023b</a>)</span> for the most comprehensive introduction to the <strong>stars</strong> package.</p>
 </div>
-<div id="an-introduction-to-terra" class="section level3" number="2.3.2">
+<div id="introduction-to-terra" class="section level3" number="2.3.2">
 <h3>
-<span class="header-section-number">2.3.2</span> An introduction to terra<a class="anchor" aria-label="anchor" href="#an-introduction-to-terra"><i class="fas fa-link"></i></a>
+<span class="header-section-number">2.3.2</span> Introduction to terra<a class="anchor" aria-label="anchor" href="#introduction-to-terra"><i class="fas fa-link"></i></a>
 </h3>
 <p>
 The <strong>terra</strong> package supports raster objects in R.
 It provides an extensive set of functions to create, read, export, manipulate and process raster datasets.
 <strong>terra</strong>’s functionality is largely the same as the more mature <strong>raster</strong> package, but there are some differences: <strong>terra</strong> functions are usually more computationally efficient than <strong>raster</strong> equivalents.
 On the other hand, the <strong>raster</strong> class system is popular and used by many other packages.
-You can seamlessly translate between the two types of object to ensure backwards compatibility with older scripts and packages, for example, with the functions <a href="https://rspatial.github.io/raster/reference/raster.html"><code>raster()</code></a>, <a href="https://rspatial.github.io/raster/reference/stack.html"><code>stack()</code></a>, and <code>brick()</code> in the <strong>raster</strong> package (see the previous chapter for more on the evolution of R packages for working with geographic data).</p>
+You can seamlessly translate between the two types of object to ensure backward compatibility with older scripts and packages, for example, with the functions <a href="https://rspatial.github.io/raster/reference/raster.html"><code>raster()</code></a>, <a href="https://rspatial.github.io/raster/reference/stack.html"><code>stack()</code></a>, and <code>brick()</code> in the <strong>raster</strong> package (see the previous chapter for more on the evolution of R packages for working with geographic data).</p>
 <p>In addition to functions for raster data manipulation, <strong>terra</strong> provides many low-level functions that can form a foundation for developing new tools for working with raster datasets.
 <strong>terra</strong> also lets you work on large raster datasets that are too large to fit into the main memory.
 In this case, <strong>terra</strong> provides the possibility to divide the raster into smaller chunks, and processes these iteratively instead of loading the whole raster file into RAM.</p>
 <p>For the illustration of <strong>terra</strong> concepts, we will use datasets from the <strong>spDataLarge</strong> <span class="citation">(<a href="references.html#ref-R-spDataLarge">Nowosad and Lovelace 2023</a>)</span>.
-It consists of a few raster objects and one vector object covering an area of the Zion National Park (Utah, USA).
+It consists of a few raster objects and one vector object covering an area of Zion National Park (Utah, USA).
 For example, <code>srtm.tif</code> is a digital elevation model of this area (for more details, see its documentation <code>?srtm</code>).
 First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code>:</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
@@ -932,7 +935,7 @@ First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code
 <span><span class="co">#&gt; name        : srtm </span></span>
 <span><span class="co">#&gt; min value   : 1024 </span></span>
 <span><span class="co">#&gt; max value   : 2892</span></span></code></pre></div>
-<p>Dedicated functions report each component: <code><a href="https://rdrr.io/r/base/dim.html">dim()</a></code> returns the number of rows, columns and layers; <code><a href="https://rspatial.github.io/terra/reference/dimensions.html">ncell()</a></code> the number of cells (pixels); <code><a href="https://rspatial.github.io/terra/reference/dimensions.html">res()</a></code> the spatial resolution; <code><a href="https://rspatial.github.io/terra/reference/ext.html">ext()</a></code> its spatial extent; and <code><a href="https://rspatial.github.io/terra/reference/crs.html">crs()</a></code> its coordinate reference system (raster reprojection is covered in Section <a href="reproj-geo-data.html#reproj-ras">7.8</a>).
+<p>Dedicated functions report each component: <code><a href="https://rdrr.io/r/base/dim.html">dim()</a></code> returns the number of rows, columns and layers; <code><a href="https://rspatial.github.io/terra/reference/dimensions.html">ncell()</a></code> the number of cells (pixels); <code><a href="https://rspatial.github.io/terra/reference/dimensions.html">res()</a></code> the spatial resolution; <code><a href="https://rspatial.github.io/terra/reference/ext.html">ext()</a></code> its spatial extent; and <code><a href="https://rspatial.github.io/terra/reference/crs.html">crs()</a></code> its CRS (raster reprojection is covered in Section <a href="reproj-geo-data.html#reproj-ras">7.8</a>).
 <code><a href="https://rspatial.github.io/terra/reference/sources.html">inMemory()</a></code> reports whether the raster data is stored in memory or on disk, and <code>sources</code> specifies the file location.</p>
 
 <div class="rmdnote">
@@ -944,6 +947,7 @@ First, let’s create a <code>SpatRaster</code> object named <code>my_rast</code
 <span class="header-section-number">2.3.3</span> Basic map-making<a class="anchor" aria-label="anchor" href="#basic-map-raster"><i class="fas fa-link"></i></a>
 </h3>
 <p>Similar to the <strong>sf</strong> package, <strong>terra</strong> also provides <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> methods for its own classes.
+As shown in the following command, the <code><a href="https://rspatial.github.io/terra/reference/plot.html">plot()</a></code> function creates a basic raster plot, resulting in Figure <a href="spatial-class.html#fig:basic-new-raster-plot">2.15</a>.
 </p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html">plot</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span></span></code></pre></div>
@@ -974,7 +978,7 @@ The easiest way to create a raster object in R is to read-in a raster file from 
 <span><span class="va">single_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html">rast</a></span><span class="op">(</span><span class="va">raster_filepath</span><span class="op">)</span></span></code></pre></div>
 <p>The <strong>terra</strong> package supports numerous drivers with the help of the GDAL library.
 Rasters from files are usually not read entirely into RAM, with an exception of their header and a pointer to the file itself.</p>
-<p>Rasters can also be created from scratch using the same <code><a href="https://rspatial.github.io/terra/reference/rast.html">rast()</a></code> function.
+<p>Rasters can also be created from scratch, using the same <code><a href="https://rspatial.github.io/terra/reference/rast.html">rast()</a></code> function.
 This is illustrated in the subsequent code chunk, which results in a new <code>SpatRaster</code> object.
 The resulting raster consists of 36 cells (6 columns and 6 rows specified by <code>nrows</code> and <code>ncols</code>) centered around the Prime Meridian and the Equator (see <code>xmin</code>, <code>xmax</code>, <code>ymin</code> and <code>ymax</code> parameters).
 Values (<code>vals</code>) are assigned to each cell: 1 to cell 1, 2 to cell 2, and so on.
@@ -988,7 +992,7 @@ For other ways of creating raster objects, see <code><a href="https://rspatial.g
 The unit of the resolution is that of the underlying CRS.
 Here, it is degrees, because the default CRS of raster objects is WGS84.
 However, one can specify any other CRS with the <code>crs</code> argument.</p>
-<p>The <code>SpatRaster</code> class also handles multiple layers, which typically correspond to a single multispectral satellite file or a time-series of rasters.</p>
+<p>The <code>SpatRaster</code> class also handles multiple layers, which typically correspond to a single multi-spectral satellite file or a time-series of rasters.</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_raster_file</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span><span class="op">(</span><span class="st">"raster/landsat.tif"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span></span>
 <span><span class="va">multi_rast</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html">rast</a></span><span class="op">(</span><span class="va">multi_raster_file</span><span class="op">)</span></span>
@@ -1006,7 +1010,7 @@ However, one can specify any other CRS with the <code>crs</code> argument.</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">nlyr</a></span><span class="op">(</span><span class="va">multi_rast</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4</span></span></code></pre></div>
-<p>For multilayer raster objects, layers can be selected with the <code>[[</code> and <code>$</code> operators, for example with commands <code>multi_rast[["landsat_1"]]</code> and <code>multi_rast$landsat_1</code>.
+<p>For multi-layer raster objects, layers can be selected with the <code>[[</code> and <code>$</code> operators, for example with commands <code>multi_rast[["landsat_1"]]</code> and <code>multi_rast$landsat_1</code>.
 The <code><a href="https://rspatial.github.io/terra/reference/subset.html">terra::subset()</a></code> can also be used to select layers.
 It accepts a layer number or its name as the second argument:</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
@@ -1032,7 +1036,7 @@ In these cases, there are two main possible solutions: (1) use of the <code><a h
 </h2>
 <p>
 Vector and raster spatial data types share concepts intrinsic to spatial data.
-Perhaps the most fundamental of these is the Coordinate Reference System (CRS), which defines how the spatial elements of the data relate to the surface of the Earth (or other bodies).
+Perhaps the most fundamental of these is the coordinate reference systems (CRSs), which defines how the spatial elements of the data relate to the surface of the Earth (or other bodies).
 CRSs are either geographic or projected, as introduced at the beginning of this chapter (see Figure <a href="spatial-class.html#fig:vectorplots">2.1</a>).
 This section explains each type, laying the foundations for Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>, which provides a deep dive into setting, transforming and querying CRSs.</p>
 <div id="geographic-coordinate-reference-systems" class="section level3" number="2.4.1">
@@ -1040,12 +1044,12 @@ This section explains each type, laying the foundations for Chapter <a href="rep
 <span class="header-section-number">2.4.1</span> Geographic coordinate reference systems<a class="anchor" aria-label="anchor" href="#geographic-coordinate-reference-systems"><i class="fas fa-link"></i></a>
 </h3>
 <p>
-Geographic coordinate reference systems identify any location on the Earth’s surface using two values — longitude and latitude (Figure <a href="spatial-class.html#fig:vector-crs">2.17</a>, left panel).
+Geographic CRSs identify any location on the Earth’s surface using two values — longitude and latitude (Figure <a href="spatial-class.html#fig:vector-crs">2.17</a>, left panel).
 <em>Longitude</em> is location in the East-West direction in angular distance from the Prime Meridian plane.
 <em>Latitude</em> is angular distance North or South of the equatorial plane.
 Distances in geographic CRSs are therefore not measured in meters.
 This has important consequences, as demonstrated in Section <a href="reproj-geo-data.html#reproj-geo-data">7</a>.</p>
-<p>The surface of the Earth in geographic coordinate reference systems is represented by a spherical or ellipsoidal surface.
+<p>The surface of the Earth in geographic CRSs is represented by a spherical or ellipsoidal surface.
 Spherical models assume that the Earth is a perfect sphere of a given radius – they have the advantage of simplicity but, at the same time, they are inaccurate as the Earth is not exactly a sphere.
 Ellipsoidal models are slightly more accurate, and are defined by two parameters: the equatorial radius and the polar radius.
 These are suitable because the Earth is compressed: the equatorial radius is around 11.5 km longer than the polar radius <span class="citation">(<a href="references.html#ref-maling_coordinate_1992">Maling 1992</a>)</span>.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;
@@ -1060,7 +1064,7 @@ Black lines represent a <em>geocentric datum</em>, whose center is located in th
 In a <em>local datum</em>, shown as a purple dashed line, the ellipsoidal surface is shifted to align with the surface at a particular location.
 These allow local variations in Earth’s surface, for example due to large mountain ranges, to be accounted for in a local CRS.
 This can be seen in Figure <a href="spatial-class.html#fig:datum-fig">2.16</a>, where the local datum is fitted to the area of Philippines, but is misaligned with most of the rest of the planet’s surface.
-Both datums in Figure <a href="spatial-class.html#fig:datum-fig">2.16</a> are put on top of a geoid - a model of global mean sea level.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;Please note that the geoid on the Figure exaggerates the bumpy surface of the geoid by a factor of 10,000 to highlight the irregular shape of the planet.&lt;/p&gt;"><sup>19</sup></a></p>
+Both datums in Figure <a href="spatial-class.html#fig:datum-fig">2.16</a> are put on top of a geoid — a model of global mean sea level.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content='&lt;p&gt;Note that the geoid in Figure &lt;a href="spatial-class.html#fig:datum-fig"&gt;2.16&lt;/a&gt; is exaggerated by a factor of 10,000 to highlight the irregular shape of the planet.&lt;/p&gt;'><sup>19</sup></a></p>
 
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:datum-fig"></span>
@@ -1081,7 +1085,7 @@ They have an origin, x and y axes, and a linear unit of measurement such as mete
 Therefore, some properties of the Earth’s surface are distorted in this process, such as area, direction, distance, and shape.
 A projected coordinate reference system can preserve only one or two of those properties.
 Projections are often named based on a property they preserve: equal-area preserves area, azimuthal preserve direction, equidistant preserve distance, and conformal preserve local shape.</p>
-<p>There are three main groups of projection types - conic, cylindrical, and planar (azimuthal).
+<p>There are three main groups of projection types: conic, cylindrical, and planar (azimuthal).
 In a conic projection, the Earth’s surface is projected onto a cone along a single line of tangency or two lines of tangency.
 Distortions are minimized along the tangency lines and rise with the distance from those lines in this projection.
 Therefore, it is the best suited for maps of mid-latitude areas.
@@ -1093,11 +1097,11 @@ It is typically used in mapping polar regions.
 <code>sf_proj_info(type = "proj")</code> gives a list of the available projections supported by the PROJ library.</p>
 <p>A quick summary of different projections, their types, properties, and suitability can be found at <a href="https://www.geo-projections.com/">www.geo-projections.com</a>.
 We will expand on CRSs and explain how to project from one CRS to another in Chapter <a href="reproj-geo-data.html#reproj-geo-data">7</a>.
-For now, it is sufficient to know:</p>
+For now, it is sufficient to know that:</p>
 <ul>
-<li>That coordinate systems are a key component of geographic objects</li>
+<li>Coordinate systems are a key component of geographic objects</li>
 <li>Knowing which CRS your data is in, and whether it is in geographic (lon/lat) or projected (typically meters), is important and has consequences for how R handles spatial and geometry operations</li>
-<li>CRSs of <code>sf</code> objects can be queried with the function <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code>, CRSs of <code>terra</code> objects can be queried with the function <code><a href="https://rspatial.github.io/terra/reference/crs.html">crs()</a></code>
+<li>CRSs of <code>sf</code> objects can be queried with the function <code><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs()</a></code> and CRSs of <code>terra</code> objects can be queried with the function <code><a href="https://rspatial.github.io/terra/reference/crs.html">crs()</a></code>
 </li>
 </ul>
 <div class="figure" style="text-align: center">
@@ -1115,7 +1119,7 @@ FIGURE 2.17: Examples of geographic (WGS 84; left) and projected (NAD83 / UTM zo
 <p>An important feature of CRSs is that they contain information about spatial units.
 Clearly, it is vital to know whether a house’s measurements are in feet or meters, and the same applies to maps.
 It is good cartographic practice to add a <em>scale bar</em> or some other distance indicator onto maps to demonstrate the relationship between distances on the page or screen and distances on the ground.
-Likewise, it is important to formally specify the units in which the geometry data or cells are measured to provide context, and ensure that subsequent calculations are done in context.</p>
+Likewise, it is important to formally specify the units in which the geometry data or cells are measured to provide context, and to ensure that subsequent calculations are done in context.</p>
 <p>A novel feature of geometry data in <code>sf</code> objects is that they have <em>native support</em> for units.
 This means that distance, area and other geometric calculations in <strong>sf</strong> return values that come with a <code>units</code> attribute, defined by the <strong>units</strong> package <span class="citation">(<a href="references.html#ref-pebesma_measurement_2016">Pebesma, Mailund, and Hiebert 2016</a>)</span>.
 This is advantageous, preventing confusion caused by different units (most CRSs use meters, some use feet) and providing information on dimensionality.
@@ -1142,11 +1146,11 @@ The solution is to set the correct units with the <strong>units</strong> package
 <p>Units are of equal importance in the case of raster data.
 However, so far <strong>sf</strong> is the only spatial package that supports units, meaning that people working on raster data should approach changes in the units of analysis (for example, converting pixel widths from imperial to decimal units) with care.
 The <code>my_rast</code> object (see above) uses a WGS84 projection with decimal degrees as units.
-Consequently, its resolution is also given in decimal degrees but you have to know it, since the <code><a href="https://rspatial.github.io/terra/reference/dimensions.html">res()</a></code> function simply returns a numeric vector.</p>
+Consequently, its resolution is also given in decimal degrees, but you have to know it, since the <code><a href="https://rspatial.github.io/terra/reference/dimensions.html">res()</a></code> function simply returns a numeric vector.</p>
 <div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">res</a></span><span class="op">(</span><span class="va">my_rast</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 0.000833 0.000833</span></span></code></pre></div>
-<p>If we used the UTM projection, the units would change.</p>
+<p>If we used the Universal Transverse Mercator (UTM) projection, the units would change.</p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">repr</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/project.html">project</a></span><span class="op">(</span><span class="va">my_rast</span>, <span class="st">"EPSG:26912"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">res</a></span><span class="op">(</span><span class="va">repr</span><span class="op">)</span></span>
@@ -1208,9 +1212,9 @@ What kind of information you can learn from it?</p>
 <li><a class="nav-link" href="#intro-spatial-class"><span class="header-section-number">2.1</span> Introduction</a></li>
 <li>
 <a class="nav-link" href="#vector-data"><span class="header-section-number">2.2</span> Vector data</a><ul class="nav navbar-nav">
-<li><a class="nav-link" href="#intro-sf"><span class="header-section-number">2.2.1</span> An introduction to simple features</a></li>
+<li><a class="nav-link" href="#intro-sf"><span class="header-section-number">2.2.1</span> Introduction to simple features</a></li>
 <li><a class="nav-link" href="#why-simple-features"><span class="header-section-number">2.2.2</span> Why simple features?</a></li>
-<li><a class="nav-link" href="#basic-map"><span class="header-section-number">2.2.3</span> Basic map-making</a></li>
+<li><a class="nav-link" href="#basic-map"><span class="header-section-number">2.2.3</span> Basic maps</a></li>
 <li><a class="nav-link" href="#geometry"><span class="header-section-number">2.2.4</span> Geometry types</a></li>
 <li><a class="nav-link" href="#sf"><span class="header-section-number">2.2.5</span> The sf class</a></li>
 <li><a class="nav-link" href="#sfg"><span class="header-section-number">2.2.6</span> Simple feature geometries (sfg)</a></li>
@@ -1222,7 +1226,7 @@ What kind of information you can learn from it?</p>
 <li>
 <a class="nav-link" href="#raster-data"><span class="header-section-number">2.3</span> Raster data</a><ul class="nav navbar-nav">
 <li><a class="nav-link" href="#r-packages-for-working-with-raster-data"><span class="header-section-number">2.3.1</span> R packages for working with raster data</a></li>
-<li><a class="nav-link" href="#an-introduction-to-terra"><span class="header-section-number">2.3.2</span> An introduction to terra</a></li>
+<li><a class="nav-link" href="#introduction-to-terra"><span class="header-section-number">2.3.2</span> Introduction to terra</a></li>
 <li><a class="nav-link" href="#basic-map-raster"><span class="header-section-number">2.3.3</span> Basic map-making</a></li>
 <li><a class="nav-link" href="#raster-classes"><span class="header-section-number">2.3.4</span> Raster classes</a></li>
 </ul>

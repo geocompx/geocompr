@@ -165,7 +165,7 @@ ep = qgisprocess::qgis_run_algorithm(
 ```
 
 This returns a list named `ep` containing the paths to the computed output rasters.
-Let's read in catchment area as well as catchment slope into a multilayer `SpatRaster` object (see Section \@ref(raster-classes)).
+Let's read in catchment area as well as catchment slope into a multi-layer`SpatRaster` object (see Section \@ref(raster-classes)).
 Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`.
 
 
@@ -176,7 +176,7 @@ ep = ep[c("AREA", "SLOPE")] |>
   rast()
 names(ep) = c("carea", "cslope") # assign better names 
 origin(ep) = origin(dem) # make sure rasters have the same origin
-ep = c(dem, ndvi, ep) # add dem and ndvi to the multilayer SpatRaster object
+ep = c(dem, ndvi, ep) # add dem and ndvi to the multi-layerSpatRaster object
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
@@ -479,7 +479,7 @@ autotuner_rf$predict(task)
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
-Given a multilayer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial distribution maps, i.e., predict to new data.
+Given a multi-layer`SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial distribution maps, i.e., predict to new data.
 
 
 ``` r

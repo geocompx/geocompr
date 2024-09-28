@@ -4,7 +4,7 @@
 
 ## Prerequisites {-}
 
-This chapter has minimal software prerequisites as it primarily uses base R.
+This chapter has minimal software prerequisites, as it primarily uses base R.
 Only, the **sf**\index{sf} package is used to check the results of an algorithm we will develop to calculate the area of polygons.
 In terms of prior knowledge, this chapter assumes you have an understanding of the geographic classes introduced in Chapter \@ref(spatial-class) and how they can be used to represent a wide range of input file formats (see Chapter \@ref(read-write)).
 
@@ -192,8 +192,8 @@ C1 = (T1[1,] + T1[2,] + T1[3,]) / 3
 
 
 <div class="figure" style="text-align: center">
-<img src="figures/polymat-1.png" alt="Illustration of polygon centroid calculation problem." width="100%" />
-<p class="caption">(\#fig:polymat)Illustration of polygon centroid calculation problem.</p>
+<img src="figures/polymat-1.png" alt="Polygon centroid calculation problem." width="100%" />
+<p class="caption">(\#fig:polymat)Polygon centroid calculation problem.</p>
 </div>
 
 Step 3 is to find the area of each triangle, so a *weighted mean* accounting for the disproportionate impact of large triangles is accounted for. 
@@ -275,7 +275,7 @@ Algorithm\index{algorithm} development is hard.
 This should be apparent from the amount of work that has gone into developing a centroid\index{centroid} algorithm\index{algorithm} in base R\index{R} that is just one, rather inefficient, approach to the problem with limited real-world applications (convex polygons are uncommon in practice).
 The experience should lead to an appreciation of low-level geographic libraries such as GEOS\index{GEOS} and CGAL\index{CGAL} (the Computational Geometry Algorithms Library) which not only run fast but work on a wide range of input geometry types.
 A great advantage of the open source nature of such libraries is that their source code\index{source code} is readily available for study, comprehension and (for those with the skills and confidence) modification.^[
-The CGAL\index{CGAL} function `CGAL::centroid()` is in fact composed of 7 sub-functions as described at https://doc.cgal.org/latest/Kernel_23/group__centroid__grp.html allowing it to work on a wide range of input data types, whereas the solution we created works only on a very specific input data type.
+The CGAL\index{CGAL} function `CGAL::centroid()` is in fact composed of seven sub-functions as described at https://doc.cgal.org/latest/Kernel_23/group__centroid__grp.html allowing it to work on a wide range of input data types, whereas the solution we created works only on a very specific input data type.
 The source code underlying GEOS\index{GEOS} function `Centroid::getCentroid()` can be found at https://github.com/libgeos/geos/search?q=getCentroid.
 ]
 
