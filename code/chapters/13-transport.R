@@ -247,7 +247,7 @@ sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
 route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 
 
-## ----rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE----
+## ----rnetvis, out.width="49%", fig.show='hold', fig.cap="The % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE----
 routes_short_scenario |> 
   ggplot() +
   geom_line(aes(distance / 1000, uptake)) +
