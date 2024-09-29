@@ -115,7 +115,7 @@ knitr::include_graphics("images/lsl-susc-1.png")
 knitr::include_graphics("images/13_partitioning.png")
 
 
-## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr3 package. Source: @becker_mlr3_2022. (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr3 package."----
+## ----building-blocks, echo=FALSE, fig.height=4, fig.width=4, fig.cap="Basic building blocks of the mlr3 package. Source: @bischl_applied_2024. (Permission to reuse this figure was kindly granted.)", fig.scap="Basic building blocks of the mlr3 package."----
 knitr::include_graphics("images/13_ml_abstraction_crop.png")
 
 
