@@ -452,7 +452,7 @@ E1. Read the script [`11-centroid-alg.R`](https://github.com/geocompx/geocompr/b
 
 E2. In the geometric algorithms section, we calculated that the area of the polygon `poly_mat` was 245 units squared and that its centroid as at the coordinates (8.8, 9.2).
 
-  - Reproduce the results on your own computer with reference to the script [`11-centroid-alg.R`](https://github.com/geocompx/geocompr/blob/main/code/11-centroid-alg.R), an implementation of this algorithm (bonus: type out the commands - try to avoid copy-pasting).
+  - Reproduce the results on your own computer with reference to the script [`11-centroid-alg.R`](https://github.com/geocompx/geocompr/blob/main/code/11-centroid-alg.R), an implementation of this algorithm (bonus: type the commands - try to avoid copy-pasting).
   - Are the results correct? Verify them by converting `poly_mat` into an `sfc` object (named `poly_sfc`) with `st_polygon()` (hint: this function takes objects of class `list()`) and then using `st_area()` and `st_centroid()`.
 
 
