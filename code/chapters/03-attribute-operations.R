@@ -95,7 +95,7 @@ small_countries = world[world$area_km2 < 10000, ]
 
 
 ## ---- echo=FALSE, eval=FALSE------------------------------------------------------------------------
-## # Aim: benchmark base vs dplyr subsetting
+## # Aim: benchmark base vs. dplyr subsetting
 ## # Could move elsewhere?
 ## i = sample(nrow(world), size = 10)
 ## benchmark_subset = bench::mark(
