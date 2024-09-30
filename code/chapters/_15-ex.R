@@ -84,7 +84,7 @@ ep = ep[c("AREA", "SLOPE")] |>
 names(ep) = c("carea", "cslope")
 # make sure all rasters share the same origin
 origin(ep) = origin(dem)
-# add dem and ndvi to the multi-layerSpatRaster object
+# add dem and ndvi to the multi-layer SpatRaster object
 ep = c(dem, ndvi, ep) 
 ep$carea = log10(ep$carea)
 
