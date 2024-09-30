@@ -386,7 +386,7 @@ It is fast and flexible, but it may be worth looking at other packages such as *
 ### Raster data {#raster-data-read}
 
 \index{raster!data input}
-Similar to vector data, raster data comes in many file formats with some supporting multi-layerfiles.
+Similar to vector data, raster data comes in many file formats with some supporting multi-layer files.
 **terra**'s `rast()` command reads in a single layer when a file with just one layer is provided.
 
 
@@ -395,7 +395,7 @@ raster_filepath = system.file("raster/srtm.tif", package = "spDataLarge")
 single_layer = rast(raster_filepath)
 ```
 
-It also works in case you want to read a multi-layerfile.
+It also works in case you want to read a multi-layer file.
 
 
 ``` r
@@ -680,7 +680,7 @@ usa_sf = ne_countries(country = "United States of America", returnclass = "sf")
 Country borders can be also accessed with other packages, such as **geodata**, **giscoR**, or **rgeoboundaries**.
 
 A second example downloads a series of rasters containing global monthly precipitation sums with spatial resolution of 10 minutes (~18.5 km at the equator) using the **geodata** package [@R-geodata].
-The result is a multi-layerobject of class `SpatRaster`.
+The result is a multi-layer object of class `SpatRaster`.
 
 
 ``` r
