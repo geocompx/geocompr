@@ -189,8 +189,8 @@ seine_buff_50km = st_buffer(seine, dist = 50000)
 The most important ones are:
 
 - `nQuadSegs` (when the GEOS\index{GEOS} engine is used), which means 'number of segments per quadrant' and is set by default to 30 (meaning circles created by buffers are composed of $4 \times 30 = 120$ lines).
-Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case, it should be reduced) or when very high precision is needed (in which case, it should be increased)
-- `max_cells` (when the S2\index{S2} engine is used), the larger the value, the smoother the buffer will be, but the calculations will take longer
+Unusual cases where it may be useful include when the memory consumed by the output of a buffer operation is a major concern (in which case it should be reduced) or when very high precision is needed (in which case it should be increased)
+- `max_cells` (when the S2\index{S2} engine is used), the larger the value, the more smooth the buffer will be, but the calculations will take longer
 - `endCapStyle` and `joinStyle` (when the GEOS engine is used), which control the appearance of the buffer's edges
 - `singleSide` (when the GEOS engine is used), which controls whether the buffer is created on one or both sides of the input geometry
 </div>\EndKnitrBlock{rmdnote}
@@ -557,8 +557,8 @@ multilinestring_sf
 
 You can imagine it as a road or river network. 
 The new object has only one row that defines all the lines.
-This restricts the number of operations that can be done, for example, it prevents adding names to each line segment or calculating lengths of single lines.
-The `st_cast()` function can be used in this situation, as it separates one multilinestring into three linestrings.
+This restricts the number of operations that can be done, for example it prevents adding names to each line segment or calculating lengths of single lines.
+The `st_cast()` function can be used in this situation, as it separates one mutlilinestring into three linestrings.
 
 
 ``` r
