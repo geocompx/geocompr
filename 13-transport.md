@@ -511,7 +511,6 @@ This is done using the publicly available OSRM service with the **stplanr** func
 ``` r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
                      osrm.profile = "bike")
-#> <simpleError in open.connection(con, "rb"): cannot open the connection to 'https://routing.openstreetmap.de/routed-bike/route/v1/driving/-2.62449584285587,51.5083596238341;-2.66873099020632,51.5135817785512?alternatives=false&geometries=geojson&steps=false&overview=full'>
 ```
 
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
@@ -570,7 +569,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 1023
+#> [1] 3850
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
@@ -641,11 +640,6 @@ The results demonstrate that each graph edge represents a segment: the segments 
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
-```
-
-
-```
-#> [plot mode] legend/component: Some components or legends are too wide and are therefore rescaled. Set the tmap option 'component.autoscale' to FALSE to disable rescaling.
 ```
 
 <div class="figure" style="text-align: center">
