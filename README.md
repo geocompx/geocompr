@@ -63,7 +63,7 @@ changed, including:
   [\#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
 - New
   [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
-  on the dimensionally extended 9 intersection model (DE-9IM)
+  on the dimensionally extended 9-intersection model (DE-9IM)
 - New [chapter](https://r.geocompx.org/raster-vector.html) on
   raster-vector interactions split out from Chapter 5
 - New
@@ -234,7 +234,7 @@ install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'http
 ```
 
 Installing `geocompkg` will also install core packages required for
-reproducing **Part 1 of the book** (chapters 1 to 8). Note: you may also
+reproducing **Part I of the book** (chapters 1 to 8). Note: you may also
 need to install [system
 dependencies](https://github.com/r-spatial/sf#installing) if you’re
 running Linux (recommended) or Mac operating systems. You also need to

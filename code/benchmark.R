@@ -1,4 +1,4 @@
-# Aim: benchmark and record how long it takes to build the book on different set-ups
+# Aim: benchmark and record how long it takes to build the book on different setups
 
 remotes::install_cran("benchmarkme")
 sys_details = benchmarkme::get_sys_details()

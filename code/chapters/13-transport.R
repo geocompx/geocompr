@@ -247,7 +247,7 @@ sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
 route_network_scenario = overline(routes_short_scenario, attrib = "bicycle")
 
 
-## ----rnetvis, out.width="49%", fig.show='hold', fig.cap="Illustration of the % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE----
+## ----rnetvis, out.width="49%", fig.show='hold', fig.cap="The % of car trips switching to cycling as a function of distance (left) and route network level results of this function (right).", echo=FALSE----
 routes_short_scenario |> 
   ggplot() +
   geom_line(aes(distance / 1000, uptake)) +
@@ -335,7 +335,7 @@ route_network_no_infra = st_difference(
 ##     lines.lwd = 5)
 
 
-## ----cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritise cycle infrastructure in Bristol to reduce car dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritise cycle infrastructure."----
+## ----cycleways, echo=FALSE, message=FALSE, fig.cap="Potential routes along which to prioritize cycle infrastructure in Bristol to reduce car-dependency. The static map provides an overview of the overlay between existing infrastructure and routes with high car-bike switching potential (left). The screenshot the interactive map generated from the `qtm()` function highlights Whiteladies Road as somewhere that would benefit from a new cycleway (right).", out.width="50%", fig.show='hold', fig.scap="Routes along which to prioritize cycle infrastructure."----
 # Previous verson:
 # source("https://github.com/Robinlovelace/geocompr/raw/main/code/13-cycleways.R")
 # m_leaflet

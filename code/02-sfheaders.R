@@ -1,4 +1,4 @@
-# Aim: compare sf vs sfheaders in terms of speed
+# Aim: compare sf vs. sfheaders in terms of speed
 
 library(spData)
 library(sf)
