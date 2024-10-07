@@ -1003,12 +1003,9 @@ For that reason, despite advocating **shiny**, we recommend starting with the lo
 This way your prototype web applications should be limited not by technical considerations, but by your motivations and imagination.
 
 <div class="figure" style="text-align: center">
-<iframe src="https://shiny.robinlovelace.net/CycleHireApp/?showcase=0" width="690" height="400px" data-external="1"></iframe>
+<iframe src="https://shiny.robinlovelace.net/CycleHireApp/" width="690" height="400px" data-external="1"></iframe>
 <p class="caption">(\#fig:CycleHireApp-html)CycleHireApp, a simple web mapping application for finding the closest cycle hiring station based on your location and requirement of cycles. Interactive version available online at: r.geocompx.org.</p>
 </div>
-
-
-
 ## Other mapping packages
 
 **tmap** provides a powerful interface for creating a wide range of static maps (Section \@ref(static-maps)) and also supports interactive maps (Section \@ref(interactive-maps)).
