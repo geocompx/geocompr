@@ -26,7 +26,7 @@ This chapter demonstrates how the skills learned in Parts I and II can be applie
 This is a broad field of research and commercial application.
 A typical example of geomarketing is where to locate a new shop.
 The aim here is to attract most visitors and, ultimately, make the most profit.
-There are also many non-commercial applications that can use the technique for public benefit, for example where to locate new health services [@tomintz_geography_2008].
+There are also many non-commercial applications that can use the technique for public benefit, for example, where to locate new health services [@tomintz_geography_2008].
 
 People are fundamental to location analysis\index{location analysis}, in particular where they are likely to spend their time and other resources.
 Interestingly, ecological concepts and models are quite similar to those used for store location analysis.
@@ -43,7 +43,7 @@ Typical research questions include:
 - Do existing services over- or under-utilize the market potential?
 - What is the market share of a company in a specific area?
 
-This chapter demonstrates how geocomputation can answer such questions based on a hypothetical case study based on real data.
+This chapter demonstrates how geocomputation can answer such questions based on a hypothetical case study and real data.
 
 ## Case study: bike shops in Germany {#case-study}
 
@@ -87,7 +87,7 @@ data("census_de", package = "spDataLarge")
 The `census_de` object is a data frame containing 13 variables for more than 360,000 grid cells across Germany.
 For our work, we only need a subset of these: Easting (`x`) and Northing (`y`), number of inhabitants (population; `pop`), mean average age (`mean_age`), proportion of women (`women`) and average household size (`hh_size`).
 These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
-Further, `mutate()` is used to convert values -1 and -9 (meaning "unknown") to `NA`.
+Further, `mutate()` is used to convert values `-1` and `-9` (meaning "unknown") to `NA`.
 
 
 ``` r
@@ -101,9 +101,9 @@ input_tidy = mutate(input, across(.cols = c(pop, women, mean_age, hh_size),
 
 
 
-Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip (see Figure \@ref(fig:census-stack) for their spatial distribution).
+Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip.
 
-| Class | Population | % female | Mean age | Household size |
+| Class | Population | % Female | Mean Age | Household Size |
 |:-----:|:----------:|:--------:|:--------:|:--------------:|
 |   1   |   3-250    |   0-40   |   0-40   |      1-2       |
 |   2   |  250-500   |  40-47   |  40-42   |     2-2.5      |
@@ -139,13 +139,13 @@ input_ras
 #> max values  :   6,     5,        5,       5
 ```
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS\index{CRS!projected} where each grid cell has the same area, here 1000 x 1000 square meters. 
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS\index{CRS!projected} where each grid cell has the same area, here 1000 * 1000 square meters. 
 Since we are using mainly densities such as the number of inhabitants or the portion of women per grid cell, it is of utmost importance that the area of each grid cell is the same to avoid 'comparing apples and oranges'.
-Be careful with geographic CRS\index{CRS!geographic} where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)). </div>\EndKnitrBlock{rmdnote}
+Be careful with geographic CRS\index{CRS!geographic} where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).</div>\EndKnitrBlock{rmdnote}
 
 <div class="figure" style="text-align: center">
-<img src="images/14_census_stack.png" alt="Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes)." width="100%" />
-<p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table \@ref(tab:census-desc) for a description of the classes).</p>
+<img src="images/14_census_stack.png" alt="Gridded German census data of 2011 (see Table 14.1 for a description of the classes)." width="100%" />
+<p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table 14.1 for a description of the classes).</p>
 </div>
 
 The next stage is to reclassify the values of the rasters stored in `input_ras` in accordance with the survey mentioned in Section \@ref(case-study), using the **terra** function `classify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
@@ -155,9 +155,9 @@ A cell value of 8000 inhabitants was chosen for 'class 6' because these cells co
 Of course, these are approximations of the true population, not precise values.^[
 The potential error introduced during this reclassification stage will be explored in the exercises.
 ]
-However, the level of detail is sufficient to delineate metropolitan areas (see next section).
+However, the level of detail is sufficient to delineate metropolitan areas (see Section \@ref(define-metropolitan-areas)).
 
-In contrast to the `pop` variable, representing absolute estimates of the total population, the remaining variables were re-classified as weights corresponding with weights used in the survey.
+In contrast to the `pop` variable, representing absolute estimates of the total population, the remaining variables were reclassified as weights corresponding with weights used in the survey.
 Class 1 in the variable `women`, for instance, represents areas in which 0 to 40% of the population is female;
 these are reclassified with a comparatively high weight of 3 because the target demographic is predominantly male.
 Similarly, the classes containing the youngest people and highest proportion of single households are reclassified to have high weights.
@@ -202,7 +202,7 @@ reclass # full output not shown
 
 We deliberately define metropolitan areas as pixels of 20 km^2^ inhabited by more than 500,000 people.
 Pixels at this coarse resolution can rapidly be created using `aggregate()`\index{aggregation}, as introduced in Section \@ref(aggregation-and-disaggregation).
-The command below uses the argument `fact = 20` to reduce the resolution of the result twenty-fold (recall the original raster resolution was 1 km^2^).
+The command below uses the argument `fact = 20` to reduce the resolution of the result 20-fold (recall the original raster resolution was 1 km^2^).
 
 
 ``` r
@@ -267,7 +267,7 @@ To make sure that the reader uses the exact same results, we have put them into 
 
 Table: (\#tab:metro-names)Result of the reverse geocoding.
 
-|city              |state               |
+|City              |State               |
 |:-----------------|:-------------------|
 |Hamburg           |NA                  |
 |Berlin            |NA                  |
@@ -280,7 +280,7 @@ Table: (\#tab:metro-names)Result of the reverse geocoding.
 
 
 
-Overall, we are satisfied with the `city` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Velbert which belongs to the greater region of Düsseldorf.
+Overall, we are satisfied with the `City` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Velbert which belongs to the greater region of Düsseldorf.
 Hence, we replace Velbert with Düsseldorf (Figure \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we avoid them.
 
@@ -288,8 +288,8 @@ Umlauts like `ü` might lead to trouble further on, for example when determining
 ``` r
 metro_names = metro_names$city |> 
   as.character() |>
-  {\(x) ifelse(x == "Velbert", "Düsseldorf", x)}() |>
-  {\(x) gsub("ü", "ue", x)}()
+  (\(x) ifelse(x == "Velbert", "Düsseldorf", x))() |>
+  gsub("ü", "ue", x = _)
 ```
 
 ## Points of interest
@@ -305,9 +305,9 @@ The subsequent code chunk does this using a number of functions including:
 - `while()`\index{loop!while}, which tries two more times to download the data if the download failed the first time^[The OSM-download will sometimes fail at the first attempt.
 ]
 
-Before running this code: please consider it will download almost 2GB of data.
+Before running this code, please consider it will download almost two GB of data.
 To save time and resources, we have put the output named `shops` into **spDataLarge**.
-To make it available in your environment run `data("shops", package = "spDataLarge")`.
+To make it available in your environment, run `data("shops", package = "spDataLarge")`.
 
 
 ``` r
@@ -343,7 +343,7 @@ if (any(ind)) {
 }
 ```
 
-To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.] we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally combines all shops into one large `sf`\index{sf} object.
+To make sure that each list element (an `sf`\index{sf} data frame) comes with the same columns^[This is not a given since OSM contributors are not equally meticulous when collecting data.], we only keep the `osm_id` and the `shop` columns with the help of the `map_dfr` loop which additionally combines all shops into one large `sf`\index{sf} object.
 
 
 ``` r
@@ -392,11 +392,10 @@ poi = classify(poi, rcl = rcl_poi, right = NA)
 names(poi) = "poi"
 ```
 
-## Identifying suitable locations
+## Identify suitable locations
 
 The only steps that remain before combining all the layers are to add `poi` to the `reclass` raster stack and remove the population layer from it.
-The reasoning for the latter is twofold.
-First of all, we have already delineated metropolitan areas, that is areas where the population density is above average compared to the rest of Germany.
+The reasoning for the latter is: First of all, we have already delineated metropolitan areas, that is areas where the population density is above average compared to the rest of Germany.
 Second, though it is advantageous to have many potential customers within a specific catchment area\index{catchment area}, the sheer number alone might not actually represent the desired target group.
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.
 
@@ -432,14 +431,14 @@ For instance, a score greater than 9 might be a suitable threshold indicating ra
 
 The presented approach is a typical example of the normative usage of a GIS\index{GIS} [@longley_geographic_2015].
 We combined survey data with expert-based knowledge and assumptions (definition of metropolitan areas, defining class intervals, definition of a final score threshold).
-This approach is less suitable for scientific research than applied analysis that provides an evidence based indication of areas suitable for bike shops that should be compared with other sources of information.
+This approach is less suitable for scientific research than applied analysis that provides an evidence-based indication of areas suitable for bike shops that should be compared with other sources of information.
 A number of changes to the approach could improve the analysis:
 
 - We used equal weights when calculating the final scores but other factors, such as the household size, could be as important as the portion of women or the mean age
 - We used all points of interest\index{point of interest} but only those related to bike shops, such as do-it-yourself, hardware, bicycle, fishing, hunting, motorcycles, outdoor and sports shops (see the range of shop values available on the  [OSM Wiki](https://wiki.openstreetmap.org/wiki/Map_Features#Shop)) may have yielded more refined results
-- Data at a higher resolution may improve the output (see exercises)
+- Data at a higher resolution may improve the output (see Exercises)
 - We have used only a limited set of variables and data from other sources, such as the [INSPIRE geoportal](https://inspire-geoportal.ec.europa.eu/) or data on cycle paths from OpenStreetMap, may enrich the analysis (see also Section \@ref(retrieving-data))
-- Interactions remained unconsidered, such as a possible relationships between the portion of men and single households
+- Interactions remained unconsidered, such as a possible relationship between the portion of men and single households
 
 In short, the analysis could be extended in multiple directions.
 Nevertheless, it should have given you a first impression and understanding of how to obtain and deal with spatial data in R\index{R} within a geomarketing\index{geomarketing} context.
@@ -460,8 +459,8 @@ That is, if there already is a bike shop in the vicinity of the chosen location,
 
 E1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
 Please note that the unzipped file has a size of 1.23 GB.
-To read it into R you can use `readr::read_csv`.
-This takes 30 seconds on a machine with 16 GB RAM.
+To read it into R, you can use `readr::read_csv`.
+This takes 30 seconds on a machine with 16-GB RAM.
 `data.table::fread()` might be even faster, and returns an object of class `data.table()`.
 Use `dplyr::as_tibble()` to convert it into a tibble.
 Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
