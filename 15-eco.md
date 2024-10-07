@@ -102,7 +102,7 @@ Visualizing the data helps to get more familiar with it, as shown in Figure \@re
 The next step is to compute variables which are not only needed for the modeling and predictive mapping (see Section \@ref(predictive-mapping)) but also for aligning the non-metric multidimensional scaling (NMDS)\index{NMDS} axes with the main gradient in the study area, altitude and humidity, respectively (see Section \@ref(nmds)).
 
 Specifically, we compute catchment slope and catchment area\index{catchment area} from a digital elevation model\index{digital elevation model} using R-GIS bridges (see Chapter \@ref(gis)).
-Curvatures might also represent valuable predictors, and in the exercise section you can find out how they would impact the modeling result.
+Curvatures might also represent valuable predictors, and in the Exercise section you can find out how they would impact the modeling result.
 
 To compute catchment area\index{catchment area} and catchment slope, we can make use of the `sagang:sagawetnessindex` function.^[Admittedly, it is a bit unsatisfying that the only way of knowing that `sagawetnessindex` computes the desired terrain attributes is to be familiar with SAGA\index{SAGA}.]
 `qgis_show_help()` returns all function\index{function} parameters and default values of a specific geoalgorithm\index{geoalgorithm}.
@@ -336,7 +336,7 @@ The observations falling into the left branch have a mean NMDS\index{NMDS} score
 Overall, we can interpret the tree as follows: the higher the elevation, the higher the NMDS\index{NMDS} score becomes.
 This means that the simple decision tree has already revealed four distinct floristic assemblages.
 For a more in-depth interpretation, please refer to Section \@ref(predictive-mapping).
-Decision trees have a tendency to overfit\index{overfitting}, that is, they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section \@ref(intro-cv); @james_introduction_2013].
+Decision trees have a tendency to overfit\index{overfitting}, that is, they mirror too closely the input data including its noise which in turn leads to bad predictive performances [Section \@ref(intro-cv), @james_introduction_2013].
 Bootstrap aggregation (bagging) is an ensemble technique that can help to overcome this problem.
 Ensemble techniques simply combine the predictions of multiple models.
 Thus, bagging takes repeated samples from the same input data and averages the predictions.
