@@ -68,7 +68,7 @@ p_linestring_sf = ggplot() +
         axis.title = element_blank())
 
 p_polygon_sf = ggplot() +
-  geom_sf(data = polygon_sf, fill = "grey") +
+  geom_sf(data = polygon_sf, fill = "gray") +
   labs(title = "POLYGON")  +
   coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) +
   theme(line = element_blank(),
@@ -92,7 +92,7 @@ p_multilinestring_sf = ggplot() +
         axis.title = element_blank())
 
 p_multipolygon_sf = ggplot() +
-  geom_sf(data = multipolygon_sf, fill = "grey") +
+  geom_sf(data = multipolygon_sf, fill = "gray") +
   labs(title = "MULTIPOLYGON")  +
   coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) +
   theme(line = element_blank(),
@@ -102,10 +102,10 @@ p_multipolygon_sf = ggplot() +
 p_geometrycollection_sf = ggplot() +
   geom_sf(data = point_sf) +
   geom_sf(data = linestring_sf) +
-  geom_sf(data = polygon_sf, fill = "grey") +
+  geom_sf(data = polygon_sf, fill = "gray") +
   geom_sf(data = multipoint_sf) +
   geom_sf(data = multilinestring_sf) +
-  geom_sf(data = multipolygon_sf, fill = "grey") +
+  geom_sf(data = multipolygon_sf, fill = "gray") +
   labs(title = "GEOMETRYCOLLECTION")  +
   coord_sf(xlim = c(0.6, 1.6), ylim = c(0.4, 1.4)) +
   theme(
@@ -125,7 +125,7 @@ mygb = function(x, y) {
   grid.bezier(
     x = x,
     y = y,
-    gp = gpar(col = "grey", fill = "grey"),
+    gp = gpar(col = "gray", fill = "gray"),
     arrow = arrow(type = "closed", length = unit(2, "mm"))
   )
 }

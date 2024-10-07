@@ -49,9 +49,9 @@ text(world_coords, world$iso_a2)
 # Alternative answer:
 nigeria = world[world$name_long == "Nigeria", ]
 africa = world[world$continent == "Africa", ]
-plot(st_geometry(nigeria), col = "white", lwd = 3, main = "Nigeria in context", border = "lightgrey", expandBB = c(0.5, 0.2, 0.5, 0.2))
-plot(st_geometry(world), lty = 3, add = TRUE, border = "grey")
-plot(st_geometry(nigeria), col = "yellow", add = TRUE, border = "darkgrey")
+plot(st_geometry(nigeria), col = "white", lwd = 3, main = "Nigeria in context", border = "lightgray", expandBB = c(0.5, 0.2, 0.5, 0.2))
+plot(st_geometry(world), lty = 3, add = TRUE, border = "gray")
+plot(st_geometry(nigeria), col = "yellow", add = TRUE, border = "darkgray")
 a = africa[grepl("Niger", africa$name_long), ]
 ncentre = st_centroid(a)
 ncentre_num = st_coordinates(ncentre)
