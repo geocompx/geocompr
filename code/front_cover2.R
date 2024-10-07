@@ -294,7 +294,7 @@ col_lv4 = alpha(pal[12], alp)
 col_lv5 = alpha(pal[15], alp)
 
 col_world = "#073B4C"
-col_borders = "grey80"
+col_borders = "gray80"
 col_back = "#1D201F"
 
 pal_dis = moma.colors("ustwo" , n = 5, type = "discrete")
