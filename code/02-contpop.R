@@ -6,6 +6,6 @@ par(mar = c(0, 0, 0, 0))
 plot(world_proj["continent"], reset = FALSE, main = "", key.pos = NULL)
 g = st_graticule()
 g = st_transform(g, crs = "+proj=eck4")
-plot(g$geometry, add = TRUE, col = "lightgrey")
+plot(g$geometry, add = TRUE, col = "lightgray")
 cex = sqrt(world$pop) / 10000
 plot(st_geometry(world_cents), add = TRUE, cex = cex, lwd = 2, graticule = TRUE)

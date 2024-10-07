@@ -63,12 +63,12 @@ aggzone_wgs = st_transform(aggregating_zones, "EPSG:4326")
 ## ----uniondata, echo=FALSE, fig.cap="Illustration of two areal units: incongruent (black lines) and aggregating zones (red borders). "----
 library(tmap)
 tm_shape(incongr_wgs) +
-  tm_polygons(border.col = "grey5") +
+  tm_polygons(border.col = "gray5") +
   tm_shape(aggzone_wgs) +
   tm_borders(alpha = 0.5, col = "red") +
   tm_add_legend(type = "line",
                 labels = c("incongr_wgs", "aggzone_wgs"),
-                col = c("grey5", "red"),
+                col = c("gray5", "red"),
                 lwd = 3) +
   tm_scale_bar(position = c("left", "bottom"),
                breaks = c(0, 0.5, 1)) +

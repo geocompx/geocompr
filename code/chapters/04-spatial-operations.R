@@ -368,7 +368,7 @@ plot(grid, col = grid_sf$rooks)
 tm_shape(grid_sf) +
   tm_fill(col = c("queens", "rooks"), palette = c("white", "black")) +
   tm_shape(grid_sf) +
-  tm_borders(col = "grey", lwd = 2) +
+  tm_borders(col = "gray", lwd = 2) +
   tm_layout(frame = FALSE, legend.show = FALSE,
             panel.labels = c("queen", "rook"))
 

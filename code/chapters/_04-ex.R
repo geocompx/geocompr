@@ -57,13 +57,13 @@ nz_height_combined |>
 ## ----04-ex-4-1--------------------------------------------------------------------------------------
 colorado = us_states[us_states$NAME == "Colorado", ]
 plot(us_states$geometry)
-plot(colorado$geometry, col = "grey", add = TRUE)
+plot(colorado$geometry, col = "gray", add = TRUE)
 
 
 ## ----04-ex-4-2--------------------------------------------------------------------------------------
 intersects_with_colorado = us_states[colorado, , op = st_intersects]
 plot(us_states$geometry, main = "States that intersect with Colorado")
-plot(intersects_with_colorado$geometry, col = "grey", add = TRUE)
+plot(intersects_with_colorado$geometry, col = "gray", add = TRUE)
 
 
 ## ----04-ex-4-3--------------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ us_states |>
 ## ----04-ex-4-4--------------------------------------------------------------------------------------
 touches_colorado = us_states[colorado, , op = st_touches]
 plot(us_states$geometry, main = "States that touch Colorado")
-plot(touches_colorado$geometry, col = "grey", add = TRUE)
+plot(touches_colorado$geometry, col = "gray", add = TRUE)
 
 
 ## ----04-ex-4-5--------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ washington_to_cali = us_states |>
 states_crossed = us_states[washington_to_cali, , op = st_crosses]
 states_crossed$NAME
 plot(us_states$geometry, main = "States crossed by a straight line\n from the District of Columbia to central California")
-plot(states_crossed$geometry, col = "grey", add = TRUE)
+plot(states_crossed$geometry, col = "gray", add = TRUE)
 plot(washington_to_cali, add = TRUE)
 
 
