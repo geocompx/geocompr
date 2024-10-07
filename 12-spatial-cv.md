@@ -234,7 +234,7 @@ However, it is possible to include spatial autocorrelation\index{autocorrelation
 Though, this is beyond the scope of this book, we give the interested reader some pointers where to look it up:
 
 1. The predictions of regression kriging combines the predictions of a regression with the kriging of the regression's residuals [@goovaerts_geostatistics_1997; @hengl_practical_2007; @bivand_applied_2013]. 
-2. One can also add a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`; @zuur_mixed_2009; @zuur_beginners_2017].  
+2. One can also add a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`, @zuur_mixed_2009; @zuur_beginners_2017].  
 3. One can also use mixed-effect modeling approaches.
 Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
 Classes can be, for example, bee hives, owl nests, vegetation transects or an altitudinal stratification.
