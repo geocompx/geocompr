@@ -171,7 +171,7 @@ nz_scale_sf = st_set_geometry(nz, nz_scale)
 ## ----points, fig.cap="Overlapping circles.", fig.asp=0.4, crop = TRUE-------------------------------
 b = st_sfc(st_point(c(0, 1)), st_point(c(1, 1))) # create 2 points
 b = st_buffer(b, dist = 1) # convert points to circles
-plot(b, border = "grey")
+plot(b, border = "gray")
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 
 
@@ -179,8 +179,8 @@ text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 3) # add text
 x = b[1]
 y = b[2]
 x_and_y = st_intersection(x, y)
-plot(b, border = "grey")
-plot(x_and_y, col = "lightgrey", border = "grey", add = TRUE) # intersecting area
+plot(b, border = "gray")
+plot(x_and_y, col = "lightgray", border = "gray", add = TRUE) # intersecting area
 
 
 ## ----venn-clip, echo=FALSE, fig.cap="Spatial equivalents of logical operators.", warning=FALSE------
@@ -194,9 +194,9 @@ box = st_as_sfc(bb)
 set.seed(2017)
 p = st_sample(x = box, size = 10)
 p_xy1 = p[x_and_y]
-plot(box, border = "grey", lty = 2)
-plot(x, add = TRUE, border = "grey")
-plot(y, add = TRUE, border = "grey")
+plot(box, border = "gray", lty = 2)
+plot(x, add = TRUE, border = "gray")
+plot(y, add = TRUE, border = "gray")
 plot(p, add = TRUE)
 plot(p_xy1, cex = 3, col = "red", add = TRUE)
 text(x = c(-0.5, 1.5), y = 1, labels = c("x", "y"), cex = 2)

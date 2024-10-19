@@ -68,7 +68,7 @@ sticker(
 #   y = st_geometry(y) %>% 
 #     st_transform(st_crs("+proj=laea +y_0=0 +lon_0=0 +lat_0=0 +ellps=WGS84 +no_defs"))
 #   y = y + c(lon_0, 0)
-#   plot(st_geometry(x), col = "grey")
+#   plot(st_geometry(x), col = "gray")
 #   plot(st_geometry(y), add = TRUE, col = "blue")
 # }
 # 

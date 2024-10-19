@@ -419,14 +419,14 @@ library(tmap)
 tm1 = tm_shape(india_buffer_with_s2) +
   tm_fill(col = hcl.colors(4, palette = "purple green")[3]) +
   tm_shape(india) +
-  tm_fill(col = "grey95") +
+  tm_fill(col = "gray95") +
   tm_layout(main.title = "st_buffer() with dist = 1",
             title = "s2 switched on (default)")
 
 tm2 = tm_shape(india_buffer_without_s2) +
   tm_fill(col = hcl.colors(4, palette = "purple green")[3]) +
   tm_shape(india) +
-  tm_fill(col = "grey95") +
+  tm_fill(col = "gray95") +
   tm_layout(main.title = " ",
             title = "s2 switched off")
 

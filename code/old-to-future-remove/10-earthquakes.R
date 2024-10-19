@@ -17,7 +17,7 @@ print(paste0(nrow(earthquakes), " significant earthquakes happened last month"))
 
 # map ---------------------------------------------------------------------
 
-plot(st_geometry(world), border = "grey")
+plot(st_geometry(world), border = "gray")
 plot(st_geometry(earthquakes), cex = earthquakes$mag, add = TRUE)
 title(paste0(
   "Location of significant (mag > 5) Earthquakes in the month to ",
