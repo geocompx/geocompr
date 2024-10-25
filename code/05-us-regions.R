@@ -15,4 +15,4 @@ us_facet = rbind(us_states_facet, regions_facet) |>
 
 tm_shape(us_facet) +
   tm_polygons("total_pop_15", fill.legend = tm_legend("Total population:")) +
-  tm_facets(by = "Level", ncols = 2, drop.units = TRUE)
+  tm_facets(by = "Level", ncol = 2, drop.units = TRUE)
