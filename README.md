@@ -211,7 +211,7 @@ with the following commands:
 ``` r
 install.packages("remotes")
 # To reproduce the first Part (chapters 1 to 8):
-install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
+install.packages("geocompkg", repos = c("https://geocompr.r-universe.dev", "https://cloud.r-project.org"), dependencies = TRUE, force = TRUE)
 ```
 
 Installing `geocompkg` will also install core packages required for
@@ -229,8 +229,8 @@ run!):
 ``` r
 # Install packages to fully reproduce book (may take several minutes):
 options(repos = c(
-  geocompx = 'https://geocompx.r-universe.dev',
-  cran = 'https://cloud.r-project.org/'
+  geocompx = "https://geocompx.r-universe.dev",
+  cran = "https://cloud.r-project.org/"
 ))
 # From geocompx.r-universe.dev (recommended):
 install.packages("geocompkg", dependencies = TRUE)
