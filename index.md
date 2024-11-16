@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2024-11-07'
+date: '2024-11-16'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -49,7 +49,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2024-11-07.
+This version of the book was built on GH Actions on 2024-11-16.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -245,7 +245,7 @@ The wider context and motivations underlying this book are covered in Chapter \@
 
 
 
-Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, florisvdh, babayoshihiko, katygregg, tibbles-and-tribbles, Lvulis, rsbivand, iod-ine, KiranmayiV, cuixueqin, defuneste, zmbc, erstearns, FlorentBedecarratsNM, dcooley, darrellcarvalho, marcosci, appelmar, MikeJohnPage, eyesofbambi, krystof236, nickbearman, tylerlittlefield, giocomai, KHwong12, LaurieLBaker, MarHer90, mdsumner, pat-s, sdesabbata, ahmohil, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, howardbaek, jimr1603, jbixon13, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, ganes1410, richfitz, VLucet, wdearden, yihui, adambhouston, chihinl, cshancock, e-clin, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz, and vlarmet.
+Many thanks to everyone who contributed directly and indirectly via the code hosting and collaboration site GitHub, including the following people who contributed direct via pull requests: prosoitos, tibbles-and-tribbles, florisvdh, babayoshihiko, katygregg, Lvulis, rsbivand, iod-ine, KiranmayiV, cuixueqin, defuneste, smkerr, zmbc, marcosci, darrellcarvalho, dcooley, FlorentBedecarratsNM, erstearns, appelmar, MikeJohnPage, eyesofbambi, krystof236, nickbearman, tylerlittlefield, sdesabbata, howardbaik, edzer, pat-s, giocomai, KHwong12, LaurieLBaker, eblondel, MarHer90, mdsumner, ahmohil, richfitz, VLucet, wdearden, yihui, adambhouston, chihinl, cshancock, e-clin, ec-nebi, gregor-d, jasongrahn, p-kono, pokyah, schuetzingit, tim-salabim, tszberkowitz, vlarmet, ateucher, annakrystalli, andtheWings, kant, gavinsimpson, Himanshuteli, yutannihilation, jimr1603, jbixon13, jkennedyie, olyerickson, yvkschaefer, katiejolly, kwhkim, layik, mpaulacaldas, mtennekes, mvl22, and ganes1410.
 Thanks to Marco Sciaini who created the front cover image for the first edition and to Benjamin Nowak who created the cover image for the second edition.
 See `code/frontcover.R` and `code/frontcover2.R` for the reproducible code that generated these visualizations.
 Dozens more people contributed online, by raising and commenting on issues, and by providing feedback via social media.
