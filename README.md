@@ -25,8 +25,12 @@ please [cite
 it](https://github.com/geocompx/geocompr/raw/main/CITATION.bib) as
 follows:
 
-> Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2019).
+> Lovelace, Robin, Jakub Nowosad and Jannes Muenchow (2025).
 > Geocomputation with R. The R Series. CRC Press.
+
+To learn more about the second edition of the book, see the [“Second
+edition of Geocomputation with R is complete” blog
+post](https://geocompx.org/post/2024/geocompr2-bp3/).
 
 The first version of the book has been published by [CRC
 Press](https://www.crcpress.com/9781138304512) in the [R
@@ -35,62 +39,37 @@ and can be viewed online at
 [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). Read the
 latest version at [r.geocompx.org](https://r.geocompx.org/).
 
+<!-- 
 ### Note: we are actively working on the Second Edition 🏗
-
-<details>
-<summary>
-Summary of the changes
-</summary>
-
-Since commencing work on the Second Edition in September 2021 much has
-changed, including:
-
-- Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits
-  related to this update
-  [here](https://github.com/geocompx/geocompr/search?q=terra&type=commits))
-- Update of Chapter 7 to include mention alternative ways or reading-in
-  OSM data in [\#656](https://github.com/geocompx/geocompr/pull/656)
-- Refactor build settings so the book builds on Docker images in the
-  [geocompr/docker](https://github.com/geocompx/docker) repo
-- Improve the experience of using the book in Binder (ideal for trying
-  out the code before installing or updating the necessary R packages),
-  as documented in issue
-  [\#691](https://github.com/geocompx/geocompr/issues/691) (thanks to
-  [yuvipanda](https://github.com/yuvipanda))
-- Improved communication of binary spatial predicates in Chapter 4 (see
-  [\#675](https://github.com/geocompx/geocompr/pull/675))
-- New section on the links between subsetting and clipping (see
-  [\#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
-- New
-  [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings)
-  on the dimensionally extended 9-intersection model (DE-9IM)
-- New [chapter](https://r.geocompx.org/raster-vector.html) on
-  raster-vector interactions split out from Chapter 5
-- New
-  [section](https://r.geocompx.org/spatial-class.html#the-sfheaders-package)
-  on the **sfheaders** package
-- New [section](https://r.geocompx.org/spatial-class.html#s2) in Chapter
-  2 on spherical geometry engines and the **s2** package
-- Replacement of code based on the old **mlr** package with code based
-  on the new **mlr3** package, as described in a huge [pull
-  request](https://github.com/geocompx/geocompr/pull/771)
-  <!-- Todo: update this bullet point (Rl 2021-11) -->
-  <!-- - Next issue  -->
-
+&#10;<details>
+  <summary>Summary of the changes</summary>
+&#10;Since commencing work on the Second Edition in September 2021 much has changed, including:
+&#10;- Replacement of `raster` with `terra` in Chapters 1 to 7 (see commits related to this update [here](https://github.com/geocompx/geocompr/search?q=terra&type=commits)) 
+- Update of Chapter 7 to include mention alternative ways or reading-in OSM data in [#656](https://github.com/geocompx/geocompr/pull/656)
+- Refactor build settings so the book builds on Docker images in the [geocompr/docker](https://github.com/geocompx/docker) repo
+- Improve the experience of using the book in Binder (ideal for trying out the code before installing or updating the necessary R packages), as documented in issue [#691](https://github.com/geocompx/geocompr/issues/691) (thanks to [yuvipanda](https://github.com/yuvipanda))
+- Improved communication of binary spatial predicates in Chapter 4 (see [#675](https://github.com/geocompx/geocompr/pull/675))
+- New section on the links between subsetting and clipping (see [#698](https://github.com/geocompx/geocompr/pull/698)) in Chapter 5
+- New [section](https://r.geocompx.org/spatial-operations.html#de-9im-strings) on the dimensionally extended 9-intersection model (DE-9IM)
+- New [chapter](https://r.geocompx.org/raster-vector.html) on raster-vector interactions split out from Chapter 5
+- New [section](https://r.geocompx.org/spatial-class.html#the-sfheaders-package) on the **sfheaders** package
+- New [section](https://r.geocompx.org/spatial-class.html#s2) in Chapter 2 on spherical geometry engines and the **s2** package
+- Replacement of code based on the old **mlr** package with code based on the new **mlr3** package, as described in a huge [pull request](https://github.com/geocompx/geocompr/pull/771)
+- Adaptation to changes in the PROJ library, using WKT2 and SRID format for defining coordinate reference systems
+- Update to most figures using version 4 of the **tmap** package, with a different syntax and new features for improved customization and aesthetics
+- Several new graphs to enhance understanding, such as one illustrating the process of creating an `sf` object
+- Rewritten and expanded the "Bridges to GIS software" chapter, including new packages like **qgisprocess**, **Rsagacmd**, and **rgrass**
+- Rewritten the "Transportation" chapter, introducing new sections on routes and route networks
+- New book parts related to the creation of geographic metadata and connecting R with cloud services
+<!-- Todo: update this bullet point (Rl 2023-03) -->
 <!-- Todo: add news file? (RL 2021-11) -->
 <!-- See NEWS.md for a summary of the changes. -->
+<!--
+See [https://github.com/geocompx/geocompr/compare/1.9...main](https://github.com/geocompx/geocompr/compare/1.9...main#files_bucket) for a continuously updated summary of the changes to date.
+This shows 20k+ lines of code/prose added, lots of refactoring!
+</details> -->
 
-See
-[https://github.com/geocompx/geocompr/compare/1.9…main](https://github.com/geocompx/geocompr/compare/1.9...main#files_bucket)
-for a continuously updated summary of the changes to date. At the time
-of writing (April 2022) there have been more than 10k lines of
-code/prose added, lots of refactoring!
-
-[![](https://user-images.githubusercontent.com/1825120/140612663-e62566a2-62ab-4a22-827a-e86f5ce7bd63.png)](https://github.com/geocompx/geocompr/compare/1.9...main)
-
-</details>
-
-Contributions at this stage are very welcome.
+Contributions are very welcome.
 
 ## Contributing
 
@@ -115,54 +94,38 @@ for the book’s style.
 
 Many thanks to all contributors to the book so far via GitHub (this list
 will update automatically): [prosoitos](https://github.com/prosoitos),
+[tibbles-and-tribbles](https://github.com/tibbles-and-tribbles),
 [florisvdh](https://github.com/florisvdh),
 [babayoshihiko](https://github.com/babayoshihiko),
 [katygregg](https://github.com/katygregg),
-[tibbles-and-tribbles](https://github.com/tibbles-and-tribbles),
 [Lvulis](https://github.com/Lvulis),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
 [KiranmayiV](https://github.com/KiranmayiV),
 [cuixueqin](https://github.com/cuixueqin),
 [defuneste](https://github.com/defuneste),
-[zmbc](https://github.com/zmbc),
-[erstearns](https://github.com/erstearns),
-[FlorentBedecarratsNM](https://github.com/FlorentBedecarratsNM),
-[dcooley](https://github.com/dcooley),
-[darrellcarvalho](https://github.com/darrellcarvalho),
+[smkerr](https://github.com/smkerr), [zmbc](https://github.com/zmbc),
 [marcosci](https://github.com/marcosci),
+[darrellcarvalho](https://github.com/darrellcarvalho),
+[dcooley](https://github.com/dcooley),
+[FlorentBedecarratsNM](https://github.com/FlorentBedecarratsNM),
+[erstearns](https://github.com/erstearns),
 [appelmar](https://github.com/appelmar),
 [MikeJohnPage](https://github.com/MikeJohnPage),
 [eyesofbambi](https://github.com/eyesofbambi),
 [krystof236](https://github.com/krystof236),
 [nickbearman](https://github.com/nickbearman),
 [tylerlittlefield](https://github.com/tylerlittlefield),
+[sdesabbata](https://github.com/sdesabbata),
+[howardbaik](https://github.com/howardbaik),
+[edzer](https://github.com/edzer), [pat-s](https://github.com/pat-s),
 [giocomai](https://github.com/giocomai),
 [KHwong12](https://github.com/KHwong12),
 [LaurieLBaker](https://github.com/LaurieLBaker),
+[eblondel](https://github.com/eblondel),
 [MarHer90](https://github.com/MarHer90),
 [mdsumner](https://github.com/mdsumner),
-[pat-s](https://github.com/pat-s),
-[sdesabbata](https://github.com/sdesabbata),
 [ahmohil](https://github.com/ahmohil),
-[ateucher](https://github.com/ateucher),
-[annakrystalli](https://github.com/annakrystalli),
-[andtheWings](https://github.com/andtheWings),
-[kant](https://github.com/kant),
-[gavinsimpson](https://github.com/gavinsimpson),
-[Himanshuteli](https://github.com/Himanshuteli),
-[yutannihilation](https://github.com/yutannihilation),
-[howardbaek](https://github.com/howardbaek),
-[jimr1603](https://github.com/jimr1603),
-[jbixon13](https://github.com/jbixon13),
-[olyerickson](https://github.com/olyerickson),
-[yvkschaefer](https://github.com/yvkschaefer),
-[katiejolly](https://github.com/katiejolly),
-[kwhkim](https://github.com/kwhkim), [layik](https://github.com/layik),
-[mpaulacaldas](https://github.com/mpaulacaldas),
-[mtennekes](https://github.com/mtennekes),
-[mvl22](https://github.com/mvl22),
-[ganes1410](https://github.com/ganes1410),
 [richfitz](https://github.com/richfitz),
 [VLucet](https://github.com/VLucet),
 [wdearden](https://github.com/wdearden),
@@ -179,7 +142,25 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [schuetzingit](https://github.com/schuetzingit),
 [tim-salabim](https://github.com/tim-salabim),
 [tszberkowitz](https://github.com/tszberkowitz),
-[vlarmet](https://github.com/vlarmet).
+[vlarmet](https://github.com/vlarmet),
+[ateucher](https://github.com/ateucher),
+[annakrystalli](https://github.com/annakrystalli),
+[andtheWings](https://github.com/andtheWings),
+[kant](https://github.com/kant),
+[gavinsimpson](https://github.com/gavinsimpson),
+[Himanshuteli](https://github.com/Himanshuteli),
+[yutannihilation](https://github.com/yutannihilation),
+[jimr1603](https://github.com/jimr1603),
+[jbixon13](https://github.com/jbixon13),
+[jkennedyie](https://github.com/jkennedyie),
+[olyerickson](https://github.com/olyerickson),
+[yvkschaefer](https://github.com/yvkschaefer),
+[katiejolly](https://github.com/katiejolly),
+[kwhkim](https://github.com/kwhkim), [layik](https://github.com/layik),
+[mpaulacaldas](https://github.com/mpaulacaldas),
+[mtennekes](https://github.com/mtennekes),
+[mvl22](https://github.com/mvl22),
+[ganes1410](https://github.com/ganes1410).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -255,7 +236,7 @@ options(repos = c(
 install.packages("geocompkg", dependencies = TRUE)
 
 # Alternatively from GitHub:
-remotes::install_github("geocompr/geocompkg", dependencies = TRUE)
+remotes::install_github("geocompx/geocompkg", dependencies = TRUE)
 ```
 
 You need a recent version of the GDAL, GEOS, PROJ and udunits libraries
@@ -272,7 +253,7 @@ rstudioapi::openProject("~/Downloads/geocompr")
 bookdown::render_book("index.Rmd") # to build the book
 browseURL("_book/index.html")      # to view it
 # Or, to serve a live preview the book and observe impact of changes:
-bookdown::serve_book()
+bookdown::serve_book(".")
 ```
 
 <!-- The code associated with each chapter is saved in the `code/chapters/` folder. -->
