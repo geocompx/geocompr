@@ -86,7 +86,10 @@ These can be installed using the [**remotes**](https://github.com/r-lib/remotes)
 
 ``` r
 install.packages("remotes")
-install.packages('geocompkg', repos = c('https://geocompr.r-universe.dev', 'https://cloud.r-project.org'), dependencies = TRUE, force = TRUE)
+install.packages("geocompkg", 
+                 repos = c("https://geocompr.r-universe.dev",
+                           "https://cloud.r-project.org"), 
+                 dependencies = TRUE, force = TRUE)
 ```
 
 After installing the book's dependencies, you can rebuild the book for testing and educational purposes.
