@@ -34,7 +34,7 @@ Unless you already have these packages installed, the first thing to do is to in
 install.packages("sf")
 install.packages("terra")
 install.packages("spData")
-install.packages("spDataLarge", repos = "https://nowosad.r-universe.dev")
+install.packages("spDataLarge", repos = "https://geocompr.r-universe.dev")
 ```
 
 

@@ -656,7 +656,6 @@ hawaii_map = tm_shape(hawaii) +
   tm_title("Hawaii") +
   tm_layout(frame = FALSE, bg.color = NA, 
             title.position = c("LEFT", "BOTTOM"))
-#> [v3->v4] `tm_layout()`: use 'tm_title()' instead of `tm_layout(title = )`
 alaska_map = tm_shape(alaska) +
   tm_polygons() + 
   tm_title("Alaska") +
