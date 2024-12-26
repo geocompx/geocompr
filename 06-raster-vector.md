@@ -216,7 +216,7 @@ zion_nlcd |>
 #> 1     1 Developed   4205
 #> 2     1 Barren     98285
 #> 3     1 Forest    298299
-#> 4     1 Shrubland 203701
+#> 4     1 Shrubland 203700
 #> # ℹ 3 more rows
 ```
 

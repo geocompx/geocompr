@@ -514,7 +514,7 @@ Use `as.numeric()` to coerce the result into a regular number.
 st_distance(london2, london_proj)
 #> Units: [m]
 #>      [,1]
-#> [1,] 2018
+#> [1,] 2016
 ```
 
 Functions for querying and reprojecting CRSs are demonstrated below with reference to `cycle_hire_osm`, an `sf` object from **spData** that represents 'docking stations' where you can hire bicycles in London.
