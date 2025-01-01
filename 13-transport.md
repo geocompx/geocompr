@@ -511,7 +511,7 @@ This is done using the publicly available OSRM service with the **stplanr** func
 
 ``` r
 routes_short = route(l = desire_lines_short, route_fun = route_osrm,
-                     osrm.profile = "bike")
+                     osrm.profile = "car")
 ```
 
 The output is `routes_short`, an `sf` object representing routes on the transport network\index{network} that are suitable for cycling (according to the OSRM routing engine at least), one for each desire line.
@@ -570,7 +570,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 3862
+#> [1] 3264
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
