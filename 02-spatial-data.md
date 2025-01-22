@@ -294,15 +294,15 @@ This is demonstrated below:
 
 
 ``` r
-world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
+world_dfr = st_read(system.file("shapes/world.gpkg", package = "spData"))
 #> Reading layer `world' from data source 
-#>   `/usr/local/lib/R/site-library/spData/shapes/world.shp' using driver `ESRI Shapefile'
+#>   `/usr/local/lib/R/site-library/spData/shapes/world.gpkg' using driver `GPKG'
 #> Simple feature collection with 177 features and 10 fields
 #> Geometry type: MULTIPOLYGON
 #> Dimension:     XY
 #> Bounding box:  xmin: -180 ymin: -89.9 xmax: 180 ymax: 83.6
 #> Geodetic CRS:  WGS 84
-world_tbl = read_sf(system.file("shapes/world.shp", package = "spData"))
+world_tbl = read_sf(system.file("shapes/world.gpkg", package = "spData"))
 class(world_dfr)
 #> [1] "sf"         "data.frame"
 class(world_tbl)
