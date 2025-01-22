@@ -100,8 +100,8 @@ world_mini
 
 
 ## ---------------------------------------------------------------------------------------------------
-world_dfr = st_read(system.file("shapes/world.shp", package = "spData"))
-world_tbl = read_sf(system.file("shapes/world.shp", package = "spData"))
+world_dfr = st_read(system.file("shapes/world.gpkg", package = "spData"))
+world_tbl = read_sf(system.file("shapes/world.gpkg", package = "spData"))
 class(world_dfr)
 class(world_tbl)
 
