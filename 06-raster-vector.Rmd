@@ -237,6 +237,17 @@ grid.text("B. Elevation along the line", vp = viewport(layout.pos.row = 1, layou
 print(rast_poly_line, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
 print(plot_transect, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
 ```
+The previous method calculates straight-line distances from the starting point, which may not reflect the actual length of curved or winding paths. To compute true distances along a non-linear route, the coordinates of the segmented points can be used to calculate cumulative distances between successive points:
+
+```r
+zion_transect_coordinates <- st_coordinates(zion_transect)
+point_distances <- c(
+  0, 
+  cumsum(sqrt(rowSums(diff(zion_transect_coordinates)^2)))
+)
+```
+
+This approach sums the Euclidean distance between each pair of consecutive points along the path, yielding a more realistic elevation profile for non-linear transects.
 
 \index{raster!extraction polygons} 
 The final type of geographic vector object for raster extraction is **polygons**.
