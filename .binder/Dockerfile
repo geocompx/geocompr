@@ -4,4 +4,4 @@ FROM ghcr.io/geocompx/docker:binder
 ARG NB_USER
 ARG NB_UID
 
-COPY --chown=${NB_USER} . ${R_HOME}
+COPY --chown=${NB_USER} . /home/rstudio
