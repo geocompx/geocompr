@@ -21,17 +21,17 @@ Packages **GGally**, **lgr**, **kernlab**, **mlr3measures**, **paradox**, **pROC
 library(sf)
 library(terra)
 library(dplyr)
-library(future)             # parallel processing
-library(lgr)                # logging framework for R
-library(mlr3)               # unified interface to machine learning algorithms
-library(mlr3learners)       # most important machine learning algorithms
-library(mlr3extralearners)  # access to even more learning algorithms
-library(mlr3proba)          # here needed for mlr3extralearners::list_learners()
-library(mlr3spatiotempcv)   # spatiotemporal resampling strategies
-library(mlr3tuning)         # hyperparameter tuning
-library(mlr3viz)            # plotting functions for mlr3 objects
-library(progressr)          # report progress updates
-library(pROC)               # compute roc values
+library(future) # parallel processing
+library(lgr) # logging framework for R
+library(mlr3) # unified interface to machine learning algorithms
+library(mlr3learners) # most important machine learning algorithms
+library(mlr3extralearners) # access to even more learning algorithms
+# library(mlr3proba)          # here needed for mlr3extralearners::list_learners()
+library(mlr3spatiotempcv) # spatiotemporal resampling strategies
+library(mlr3tuning) # hyperparameter tuning
+library(mlr3viz) # plotting functions for mlr3 objects
+library(progressr) # report progress updates
+library(pROC) # compute roc values
 ```
 
 Required data will be attached in due course.
@@ -78,7 +78,7 @@ A subset of the dataset used in that paper is provided in the **spDataLarge**\in
 
 ```{r 12-spatial-cv-2}
 data("lsl", "study_mask", package = "spDataLarge")
-ta = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
+ta <- terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))
 ```
 
 The above code loads three objects: a `data.frame` named `lsl`, an `sf` object named `study_mask` and a `SpatRaster` (see Section \@ref(raster-classes)) named `ta` containing terrain attribute rasters.
@@ -117,10 +117,12 @@ knitr::include_graphics("images/lsl-map-1.png")
 The first three rows of `lsl`, rounded to two significant digits, can be found in Table \@ref(tab:lslsummary).
 
 ```{r lslsummary, echo=FALSE, warning=FALSE}
-lsl_table = lsl |>
-  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~signif(., 2)))
-knitr::kable(lsl_table[c(1, 2, 350), ], caption = "Structure of the lsl dataset.",
-             caption.short = "`lsl` dataset.", booktabs = TRUE) |>
+lsl_table <- lsl |>
+  mutate(across(.cols = -any_of(c("x", "y", "lslpts")), ~ signif(., 2)))
+knitr::kable(lsl_table[c(1, 2, 350), ],
+  caption = "Structure of the lsl dataset.",
+  caption.short = "`lsl` dataset.", booktabs = TRUE
+) |>
   kableExtra::kable_styling(latex_options = "scale_down")
 ```
 
@@ -145,9 +147,10 @@ In R\index{R}, modeling functions are usually specified using formulas (see `?fo
 The following command specifies and runs a generalized linear model\index{GLM}:
 
 ```{r 12-spatial-cv-6}
-fit = glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
-          family = binomial(),
-          data = lsl)
+fit <- glm(lslpts ~ slope + cplan + cprof + elev + log10_carea,
+  family = binomial(),
+  data = lsl
+)
 ```
 
 It is worth understanding each of the three input arguments:
@@ -169,7 +172,7 @@ This is done with the generic `predict()` method, which in this case calls the f
 Setting `type` to `response` returns the predicted probabilities (of landslide occurrence) for each observation in `lsl`, as illustrated below (see `?predict.glm`).
 
 ```{r 12-spatial-cv-8}
-pred_glm = predict(object = fit, type = "response")
+pred_glm <- predict(object = fit, type = "response")
 head(pred_glm)
 ```
 
@@ -179,7 +182,7 @@ In addition to a model object (`fit`), the latter function also expects a `SpatR
 
 ```{r 12-spatial-cv-9, eval=FALSE}
 # making the prediction
-pred = terra::predict(ta, model = fit, type = "response")
+pred <- terra::predict(ta, model = fit, type = "response")
 ```
 
 ```{r lsl-susc, echo=FALSE, out.width="70%",fig.cap="Spatial distribution mapping of landslide susceptibility using a GLM.", fig.scap = "Spatial distribution of landslide susceptibility.", warning=FALSE}
@@ -299,15 +302,15 @@ Additionally, we should indicate the used CRS (`crs`) and decide if we want to u
 
 ```{r 12-spatial-cv-11, eval=TRUE}
 # 1. create task
-task = mlr3spatiotempcv::as_task_classif_st(
-  mlr3::as_data_backend(lsl), 
-  target = "lslpts", 
+task <- mlr3spatiotempcv::as_task_classif_st(
+  mlr3::as_data_backend(lsl),
+  target = "lslpts",
   id = "ecuador_lsl",
   positive = "TRUE",
   coordinate_names = c("x", "y"),
   crs = "EPSG:32717",
   coords_as_features = FALSE
-  )
+)
 ```
 
 Note that `mlr3spatiotempcv::as_task_classif_st()` also accepts an `sf`-object as input for the `backend` parameter.
@@ -330,28 +333,38 @@ To find out about learners that are able to model a binary response variable, we
 
 ```{r 12-spatial-cv-12, eval=FALSE}
 mlr3extralearners::list_mlr3learners(
-  filter = list(class = "classif", properties = "twoclass"), 
-  select = c("id", "mlr3_package", "required_packages")) |>
+  filter = list(class = "classif", properties = "twoclass"),
+  select = c("id", "mlr3_package", "required_packages")
+) |>
   head()
 ```
 
 ```{r lrns, echo=FALSE}
 # lrns_df = mlr3extralearners::list_mlr3learners(
-#   filter = list(class = "classif", properties = "twoclass"), 
+#   filter = list(class = "classif", properties = "twoclass"),
 #   select = c("id", "mlr3_package", "required_packages")) |>
 #   head()
 # dput(lrns_df)
-lrns_df = structure(list(Class = c("classif.adaboostm1", "classif.binomial",
-"classif.featureless", "classif.fnn", "classif.gausspr", "classif.IBk"
-), Name = c("ada Boosting M1", "Binomial Regression", "Featureless classifier",
-"Fast k-Nearest Neighbour", "Gaussian Processes", "k-Nearest Neighbours"
-), `Short name` = c("adaboostm1", "binomial", "featureless",
-"fnn", "gausspr", "ibk"), Package = c("RWeka", "stats", "mlr",
-"FNN", "kernlab", "RWeka")), row.names = c(NA, 6L), class = "data.frame")
-knitr::kable(lrns_df, 
-             caption = paste("Sample of available learners for binomial", 
-                             "tasks in the mlr3 package."), 
-             caption.short = "Sample of available learners.", booktabs = TRUE)
+lrns_df <- structure(list(Class = c(
+  "classif.adaboostm1", "classif.binomial",
+  "classif.featureless", "classif.fnn", "classif.gausspr", "classif.IBk"
+), Name = c(
+  "ada Boosting M1", "Binomial Regression", "Featureless classifier",
+  "Fast k-Nearest Neighbour", "Gaussian Processes", "k-Nearest Neighbours"
+), `Short name` = c(
+  "adaboostm1", "binomial", "featureless",
+  "fnn", "gausspr", "ibk"
+), Package = c(
+  "RWeka", "stats", "mlr",
+  "FNN", "kernlab", "RWeka"
+)), row.names = c(NA, 6L), class = "data.frame")
+knitr::kable(lrns_df,
+  caption = paste(
+    "Sample of available learners for binomial",
+    "tasks in the mlr3 package."
+  ),
+  caption.short = "Sample of available learners.", booktabs = TRUE
+)
 ```
 
 This yields all learners able to model two-class problems (landslide yes or no).
@@ -360,7 +373,7 @@ Additionally, we need to specify the `predict.type` which determines the type of
 
 ```{r 12-spatial-cv-13, eval=TRUE}
 # 2. specify learner
-learner = mlr3::lrn("classif.log_reg", predict_type = "prob")
+learner <- mlr3::lrn("classif.log_reg", predict_type = "prob")
 ```
 
 To access the help page of the learner and find out from which package it was taken, we can run:
@@ -384,8 +397,10 @@ learner$model
 ```
 
 ```{r 12-spatial-cv-17, eval=FALSE}
-fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
-          data = select(lsl, -x, -y))
+fit <- glm(lslpts ~ .,
+  family = binomial(link = "logit"),
+  data = select(lsl, -x, -y)
+)
 identical(fit$coefficients, learner$model$coefficients)
 ```
 -->
@@ -404,7 +419,7 @@ We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}:
 
 ```{r 12-spatial-cv-18, eval=TRUE}
 # 3. specify resampling
-resampling = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
+resampling <- mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
 To execute the spatial resampling, we run `resample()` using the previously specified task, learner, and resampling strategy.
@@ -417,14 +432,18 @@ This returns a `data.table` object with 500 rows -- one for each model.
 # reduce verbosity
 lgr::get_logger("mlr3")$set_threshold("warn")
 # run spatial cross-validation and save it to resample result glm (rr_glm)
-rr_spcv_glm = mlr3::resample(task = task,
-                             learner = learner,
-                             resampling = resampling)
+rr_spcv_glm <- mlr3::resample(
+  task = task,
+  learner = learner,
+  resampling = resampling
+)
 # compute the AUROC as a data.table
-score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc"))
+score_spcv_glm <- rr_spcv_glm$score(measure = mlr3::msr("classif.auc"))
 # keep only the columns you need
-score_spcv_glm = dplyr::select(score_spcv_glm, task_id, learner_id, 
-                               resampling_id, classif.auc)
+score_spcv_glm <- dplyr::select(
+  score_spcv_glm, task_id, learner_id,
+  resampling_id, classif.auc
+)
 ```
 
 The output of the preceding code chunk is a bias-reduced assessment of the model's predictive performance.
@@ -432,9 +451,11 @@ We have saved it as `extdata/12-bmr_score.rds` in the book's GitHub repository.
 If required, you can read it in as follows:
 
 ```{r 12-spatial-cv-21}
-score = readRDS("extdata/12-bmr_score.rds")
-score_spcv_glm = dplyr::filter(score, learner_id == "classif.log_reg", 
-                               resampling_id == "repeated_spcv_coords")
+score <- readRDS("extdata/12-bmr_score.rds")
+score_spcv_glm <- dplyr::filter(
+  score, learner_id == "classif.log_reg",
+  resampling_id == "repeated_spcv_coords"
+)
 ```
 
 To compute the mean AUROC over all 500 models, we run:
@@ -451,12 +472,16 @@ As expected (see Section \@ref(intro-cv)), the spatially cross-validated result 
 library(ggplot2)
 # rename the levels of resampling_id
 score[, resampling_id := as.factor(resampling_id) |>
-        forcats::fct_recode("conventional CV" = "repeated_cv", 
-                            "spatial CV" = "repeated_spcv_coords") |> 
-            forcats::fct_rev()]
+  forcats::fct_recode(
+    "conventional CV" = "repeated_cv",
+    "spatial CV" = "repeated_spcv_coords"
+  ) |>
+  forcats::fct_rev()]
 # create the boxplot
-ggplot2::ggplot(data = score[learner_id == "classif.log_reg"], 
-                mapping = ggplot2::aes(x = resampling_id, y = classif.auc)) +
+ggplot2::ggplot(
+  data = score[learner_id == "classif.log_reg"],
+  mapping = ggplot2::aes(x = resampling_id, y = classif.auc)
+) +
   ggplot2::geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
   ggplot2::theme_bw() +
   ggplot2::labs(y = "AUROC", x = "")
@@ -490,7 +515,7 @@ The classification\index{classification} task remains the same, hence, we can si
 Learners implementing SVM can be found using the `list_mlr3learners()` command of the **mlr3extralearners**.
 
 ```{r 12-spatial-cv-23, eval=TRUE, echo=TRUE}
-mlr3_learners = mlr3extralearners::list_mlr3learners()
+mlr3_learners <- mlr3extralearners::list_mlr3learners()
 mlr3_learners |>
   dplyr::filter(class == "classif" & grepl("svm", id)) |>
   dplyr::select(id, class, mlr3_package, required_packages)
@@ -502,11 +527,16 @@ Setting the `type` argument to `"C-svc"` makes sure that `ksvm()` is solving a c
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-fallback).
 
 ```{r 12-spatial-cv-24}
-lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
-                     type = "C-svc")
-lrn_ksvm$encapsulate(method = "try", 
-                     fallback = lrn("classif.featureless", 
-                                    predict_type = "prob"))
+lrn_ksvm <- mlr3::lrn("classif.ksvm",
+  predict_type = "prob", kernel = "rbfdot",
+  type = "C-svc"
+)
+lrn_ksvm$encapsulate(
+  method = "try",
+  fallback = lrn("classif.featureless",
+    predict_type = "prob"
+  )
+)
 ```
 
 The next stage is to specify a resampling strategy.
@@ -514,7 +544,7 @@ Again we will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatia
 
 ```{r 12-spatial-cv-25}
 # performance estimation level
-perf_level = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
+perf_level <- mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
 Note that this is the exact same code as used for the resampling for the GLM\index{GLM} in Section \@ref(glm); we have simply repeated it here as a reminder.
@@ -535,21 +565,21 @@ To find the optimal hyperparameter combination, we fit 50 models (`terminator` o
 
 ```{r 12-spatial-cv-26, eval=TRUE}
 # five spatially disjoint partitions
-tune_level = mlr3::rsmp("spcv_coords", folds = 5)
+tune_level <- mlr3::rsmp("spcv_coords", folds = 5)
 # define the outer limits of the randomly selected hyperparameters
-search_space = paradox::ps(
+search_space <- paradox::ps(
   C = paradox::p_dbl(lower = -12, upper = 15, trafo = function(x) 2^x),
   sigma = paradox::p_dbl(lower = -15, upper = 6, trafo = function(x) 2^x)
 )
 # use 50 randomly selected hyperparameters
-terminator = mlr3tuning::trm("evals", n_evals = 50)
-tuner = mlr3tuning::tnr("random_search")
+terminator <- mlr3tuning::trm("evals", n_evals = 50)
+tuner <- mlr3tuning::tnr("random_search")
 ```
 
 The next stage is to modify the learner `lrn_ksvm` in accordance with all the characteristics defining the hyperparameter tuning with `auto_tuner()`.
 
 ```{r 12-spatial-cv-27, eval=TRUE}
-at_ksvm = mlr3tuning::auto_tuner(
+at_ksvm <- mlr3tuning::auto_tuner(
   learner = lrn_ksvm,
   resampling = tune_level,
   measure = mlr3::msr("classif.auc"),
@@ -580,8 +610,9 @@ To set up the parallelization of the inner loop, we run:
 ```{r future, eval=FALSE}
 library(future)
 # execute the outer loop sequentially and parallelize the inner loop
-future::plan(list("sequential", "multisession"), 
-             workers = floor(availableCores() / 2))
+future::plan(list("sequential", "multisession"),
+  workers = floor(availableCores() / 2)
+)
 ```
 
 Additionally, we instructed **future** to only use half instead of all available cores (default), a setting that allows possible other users to work on the same high performance computing cluster in case one is used.
@@ -600,29 +631,35 @@ Note that runtime depends on many aspects: CPU speed, the selected algorithm, th
 
 ```{r 12-spatial-cv-30, eval=FALSE}
 progressr::with_progress(expr = {
-  rr_spcv_svm = mlr3::resample(task = task,
-                               learner = at_ksvm, 
-                               # outer resampling (performance level)
-                               resampling = perf_level,
-                               store_models = FALSE,
-                               encapsulate = "evaluate")
+  rr_spcv_svm <- mlr3::resample(
+    task = task,
+    learner = at_ksvm,
+    # outer resampling (performance level)
+    resampling = perf_level,
+    store_models = FALSE,
+    encapsulate = "evaluate"
+  )
 })
 # stop parallelization
 future:::ClusterRegistry("stop")
 # compute the AUROC values
-score_spcv_svm = rr_spcv_svm$score(measure = mlr3::msr("classif.auc")) 
+score_spcv_svm <- rr_spcv_svm$score(measure = mlr3::msr("classif.auc"))
 # keep only the columns you need
-score_spcv_svm = dplyr::select(score_spcv_svm, task_id, learner_id, 
-                               resampling_id, classif.auc)
+score_spcv_svm <- dplyr::select(
+  score_spcv_svm, task_id, learner_id,
+  resampling_id, classif.auc
+)
 ```
 
 In case you do not want to run the code locally, we have saved [score_svm](https://github.com/geocompx/geocompr/blob/main/extdata/12-bmr_score.rds) in the book's GitHub repository.
 They can be loaded as follows:
 
 ```{r 12-spatial-cv-31}
-score = readRDS("extdata/12-bmr_score.rds")
-score_spcv_svm = dplyr::filter(score, learner_id == "classif.ksvm.tuned", 
-                               resampling_id == "repeated_spcv_coords")
+score <- readRDS("extdata/12-bmr_score.rds")
+score_spcv_svm <- dplyr::filter(
+  score, learner_id == "classif.ksvm.tuned",
+  resampling_id == "repeated_spcv_coords"
+)
 ```
 
 Let's have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
@@ -665,6 +702,6 @@ We recommend the following resources in this direction:
 ## Exercises
 
 ```{r, echo=FALSE, results='asis'}
-res = knitr::knit_child('_12-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
-cat(res, sep = '\n')
+res <- knitr::knit_child("_12-ex.Rmd", quiet = TRUE, options = list(include = FALSE, eval = FALSE))
+cat(res, sep = "\n")
 ```
