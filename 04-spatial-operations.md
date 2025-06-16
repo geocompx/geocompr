@@ -1033,4 +1033,4 @@ Note: it may be wise to increase the cell size of the input raster to reduce com
 
 
 E9. Try to modify the approach used in the above exercise by weighting the distance raster with the elevation raster; every 100 altitudinal meters should increase the distance to the coast by 10 km.
-Next, compute and visualize the difference between the raster created using the Euclidean distance (E7) and the raster weighted by elevation.
+Next, compute and visualize the difference between the raster created using the Euclidean distance (E8) and the raster weighted by elevation.
