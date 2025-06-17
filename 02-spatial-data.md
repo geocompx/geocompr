@@ -983,7 +983,7 @@ Typing the name of the raster into the console, will print out the raster header
 ``` r
 my_rast
 #> class       : SpatRaster 
-#> dimensions  : 457, 465, 1  (nrow, ncol, nlyr)
+#> size        : 457, 465, 1  (nrow, ncol, nlyr)
 #> resolution  : 0.000833, 0.000833  (x, y)
 #> extent      : -113, -113, 37.1, 37.5  (xmin, xmax, ymin, ymax)
 #> coord. ref. : lon/lat WGS 84 (EPSG:4326) 
@@ -1063,7 +1063,7 @@ multi_raster_file = system.file("raster/landsat.tif", package = "spDataLarge")
 multi_rast = rast(multi_raster_file)
 multi_rast
 #> class       : SpatRaster 
-#> dimensions  : 1428, 1128, 4  (nrow, ncol, nlyr)
+#> size        : 1428, 1128, 4  (nrow, ncol, nlyr)
 #> resolution  : 30, 30  (x, y)
 #> extent      : 301905, 335745, 4111245, 4154085  (xmin, xmax, ymin, ymax)
 #> coord. ref. : WGS 84 / UTM zone 12N (EPSG:32612) 

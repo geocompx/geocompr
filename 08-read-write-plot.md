@@ -420,7 +420,7 @@ myurl = paste0("/vsicurl/https://zenodo.org/record/5774954/files/",
 snow = rast(myurl)
 snow
 #> class       : SpatRaster 
-#> dimensions  : 35849, 86400, 1  (nrow, ncol, nlyr)
+#> size        : 35849, 86400, 1  (nrow, ncol, nlyr)
 #> resolution  : 0.00417, 0.00417  (x, y)
 #> extent      : -180, 180, -62, 87.4  (xmin, xmax, ymin, ymax)
 #> coord. ref. : lon/lat WGS 84 (EPSG:4326) 

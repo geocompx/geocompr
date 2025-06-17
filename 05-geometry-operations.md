@@ -635,7 +635,7 @@ clip = rast(xmin = 0.9, xmax = 1.8, ymin = -0.45, ymax = 0.45,
             resolution = 0.3, vals = rep(1, 9))
 elev[clip, drop = FALSE]
 #> class       : SpatRaster 
-#> dimensions  : 2, 1, 1  (nrow, ncol, nlyr)
+#> size        : 2, 1, 1  (nrow, ncol, nlyr)
 #> resolution  : 0.5, 0.5  (x, y)
 #> extent      : 1, 1.5, -0.5, 0.5  (xmin, xmax, ymin, ymax)
 #> coord. ref. : lon/lat WGS 84 (EPSG:4326) 

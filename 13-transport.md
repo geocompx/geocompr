@@ -643,6 +643,13 @@ ways_centrality = ways_sfn |>
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
 ```
 
+
+```
+#> [plot mode] legend/component: Some components or legends are too "wide" and are
+#> therefore rescaled.
+#> ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.
+```
+
 <div class="figure" style="text-align: center">
 <img src="figures/wayssln-1.png" alt="Route network datasets. The gray lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above." width="100%" />
 <p class="caption">(\#fig:wayssln)Route network datasets. The gray lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above.</p>

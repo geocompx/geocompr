@@ -466,7 +466,8 @@ To do so, we only need to run the `predict` method of our fitted `AutoTuner` obj
 ``` r
 # predicting using the best hyperparameter combination
 autotuner_rf$predict(task)
-#> <PredictionRegr> for 84 observations:
+#> 
+#> ── <PredictionRegr> for 84 observations: ───────────────────────────────────────
 #>  row_ids  truth response
 #>        1 -1.084   -1.176
 #>        2 -0.975   -1.176

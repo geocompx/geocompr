@@ -129,7 +129,7 @@ input_ras = rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 ``` r
 input_ras
 #> class       : SpatRaster 
-#> dimensions  : 868, 642, 4  (nrow, ncol, nlyr)
+#> size        : 868, 642, 4  (nrow, ncol, nlyr)
 #> resolution  : 1000, 1000  (x, y)
 #> extent      : 4031000, 4673000, 2684000, 3552000  (xmin, xmax, ymin, ymax)
 #> coord. ref. : ETRS89-extended / LAEA Europe (EPSG:3035) 

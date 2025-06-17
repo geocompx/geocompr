@@ -7,7 +7,7 @@
 <title>Chapter 13 Transportation | Geocomputation with R</title>
 <meta name="author" content="Robin Lovelace, Jakub Nowosad, Jannes Muenchow">
 <meta name="description" content="Prerequisites This chapter uses the following packages:90 library(sf) library(dplyr) library(spDataLarge) library(stplanr)   # for processing geographic transport data library(tmap)     #...">
-<meta name="generator" content="bookdown 0.42 with bs4_book()">
+<meta name="generator" content="bookdown 0.43 with bs4_book()">
 <meta property="og:title" content="Chapter 13 Transportation | Geocomputation with R">
 <meta property="og:type" content="book">
 <meta property="og:url" content="https://r.geocompx.org/transport.html">
@@ -19,9 +19,9 @@
 <meta name="twitter:image" content="https://r.geocompx.org/images/cover2.png">
 <!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
-<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><link href="libs/Lato-0.4.9/font.css" rel="stylesheet">
-<link href="libs/Roboto_Mono-0.4.9/font.css" rel="stylesheet">
-<link href="libs/Montserrat-0.4.9/font.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><link href="libs/Lato-0.4.10/font.css" rel="stylesheet">
+<link href="libs/Roboto_Mono-0.4.10/font.css" rel="stylesheet">
+<link href="libs/Montserrat-0.4.10/font.css" rel="stylesheet">
 <script src="libs/bs3compat-0.9.0/transition.js"></script><script src="libs/bs3compat-0.9.0/tabs.js"></script><script src="libs/bs3compat-0.9.0/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
 <script src="libs/bs4_book-1.0.0/bs4_book.js"></script><meta name="citation_title" content="Chapter 13 Transportation | Geocomputation with R">
 <meta name="citation_author" content="Robin Lovelace">
@@ -704,6 +704,9 @@ The results demonstrate that each graph edge represents a segment: the segments 
 <code class="sourceCode R"><span><span class="va">ways_centrality</span> <span class="op">=</span> <span class="va">ways_sfn</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/activate.html">activate</a></span><span class="op">(</span><span class="st">"edges"</span><span class="op">)</span> <span class="op">|&gt;</span>  </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>betweenness <span class="op">=</span> <span class="fu">tidygraph</span><span class="fu">::</span><span class="fu"><a href="https://tidygraph.data-imaginist.com/reference/centrality.html">centrality_edge_betweenness</a></span><span class="op">(</span><span class="va">lengths</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<pre><code>#&gt; [plot mode] legend/component: Some components or legends are too "wide" and are
+#&gt; therefore rescaled.
+#&gt; ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.</code></pre>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:wayssln"></span>
 <img src="figures/wayssln-1.png" alt="Route network datasets. The gray lines represent a simplified road network, with segment thickness proportional to betweenness. The green lines represent potential cycling flows (one way) calculated with the code above." width="100%"><p class="caption">
@@ -727,20 +730,20 @@ We will identify promising locations for investment in sustainable transport inf
 The steps that got us to this stage included identifying short but car-dependent commuting routes (generated from desire lines) in Section <a href="transport.html#routes">13.6</a> and analysis of route network characteristics with the <strong>sfnetworks</strong> package in Section <a href="transport.html#route-networks">13.7</a>.
 The final code chunk of this chapter combines these strands of analysis, by overlaying estimates of cycling potential from the previous section on top of a new dataset representing areas within a short distance of cycling infrastructure.
 This new dataset is created in the code chunk below which: (1) filters out the cycleway entities from the <code>bristol_ways</code> object representing the transport network,(2) ‘unions’ the individual LINESTRING entities of the cycleways into a single multilinestring object (for speed of buffering),and (3) creates a 100 m buffer around them to create a polygon.</p>
-<div class="sourceCode" id="cb463"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb464"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">existing_cycleways_buffer</span> <span class="op">=</span> <span class="va">bristol_ways</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span><span class="op">(</span><span class="va">highway</span> <span class="op">==</span> <span class="st">"cycleway"</span><span class="op">)</span> <span class="op">|&gt;</span>    <span class="co"># 1) filter out cycleways</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html">st_union</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span>                       <span class="co"># 2) unite geometries</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_unary.html">st_buffer</a></span><span class="op">(</span>dist <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>               <span class="co"># 3) create buffer</span></span></code></pre></div>
 <p>The next stage is to create a dataset representing points on the network where there is high cycling potential but little provision for cycling.</p>
-<div class="sourceCode" id="cb464"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb465"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">route_network_no_infra</span> <span class="op">=</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_ops.html">st_difference</a></span><span class="op">(</span></span>
 <span>  <span class="va">route_network_scenario</span>,</span>
 <span>  <span class="va">route_network_scenario</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_set_crs</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html">st_crs</a></span><span class="op">(</span><span class="va">existing_cycleways_buffer</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  <span class="va">existing_cycleways_buffer</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The results of the preceding code chunks are shown in Figure <a href="transport.html#fig:cycleways">13.8</a>, which shows routes with high levels of car-dependency and high cycling potential but no cycleways.</p>
-<div class="sourceCode" id="cb465"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb466"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/tmap_mode.html">tmap_mode</a></span><span class="op">(</span><span class="st">"view"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://r-tmap.github.io/tmap/reference/qtm.html">qtm</a></span><span class="op">(</span><span class="va">route_network_no_infra</span>, basemaps <span class="op">=</span> <span class="fu">leaflet</span><span class="fu">::</span><span class="va"><a href="https://rstudio.github.io/leaflet/reference/providers.html">providers</a></span><span class="op">$</span><span class="va">Esri.WorldTopoMap</span>,</span>
 <span>    lines.lwd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
