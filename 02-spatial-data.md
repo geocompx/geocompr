@@ -48,7 +48,7 @@ The packages needed to run the code presented in this chapter can be 'loaded' (t
 
 ``` r
 library(sf)            # classes and functions for vector data
-#> Linking to GEOS 3.10.2, GDAL 3.4.1, PROJ 8.2.1; sf_use_s2() is TRUE
+#> Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
 ```
 
 The output from `library(sf)` reports which versions of key geographic libraries such as GEOS the package is using, as outlined in Section \@ref(intro-sf).
@@ -248,9 +248,11 @@ world_mini
 #> Dimension:     XY
 #> Bounding box:  xmin: -180 ymin: -18.3 xmax: 180 ymax: -0.95
 #> Geodetic CRS:  WGS 84
-#>   iso_a2 name_long continent                           geom
-#> 1     FJ      Fiji   Oceania MULTIPOLYGON (((-180 -16.6,...
-#> 2     TZ  Tanzania    Africa MULTIPOLYGON (((33.9 -0.95,...
+#> # A data frame: 2 × 4
+#>   iso_a2 name_long continent                                                geom
+#> * <chr>  <chr>     <chr>                                      <MULTIPOLYGON [°]>
+#> 1 FJ     Fiji      Oceania   (((-180 -16.6, -180 -16.5, -180 -16, -180 -16.1, -…
+#> 2 TZ     Tanzania  Africa    (((33.9 -0.95, 31.9 -1.03, 30.8 -1.01, 30.4 -1.13,…
 ```
 
 All this may seem rather complex, especially for a class system that is supposed to be 'simple'!
