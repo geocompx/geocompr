@@ -638,12 +638,7 @@ elev[clip]
 # terra::extract(elev, ext(clip))
 ```
 
-This amounts to retrieving the values of the first raster object (in this case `elev`) that fall within the extent of a second raster (here: `clip`), as illustrated in Figure \@ref(fig:raster-subset).
-
-<div class="figure" style="text-align: center">
-<img src="images/04_raster_subset.png" alt="Original raster (left), raster mask (middle), and output of masking a raster (right)." width="100%" />
-<p class="caption">(\#fig:raster-subset)Original raster (left), raster mask (middle), and output of masking a raster (right).</p>
-</div>
+This amounts to retrieving the values of the first raster object (in this case `elev`) that fall within the extent of a second raster (here: `clip`).
 
 The example above returned the values of specific cells, but in many cases spatial outputs from subsetting operations on raster datasets are needed.
 This can be done by setting the `drop` argument of the `[` operator to `FALSE`.
@@ -661,6 +656,11 @@ elev[1:2, drop = FALSE]    # spatial subsetting with cell IDs
 
 Another common use case of spatial subsetting is when a raster with `logical` (or `NA`) values is used to mask another raster with the same extent and resolution, as illustrated in Figure \@ref(fig:raster-subset).
 In this case, the `[` and `mask()` functions can be used (results not shown).
+
+<div class="figure" style="text-align: center">
+<img src="images/04_raster_subset.png" alt="Original raster (left), raster mask (middle), and output of masking a raster (right)." width="100%" />
+<p class="caption">(\#fig:raster-subset)Original raster (left), raster mask (middle), and output of masking a raster (right).</p>
+</div>
 
 
 ``` r
