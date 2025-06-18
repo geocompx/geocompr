@@ -532,7 +532,7 @@ Table: (\#tab:sfs-st-cast)Geometry casting on simple feature geometries (see Sec
 |GC(1)   |   9|    1|  NA|   NA|  NA|   NA|  1|
 
 __Note:__
-Note: Values in parentheses represent the number of features; NA means the operation is not available
+Values in parentheses represent the number of features; NA means the operation is not available
 
 
 
