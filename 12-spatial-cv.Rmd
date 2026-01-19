@@ -140,7 +140,7 @@ It might be a worthwhile exercise to compute the terrain attributes with the hel
 Before introducing the **mlr3**\index{mlr3 (package)} package, an umbrella package providing a unified interface to dozens of learning algorithms (Section \@ref(spatial-cv-with-mlr3)), it is worth taking a look at the conventional modeling interface in R\index{R}.
 This introduction to supervised statistical learning\index{statistical learning} provides the basis for doing spatial CV\index{cross-validation!spatial CV}, and contributes to a better grasp on the **mlr3**\index{mlr3 (package)} approach presented subsequently.
 
-Supervised learning involves predicting a response variable as a function of predictors (Section \@ref(intro-cv)). 
+Supervised learning involves predicting a response variable as a function of predictors (Section \@ref(intro-cv)).
 In R\index{R}, modeling functions are usually specified using formulas (see `?formula` for more details on R formulas).
 The following command specifies and runs a generalized linear model\index{GLM}:
 
@@ -173,7 +173,7 @@ pred_glm = predict(object = fit, type = "response")
 head(pred_glm)
 ```
 
-Spatial distribution maps can be made by applying the coefficients to the predictor rasters. 
+Spatial distribution maps can be made by applying the coefficients to the predictor rasters.
 This can be done manually or with `terra::predict()`.
 In addition to a model object (`fit`), the latter function also expects a `SpatRaster` with the predictors (raster layers) named as in the model's input data frame (Figure \@ref(fig:lsl-susc)).
 
@@ -213,10 +213,10 @@ Here, when making predictions, we neglect spatial autocorrelation\index{autocorr
 However, it is possible to include spatial autocorrelation\index{autocorrelation!spatial} structures into models as well as into predictions.
 Though, this is beyond the scope of this book, we give the interested reader some pointers where to look it up:
 
-1. The predictions of regression kriging combines the predictions of a regression with the kriging of the regression's residuals [@goovaerts_geostatistics_1997; @hengl_practical_2007; @bivand_applied_2013]. 
-2. One can also add a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`, @zuur_mixed_2009; @zuur_beginners_2017].  
+1. The predictions of regression kriging combines the predictions of a regression with the kriging of the regression's residuals [@goovaerts_geostatistics_1997; @hengl_practical_2007; @bivand_applied_2013].
+2. One can also add a spatial correlation (dependency) structure to a generalized least squares model  [`nlme::gls()`, @zuur_mixed_2009; @zuur_beginners_2017].
 3. One can also use mixed-effect modeling approaches.
-Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009]. 
+Basically, a random effect imposes a dependency structure on the response variable which in turn allows for observations of one class to be more similar to each other than to those of another class [@zuur_mixed_2009].
 Classes can be, for example, bee hives, owl nests, vegetation transects or an altitudinal stratification.
 This mixed modeling approach assumes normal and independent distributed random intercepts.
 This can even be extended by using a random intercept that is normal and spatially dependent.
@@ -225,9 +225,9 @@ For this, however, you will have to resort most likely to Bayesian modeling appr
 Spatial distribution mapping is one very important outcome of a model (Figure \@ref(fig:lsl-susc)).
 Even more important is how good the underlying model is at making them since a prediction map is useless if the model's predictive performance is bad.
 One of the most popular measures to assess the predictive performance of a binomial model is the Area Under the Receiver Operator Characteristic Curve (AUROC)\index{AUROC}.
-This is a value between 0.5 and 1.0, with 0.5 indicating a model that is no better than random and 1.0 indicating perfect prediction of the two classes. 
+This is a value between 0.5 and 1.0, with 0.5 indicating a model that is no better than random and 1.0 indicating perfect prediction of the two classes.
 Thus, the higher the AUROC\index{AUROC}, the better the model's predictive power.
-The following code chunk computes the AUROC\index{AUROC} value of the model with `roc()`, which takes the response and the predicted values as inputs. 
+The following code chunk computes the AUROC\index{AUROC} value of the model with `roc()`, which takes the response and the predicted values as inputs.
 `auc()` returns the area under the curve.
 
 ```{r 12-spatial-cv-10, message=FALSE, eval=FALSE}
@@ -236,15 +236,15 @@ pROC::auc(pROC::roc(lsl$lslpts, fitted(fit)))
 ```
 
 An AUROC\index{AUROC} value of 0.82 represents a good fit.
-However, this is an overoptimistic estimation since we have computed it on the complete dataset. 
+However, this is an overoptimistic estimation since we have computed it on the complete dataset.
 To derive a biased-reduced assessment, we have to use cross-validation\index{cross-validation} and in the case of spatial data should make use of spatial CV\index{cross-validation!spatial CV}.
 
-## Introduction to (spatial) cross-validation {#intro-cv} 
+## Introduction to (spatial) cross-validation {#intro-cv}
 
 Cross-validation\index{cross-validation} belongs to the family of resampling methods\index{resampling} [@james_introduction_2013].
 The basic idea is to split (repeatedly) a dataset into training and test sets whereby the training data is used to fit a model which then is applied to the test set.
 Comparing the predicted values with the known response values from the test set (using a performance measure such as the AUROC\index{AUROC} in the binomial case) gives a bias-reduced assessment of the model's capability to generalize the learned relationship to independent data.
-For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure \@ref(fig:partitioning)). 
+For example, a 100-repeated 5-fold cross-validation means to randomly split the data into five partitions (folds) with each fold being used once as a test set (see upper row of Figure \@ref(fig:partitioning)).
 This guarantees that each observation is used once in one of the test sets, and requires the fitting of five models.
 Subsequently, this procedure is repeated 100 times.
 Of course, the data splitting will differ in each repetition.
@@ -300,8 +300,8 @@ Additionally, we should indicate the used CRS (`crs`) and decide if we want to u
 ```{r 12-spatial-cv-11, eval=TRUE}
 # 1. create task
 task = mlr3spatiotempcv::as_task_classif_st(
-  mlr3::as_data_backend(lsl), 
-  target = "lslpts", 
+  mlr3::as_data_backend(lsl),
+  target = "lslpts",
   id = "ecuador_lsl",
   positive = "TRUE",
   coordinate_names = c("x", "y"),
@@ -324,20 +324,20 @@ mlr3viz::autoplot(task, type = "pairs")
 ```
 
 Having created a task, we need to choose a **learner** that determines the statistical learning\index{statistical learning} method to use.
-All classification\index{classification} **learners** start with `classif.` and all regression\index{regression} learners with `regr.` (see `?Learner` for details). 
-`mlr3extralearners::list_mlr3learners()` lists all available learners and from which package **mlr3** imports them (Table \@ref(tab:lrns)). 
+All classification\index{classification} **learners** start with `classif.` and all regression\index{regression} learners with `regr.` (see `?Learner` for details).
+`mlr3extralearners::list_mlr3learners()` lists all available learners and from which package **mlr3** imports them (Table \@ref(tab:lrns)).
 To find out about learners that are able to model a binary response variable, we can run:
 
 ```{r 12-spatial-cv-12, eval=FALSE}
 mlr3extralearners::list_mlr3learners(
-  filter = list(class = "classif", properties = "twoclass"), 
+  filter = list(class = "classif", properties = "twoclass"),
   select = c("id", "mlr3_package", "required_packages")) |>
   head()
 ```
 
 ```{r lrns, echo=FALSE}
 # lrns_df = mlr3extralearners::list_mlr3learners(
-#   filter = list(class = "classif", properties = "twoclass"), 
+#   filter = list(class = "classif", properties = "twoclass"),
 #   select = c("id", "mlr3_package", "required_packages")) |>
 #   head()
 # dput(lrns_df)
@@ -348,9 +348,9 @@ lrns_df = structure(list(Class = c("classif.adaboostm1", "classif.binomial",
 ), `Short name` = c("adaboostm1", "binomial", "featureless",
 "fnn", "gausspr", "ibk"), Package = c("RWeka", "stats", "mlr",
 "FNN", "kernlab", "RWeka")), row.names = c(NA, 6L), class = "data.frame")
-knitr::kable(lrns_df, 
-             caption = paste("Sample of available learners for binomial", 
-                             "tasks in the mlr3 package."), 
+knitr::kable(lrns_df,
+             caption = paste("Sample of available learners for binomial",
+                             "tasks in the mlr3 package."),
              caption.short = "Sample of available learners.", booktabs = TRUE)
 ```
 
@@ -370,7 +370,7 @@ learner$help()
 ```
 
 <!--
-Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task. 
+Having specified a learner and a task, we can train our model which basically executes the `glm()` command in the background for our task.
 
 ```{r 12-spatial-cv-15, eval=FALSE}
 learner$train(task)
@@ -384,19 +384,19 @@ learner$model
 ```
 
 ```{r 12-spatial-cv-17, eval=FALSE}
-fit = glm(lslpts ~ ., family = binomial(link = "logit"), 
+fit = glm(lslpts ~ ., family = binomial(link = "logit"),
           data = select(lsl, -x, -y))
 identical(fit$coefficients, learner$model$coefficients)
 ```
 -->
 
-The setup steps for modeling with **mlr3**\index{mlr3 (package)} may seem tedious. 
+The setup steps for modeling with **mlr3**\index{mlr3 (package)} may seem tedious.
 But remember, this single interface provides access to the 130+ learners shown by `mlr3extralearners::list_mlr3learners()`; it would be far more tedious to learn the interface for each learner!
 Further advantages are simple parallelization of resampling techniques and the ability to tune machine learning hyperparameters\index{hyperparameter} (see Section \@ref(svm)).
 Most importantly, (spatial) resampling in **mlr3spatiotempcv** [@schratz_mlr3spatiotempcv_2021] is straightforward, requiring only two more steps: specifying a resampling method and running it.
 We will use a 100-repeated 5-fold spatial CV\index{cross-validation!spatial CV}: five partitions will be chosen based on the provided coordinates in our `task` and the partitioning will be repeated 100 times:[^13]
 
-[^13]: 
+[^13]:
 
     Note that package **sperrorest** initially implemented spatial cross-validation in R [@brenning_spatial_2012].
     In the meantime, its functionality was integrated into the **mlr3** ecosystem which is the reason why we are using **mlr3** [@schratz_hyperparameter_2019]. The **tidymodels** framework is another umbrella package for streamlined modeling in R; however, it only recently integrated support for spatial cross-validation via **spatialsample**, which so far only supports one spatial resampling method.
@@ -408,7 +408,7 @@ resampling = mlr3::rsmp("repeated_spcv_coords", folds = 5, repeats = 100)
 ```
 
 To execute the spatial resampling, we run `resample()` using the previously specified task, learner, and resampling strategy.
-This takes some time (around 15 seconds on a modern laptop) because it computes 500 resampling partitions and 500 models. 
+This takes some time (around 15 seconds on a modern laptop) because it computes 500 resampling partitions and 500 models.
 Again, we choose the AUROC as performance measure.
 To retrieve it, we use the `score()` method of the resampling result output object (`score_spcv_glm`).
 This returns a `data.table` object with 500 rows -- one for each model.
@@ -423,7 +423,7 @@ rr_spcv_glm = mlr3::resample(task = task,
 # compute the AUROC as a data.table
 score_spcv_glm = rr_spcv_glm$score(measure = mlr3::msr("classif.auc"))
 # keep only the columns you need
-score_spcv_glm = dplyr::select(score_spcv_glm, task_id, learner_id, 
+score_spcv_glm = dplyr::select(score_spcv_glm, task_id, learner_id,
                                resampling_id, classif.auc)
 ```
 
@@ -433,7 +433,7 @@ If required, you can read it in as follows:
 
 ```{r 12-spatial-cv-21}
 score = readRDS("extdata/12-bmr_score.rds")
-score_spcv_glm = dplyr::filter(score, learner_id == "classif.log_reg", 
+score_spcv_glm = dplyr::filter(score, learner_id == "classif.log_reg",
                                resampling_id == "repeated_spcv_coords")
 ```
 
@@ -451,11 +451,11 @@ As expected (see Section \@ref(intro-cv)), the spatially cross-validated result 
 library(ggplot2)
 # rename the levels of resampling_id
 score[, resampling_id := as.factor(resampling_id) |>
-        forcats::fct_recode("conventional CV" = "repeated_cv", 
-                            "spatial CV" = "repeated_spcv_coords") |> 
+        forcats::fct_recode("conventional CV" = "repeated_cv",
+                            "spatial CV" = "repeated_spcv_coords") |>
             forcats::fct_rev()]
 # create the boxplot
-ggplot2::ggplot(data = score[learner_id == "classif.log_reg"], 
+ggplot2::ggplot(data = score[learner_id == "classif.log_reg"],
                 mapping = ggplot2::aes(x = resampling_id, y = classif.auc)) +
   ggplot2::geom_boxplot(fill = c("lightblue2", "mistyrose2")) +
   ggplot2::theme_bw() +
@@ -498,14 +498,14 @@ mlr3_learners |>
 
 Of the options, we will use `ksvm()` from the **kernlab** package [@karatzoglou_kernlab_2004].
 To allow for non-linear relationships, we use the popular radial basis function (or Gaussian) kernel (`"rbfdot" `) which is also the default of `ksvm()`.
-Setting the `type` argument to `"C-svc"` makes sure that `ksvm()` is solving a classification task. 
+Setting the `type` argument to `"C-svc"` makes sure that `ksvm()` is solving a classification task.
 To make sure that the tuning does not stop because of one failing model, we additionally define a fallback learner (for more information please refer to https://mlr3book.mlr-org.com/chapters/chapter10/advanced_technical_aspects_of_mlr3.html#sec-fallback).
 
 ```{r 12-spatial-cv-24}
 lrn_ksvm = mlr3::lrn("classif.ksvm", predict_type = "prob", kernel = "rbfdot",
                      type = "C-svc")
-lrn_ksvm$encapsulate(method = "try", 
-                     fallback = lrn("classif.featureless", 
+lrn_ksvm$encapsulate(method = "try",
+                     fallback = lrn("classif.featureless",
                                     predict_type = "prob"))
 ```
 
@@ -557,12 +557,20 @@ at_ksvm = mlr3tuning::auto_tuner(
   terminator = terminator,
   tuner = tuner
 )
+
+# again we need to set a fallback model
+at_ksvm$encapsulate(
+  method = "try",
+  fallback = lrn("classif.featureless",
+    predict_type = "prob"
+  )
+)
 ```
 
 The tuning is now set up to fit 250 models to determine optimal hyperparameters for one fold.
 Repeating this for each fold, we end up with 1,250 (250 \* 5) models for each repetition.
 Repeated 100 times means fitting a total of 125,000 models to identify optimal hyperparameters (Figure \@ref(fig:partitioning)).
-These are used in the performance estimation, which requires the fitting of another 500 models (5 folds \* 100 repetitions; see Figure \@ref(fig:partitioning)). 
+These are used in the performance estimation, which requires the fitting of another 500 models (5 folds \* 100 repetitions; see Figure \@ref(fig:partitioning)).
 To make the performance estimation processing chain even clearer, let us write down the commands we have given to the computer:
 
 1. Performance level (upper left part of Figure \@ref(fig:inner-outer)): split the dataset into five spatially disjoint (outer) subfolds.
@@ -580,7 +588,7 @@ To set up the parallelization of the inner loop, we run:
 ```{r future, eval=FALSE}
 library(future)
 # execute the outer loop sequentially and parallelize the inner loop
-future::plan(list("sequential", "multisession"), 
+future::plan(list("sequential", "multisession"),
              workers = floor(availableCores() / 2))
 ```
 
@@ -601,7 +609,7 @@ Note that runtime depends on many aspects: CPU speed, the selected algorithm, th
 ```{r 12-spatial-cv-30, eval=FALSE}
 progressr::with_progress(expr = {
   rr_spcv_svm = mlr3::resample(task = task,
-                               learner = at_ksvm, 
+                               learner = at_ksvm,
                                # outer resampling (performance level)
                                resampling = perf_level,
                                store_models = FALSE,
@@ -610,9 +618,9 @@ progressr::with_progress(expr = {
 # stop parallelization
 future:::ClusterRegistry("stop")
 # compute the AUROC values
-score_spcv_svm = rr_spcv_svm$score(measure = mlr3::msr("classif.auc")) 
+score_spcv_svm = rr_spcv_svm$score(measure = mlr3::msr("classif.auc"))
 # keep only the columns you need
-score_spcv_svm = dplyr::select(score_spcv_svm, task_id, learner_id, 
+score_spcv_svm = dplyr::select(score_spcv_svm, task_id, learner_id,
                                resampling_id, classif.auc)
 ```
 
@@ -621,11 +629,11 @@ They can be loaded as follows:
 
 ```{r 12-spatial-cv-31}
 score = readRDS("extdata/12-bmr_score.rds")
-score_spcv_svm = dplyr::filter(score, learner_id == "classif.ksvm.tuned", 
+score_spcv_svm = dplyr::filter(score, learner_id == "classif.ksvm.tuned",
                                resampling_id == "repeated_spcv_coords")
 ```
 
-Let's have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes. 
+Let's have a look at the final AUROC\index{AUROC}: the model's ability to discriminate the two classes.
 
 ```{r 12-spatial-cv-33}
 # final mean AUROC
@@ -634,7 +642,7 @@ round(mean(score_spcv_svm$classif.auc), 2)
 
 It appears that the GLM\index{GLM} (aggregated AUROC\index{AUROC} was `r score[resampling_id == "repeated_spcv_coords" & learner_id == "classif.log_reg", round(mean(classif.auc), 2)]`) is slightly better than the SVM\index{SVM} in this specific case.
 To guarantee an absolute fair comparison, one should also make sure that the two models use the exact same partitions -- something we have not shown here but have silently used in the background (see `code/12_cv.R` in the book's GitHub repository for more information).
-To do so, **mlr3** offers the functions `benchmark_grid()` and `benchmark()` [see also https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#sec-benchmarking, @bischl_applied_2024]. 
+To do so, **mlr3** offers the functions `benchmark_grid()` and `benchmark()` [see also https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#sec-benchmarking, @bischl_applied_2024].
 We will explore these functions in more detail in the Exercises.
 Please note also that using more than 50 iterations in the random search of the SVM would probably yield hyperparameters\index{hyperparameter} that result in models with a better AUROC [@schratz_hyperparameter_2019].
 On the other hand, increasing the number of random search iterations would also increase the total number of models and thus runtime.
@@ -645,10 +653,10 @@ This will be covered in Chapter \@ref(eco).
 
 ## Conclusions
 
-Resampling methods are an important part of a data scientist's toolbox [@james_introduction_2013]. 
+Resampling methods are an important part of a data scientist's toolbox [@james_introduction_2013].
 This chapter used cross-validation\index{cross-validation} to assess predictive performance of various models.
 As described in Section \@ref(intro-cv), observations with spatial coordinates may not be statistically independent due to spatial autocorrelation\index{autocorrelation!spatial}, violating a fundamental assumption of cross-validation.
-Spatial CV\index{cross-validation!spatial CV} addresses this issue by reducing bias introduced by spatial autocorrelation\index{autocorrelation!spatial}. 
+Spatial CV\index{cross-validation!spatial CV} addresses this issue by reducing bias introduced by spatial autocorrelation\index{autocorrelation!spatial}.
 
 The **mlr3**\index{mlr3 (package)} package facilitates (spatial) resampling\index{resampling} techniques in combination with the most popular statistical learning\index{statistical learning} techniques including linear regression\index{regression!linear}, semi-parametric models such as generalized additive models\index{generalized additive model} and machine learning\index{machine learning} techniques such as random forests\index{random forest}, SVMs\index{SVM}, and boosted regression trees [@bischl_mlr:_2016;@schratz_hyperparameter_2019].
 Machine learning algorithms often require hyperparameter\index{hyperparameter} inputs, the optimal 'tuning' of which can require thousands of model runs which require large computational resources, consuming much time, RAM and/or cores.
