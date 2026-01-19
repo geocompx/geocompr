@@ -674,7 +674,8 @@ Performing an algebraic operation on two objects with differing extents in R, th
 
 ``` r
 elev_3 = elev + elev_2
-#> Error: [+] extents do not match
+#> Error:
+#> ! [+] extents do not match
 ```
 
 However, we can align the extent of two rasters with `extend()`. 

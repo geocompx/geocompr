@@ -14,16 +14,16 @@ The chapter uses the following packages:
 library(sf)
 library(terra)
 library(dplyr)
-library(data.table)        # fast data frame manipulation (used by mlr3)
-library(mlr3)              # machine learning (see Chapter 12)
-library(mlr3spatiotempcv)  # spatiotemporal resampling 
-library(mlr3tuning)        # hyperparameter tuning package
-library(mlr3learners)      # interface to most important machine learning pkgs
-library(paradox)           # defining hyperparameter spaces
-library(ranger)            # random forest package
-library(qgisprocess)       # bridge to QGIS (Chapter 10)
-library(tree)              # decision tree package
-library(vegan)             # community ecology package
+library(data.table) # fast data frame manipulation (used by mlr3)
+library(mlr3) # machine learning (see Chapter 12)
+library(mlr3spatiotempcv) # spatiotemporal resampling
+library(mlr3tuning) # hyperparameter tuning package
+library(mlr3learners) # interface to most important machine learning pkgs
+library(paradox) # defining hyperparameter spaces
+library(ranger) # random forest package
+library(qgisprocess) # bridge to QGIS (Chapter 10)
+library(tree) # decision tree package
+library(vegan) # community ecology package
 ```
 
 ## Introduction
@@ -33,7 +33,7 @@ The case study provides an opportunity to bring together and extend concepts pre
 
 Fog oases, locally called *lomas*, are vegetation formations found on mountains along the coastal deserts of Peru and Chile.
 Similar ecosystems can be found elsewhere, including in the deserts of Namibia and along the coasts of Yemen and Oman [@galletti_land_2016].
-Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter, resulting in green southern-facing mountain slopes along the coastal strip of Peru. 
+Despite the arid conditions and low levels of precipitation of around 30-50 mm per year on average, fog deposition increases the amount of water available to plants during austral winter, resulting in green southern-facing mountain slopes along the coastal strip of Peru.
 The fog, which develops below the temperature inversion caused by the cold Humboldt current in austral winter, provides the name for this habitat.
 Every few years, the El Niño phenomenon brings torrential rainfall to this sun-baked environment, providing tree seedlings a chance to develop roots long enough to survive the following arid conditions [@dillon_lomas_2003].
 
@@ -66,8 +66,8 @@ All the data needed for the subsequent analyses is available via the **spDataLar
 
 ``` r
 data("study_area", "random_points", "comm", package = "spDataLarge")
-dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
-ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+dem <- rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi <- rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
 `study_area` is a polygon representing the outline of the study area, and `random_points` is an `sf` object containing the 100 randomly chosen sites.
@@ -119,7 +119,7 @@ qgisprocess::qgis_show_help("sagang:sagawetnessindex")
 #> ----------------
 #> Arguments
 #> ----------------
-#> 
+#>
 #> DEM: Elevation
 #> 	Argument type:	raster
 #> 	Acceptable values:
@@ -135,11 +135,11 @@ qgisprocess::qgis_show_help("sagang:sagawetnessindex")
 #> 	Argument type:	rasterDestination
 #> 	Acceptable values:
 #> 		- Path for new raster layer
-#>... 
+#>...
 #> ----------------
 #> Outputs
 #> ----------------
-#> 
+#>
 #> AREA: <outputRaster>
 #> 	Catchment area
 #> SLOPE: <outputRaster>
@@ -155,13 +155,14 @@ The resulting rasters\index{raster} are saved to temporary files with an `.sdat`
 
 ``` r
 # environmental predictors: catchment slope and catchment area
-ep = qgisprocess::qgis_run_algorithm(
+ep <- qgisprocess::qgis_run_algorithm(
   alg = "sagang:sagawetnessindex",
   DEM = dem,
-  SLOPE_TYPE = 1, 
+  SLOPE_TYPE = 1,
   SLOPE = tempfile(fileext = ".sdat"),
   AREA = tempfile(fileext = ".sdat"),
-  .quiet = TRUE)
+  .quiet = TRUE
+)
 ```
 
 This returns a list named `ep` containing the paths to the computed output rasters.
@@ -171,12 +172,12 @@ Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`
 
 ``` r
 # read in catchment area and catchment slope
-ep = ep[c("AREA", "SLOPE")] |>
+ep <- ep[c("AREA", "SLOPE")] |>
   unlist() |>
   rast()
-names(ep) = c("carea", "cslope") # assign better names 
-origin(ep) = origin(dem) # make sure rasters have the same origin
-ep = c(dem, ndvi, ep) # add dem and ndvi to the multi-layer SpatRaster object
+names(ep) <- c("carea", "cslope") # assign better names
+origin(ep) <- origin(dem) # make sure rasters have the same origin
+ep <- c(dem, ndvi, ep) # add dem and ndvi to the multi-layer SpatRaster object
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
@@ -184,32 +185,32 @@ A log10-transformation makes the distribution more normal.
 
 
 ``` r
-ep$carea = log10(ep$carea)
+ep$carea <- log10(ep$carea)
 ```
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
 
 ``` r
-ep = rast(system.file("raster/ep.tif", package = "spDataLarge"))
+ep <- rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 
 ``` r
-ep_rp = terra::extract(ep, random_points, ID = FALSE)
-random_points = cbind(random_points, ep_rp)
+ep_rp <- terra::extract(ep, random_points, ID = FALSE)
+random_points <- cbind(random_points, ep_rp)
 ```
 
 ## Reducing dimensionality {#nmds}
 
-Ordinations\index{ordination} are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s. 
+Ordinations\index{ordination} are a popular tool in vegetation science to extract the main information, frequently corresponding to ecological gradients, from large species-plot matrices mostly filled with 0s.
 However, they are also used in remote sensing\index{remote sensing}, the soil sciences, geomarketing\index{geomarketing} and many other fields.
-If you are unfamiliar with ordination\index{ordination} techniques or in need of a refresher, have a look at [Michael W. Palmer's webpage](https://ordination.okstate.edu/overview.htm) for a short introduction to popular ordination techniques in ecology and at @borcard_numerical_2011 for a deeper look on how to apply these techniques in R. 
+If you are unfamiliar with ordination\index{ordination} techniques or in need of a refresher, have a look at [Michael W. Palmer's webpage](https://ordination.okstate.edu/overview.htm) for a short introduction to popular ordination techniques in ecology and at @borcard_numerical_2011 for a deeper look on how to apply these techniques in R.
 **vegan**'s\index{vegan (package)} package documentation is also a very helpful resource (`vignette(package = "vegan")`).
 
-Principal component analysis (PCA\index{PCA}) is probably the most famous ordination\index{ordination} technique. 
+Principal component analysis (PCA\index{PCA}) is probably the most famous ordination\index{ordination} technique.
 It is a great tool to reduce dimensionality if one can expect linear relationships between variables, and if the joint absence of a variable in two plots (observations) can be considered a similarity.
 This is barely the case with vegetation data.
 
@@ -217,11 +218,11 @@ For one, the presence of a plant often follows a unimodal, i.e., a non-linear, r
 
 Secondly, the joint absence of a species in two plots is hardly an indication for similarity.
 Suppose a plant species is absent from the driest (e.g., an extreme desert) and the moistest locations (e.g., a tree savanna) of our sampling.
-Then we really should refrain from counting this as a similarity because it is very likely that the only thing these two completely different environmental settings have in common in terms of floristic composition is the shared absence of species (except for rare ubiquitous species). 
+Then we really should refrain from counting this as a similarity because it is very likely that the only thing these two completely different environmental settings have in common in terms of floristic composition is the shared absence of species (except for rare ubiquitous species).
 
 NMDS\index{NMDS} is one popular dimension-reducing technique used in ecology [@vonwehrden_pluralism_2009].
-NMDS\index{NMDS} reduces the rank-based differences between distances between objects in the original matrix and distances between the ordinated objects. 
-The difference is expressed as stress. 
+NMDS\index{NMDS} reduces the rank-based differences between distances between objects in the original matrix and distances between the ordinated objects.
+The difference is expressed as stress.
 The lower the stress value, the better the ordination, i.e., the low-dimensional representation of the original matrix.
 Stress values lower than 10 represent an excellent fit, stress values of around 15 are still good, and values greater than 20 represent a poor fit [@mccune_analysis_2002].
 In R, `metaMDS()` of the **vegan**\index{vegan (package)} package can execute a NMDS.
@@ -234,9 +235,9 @@ Hence, we need to dismiss all sites in which no species were found.
 
 ``` r
 # presence-absence matrix
-pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
+pa <- vegan::decostand(comm, "pa") # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
-pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
+pa <- pa[rowSums(pa) != 0, ] # 84 rows, 69 columns
 ```
 
 The resulting matrix serves as input for the NMDS\index{NMDS}.
@@ -249,15 +250,15 @@ To make sure that the algorithm converges, we set the number of steps to 500 usi
 
 ``` r
 set.seed(25072018)
-nmds = vegan::metaMDS(comm = pa, k = 4, try = 500)
+nmds <- vegan::metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
 #> ...
-#> Run 498 stress 0.08834745 
-#> ... Procrustes: rmse 0.004100446  max resid 0.03041186 
-#> Run 499 stress 0.08874805 
-#> ... Procrustes: rmse 0.01822361  max resid 0.08054538 
-#> Run 500 stress 0.08863627 
-#> ... Procrustes: rmse 0.01421176  max resid 0.04985418 
+#> Run 498 stress 0.08834745
+#> ... Procrustes: rmse 0.004100446  max resid 0.03041186
+#> Run 499 stress 0.08874805
+#> ... Procrustes: rmse 0.01822361  max resid 0.08054538
+#> Run 500 stress 0.08863627
+#> ... Procrustes: rmse 0.01421176  max resid 0.04985418
 #> *** Solution reached
 #> 0.08831395
 ```
@@ -275,15 +276,17 @@ Plotting the result reveals that the first axis is, as intended, clearly associa
 
 
 ``` r
-elev = dplyr::filter(random_points, id %in% rownames(pa)) |> 
+elev <- dplyr::filter(random_points, id %in% rownames(pa)) |>
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
-rotnmds = vegan::MDSrotate(nmds, elev)
+rotnmds <- vegan::MDSrotate(nmds, elev)
 # extracting the first two axes
-sc = vegan::scores(rotnmds, choices = 1:2, display = "sites")
+sc <- vegan::scores(rotnmds, choices = 1:2, display = "sites")
 # plotting the first axis against altitude
-plot(y = sc[, 1], x = elev, xlab = "elevation in m", 
-     ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
+plot(
+  y = sc[, 1], x = elev, xlab = "elevation in m",
+  ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8
+)
 ```
 
 <div class="figure" style="text-align: center">
@@ -299,7 +302,7 @@ To spatially visualize them, we can model the NMDS\index{NMDS} scores with the p
 ## Modeling the floristic gradient
 
 To predict the floristic gradient spatially, we use a random forest\index{random forest} model.
-Random forest\index{random forest} models are frequently applied in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@hengl_random_2018;@schratz_hyperparameter_2019]. 
+Random forest\index{random forest} models are frequently applied in environmental and ecological modeling, and often provide the best results in terms of predictive performance [@hengl_random_2018;@schratz_hyperparameter_2019].
 Here, we shortly introduce decision trees and bagging, since they form the basis of random forests\index{random forest}.
 We refer the reader to @james_introduction_2013 for a more detailed description of random forests\index{random forest} and related techniques.
 
@@ -310,9 +313,9 @@ We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)}
 ``` r
 # construct response-predictor matrix
 # id- and response variable
-rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
+rp <- data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-rp = inner_join(random_points, rp, by = "id")
+rp <- inner_join(random_points, rp, by = "id")
 ```
 
 Decision trees split the predictor space into a number of regions.
@@ -320,7 +323,7 @@ To illustrate this, we apply a decision tree to our data using the scores of the
 
 
 ``` r
-tree_mo = tree::tree(sc ~ dem, data = rp)
+tree_mo <- tree::tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
@@ -345,7 +348,7 @@ Finally, random forests\index{random forest} extend and improve bagging by decor
 To achieve this, random forests\index{random forest} use bagging, but in contrast to the traditional bagging where each tree is allowed to use all available predictors, random forests only use a random sample of all available predictors.
 
 <!--
-Recall that bagging is simply a special case of a random forest with m = p. Therefore, the randomForest() function can be used to perform both random forests and bagging. 
+Recall that bagging is simply a special case of a random forest with m = p. Therefore, the randomForest() function can be used to perform both random forests and bagging.
 The argument mtry=13 indicates that all 13 predictors should be considered
 for each split of the tree—in other words, that bagging should be done.
 @james_introduction_2013
@@ -363,23 +366,23 @@ The only differences are the following:
 Instead, we show how to tune hyperparameters\index{hyperparameter} for (spatial) predictions
 
 Remember that 125,500 models were necessary to retrieve bias-reduced performance estimates when using 100-repeated 5-fold spatial cross-validation\index{cross-validation!spatial CV} and a random search of 50 iterations in Section \@ref(svm).
-In the hyperparameter\index{hyperparameter} tuning level, we found the best hyperparameter combination which in turn was used in the outer performance level for predicting the test data of a specific spatial partition (see also Figure \@ref(fig:inner-outer)). 
+In the hyperparameter\index{hyperparameter} tuning level, we found the best hyperparameter combination which in turn was used in the outer performance level for predicting the test data of a specific spatial partition (see also Figure \@ref(fig:inner-outer)).
 This was done for five spatial partitions, and repeated a 100 times yielding in total 500 optimal hyperparameter combinations.
 Which one should we use for making spatial distribution maps?
-The answer is simple: none at all. 
+The answer is simple: none at all.
 Remember, the tuning was done to retrieve a bias-reduced performance estimate, not to do the best possible spatial prediction.
 For the latter, one estimates the best hyperparameter\index{hyperparameter} combination from the complete dataset.
-This means, the inner hyperparameter\index{hyperparameter} tuning level is no longer needed, which makes perfect sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible in any case. 
+This means, the inner hyperparameter\index{hyperparameter} tuning level is no longer needed, which makes perfect sense since we are applying our model to new data (unvisited field observations) for which the true outcomes are unavailable, hence testing is impossible in any case.
 Therefore, we tune the hyperparameters\index{hyperparameter} for a good spatial prediction on the complete dataset via a 5-fold spatial CV\index{cross-validation!spatial CV} with one repetition.
 <!-- If we used more than one repetition (say 2) we would retrieve multiple optimal tuned hyperparameter combinations (say 2) -->
 
 Having already constructed the input variables (`rp`), we are all set for specifying the **mlr3**\index{mlr3 (package)} building blocks (task, learner, and resampling).
-For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021 Section \@ref(spatial-cv-with-mlr3)], and since our response (`sc`) is numeric, we use a regression\index{regression} task.
+For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@schratz_mlr3spatiotempcv_2021, Section \@ref(spatial-cv-with-mlr3)], and since our response (`sc`) is numeric, we use a regression\index{regression} task.
 
 
 ``` r
 # create task
-task = mlr3spatiotempcv::as_task_regr_st(
+task <- mlr3spatiotempcv::as_task_regr_st(
   select(rp, -id, -spri),
   target = "sc",
   id = "mongon"
@@ -392,13 +395,13 @@ Next, we go on to construct a random forest\index{random forest} learner from th
 
 
 ``` r
-lrn_rf = lrn("regr.ranger", predict_type = "response")
+lrn_rf <- lrn("regr.ranger", predict_type = "response")
 ```
 
 As opposed to, for example, Support Vector Machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
 Still, tuning often moderately improves model results, and thus is worth the effort [@probst_hyperparameters_2018].
 In random forests\index{random forest}, the hyperparameters\index{hyperparameter} `mtry`, `min.node.size` and `sample.fraction` determine the degree of randomness, and should be tuned [@probst_hyperparameters_2018].
-`mtry` indicates how many predictor variables should be used in each tree. 
+`mtry` indicates how many predictor variables should be used in each tree.
 If all predictors are used, then this corresponds in fact to bagging (see beginning of Section \@ref(modeling-the-floristic-gradient)).
 The `sample.fraction` parameter specifies the fraction of observations to be used in each tree.
 Smaller fractions lead to greater diversity, and thus less correlated trees which often is desirable (see above).
@@ -411,7 +414,7 @@ Hyperparameter\index{hyperparameter} combinations will be selected randomly but 
 
 ``` r
 # specifying the search space
-search_space = paradox::ps(
+search_space <- paradox::ps(
   mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
   sample.fraction = paradox::p_dbl(lower = 0.2, upper = 0.9),
   min.node.size = paradox::p_int(lower = 1, upper = 10)
@@ -420,13 +423,13 @@ search_space = paradox::ps(
 
 Having defined the search space, we are all set for specifying our tuning via the `AutoTuner()` function.
 Since we deal with geographic data, we will again make use of spatial cross-validation to tune the hyperparameters\index{hyperparameter} (see Sections \@ref(intro-cv) and \@ref(spatial-cv-with-mlr3)).
-Specifically, we will use a 5-fold spatial partitioning with only one repetition (`rsmp()`). 
+Specifically, we will use a 5-fold spatial partitioning with only one repetition (`rsmp()`).
 In each of these spatial partitions, we run 50 models (`trm()`) while using randomly selected hyperparameter configurations (`tnr()`) within predefined limits (`seach_space`) to find the optimal hyperparameter\index{hyperparameter} combination [see also Section \@ref(svm) and https://mlr3book.mlr-org.com/chapters/chapter4/hyperparameter_optimization.html#sec-autotuner, @bischl_applied_2024].
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
 ``` r
-autotuner_rf = mlr3tuning::auto_tuner(
+autotuner_rf <- mlr3tuning::auto_tuner(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
   measure = mlr3::msr("regr.rmse"), # performance measure
@@ -441,7 +444,7 @@ Calling the `train()`-method of the `AutoTuner`-object finally runs the hyperpar
 
 ``` r
 # hyperparameter tuning
-set.seed(24092024)
+set.seed(19012026)
 autotuner_rf$train(task)
 ```
 
@@ -454,7 +457,7 @@ autotuner_rf$train(task)
 autotuner_rf$tuning_result
 #>     mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse
 #>    <int>           <num>         <int>             <list>    <list>     <num>
-#> 1:     4           0.784            10          <list[4]> <list[3]>     0.382
+#> 1:     4           0.803             2          <list[5]> <list[3]>      0.38
 ```
 
 ### Predictive mapping
@@ -469,21 +472,25 @@ autotuner_rf$predict(task)
 #> 
 #> ── <PredictionRegr> for 84 observations: ───────────────────────────────────────
 #>  row_ids  truth response
-#>        1 -1.084   -1.176
-#>        2 -0.975   -1.176
-#>        3 -0.912   -1.168
+#>        1 -1.084   -1.080
+#>        2 -0.975   -1.030
+#>        3 -0.912   -0.929
 #>      ---    ---      ---
-#>       82  0.814    0.594
-#>       83  0.814    0.746
-#>       84  0.808    0.807
+#>       82  0.814    0.637
+#>       83  0.814    0.785
+#>       84  0.808    0.824
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
 Given a multi-layer `SpatRaster` containing rasters named as the predictors used in the modeling, `terra::predict()` will also make spatial distribution maps, i.e., predict to new data.
+As an alternative, you can also use the dedicated **mlr3spatial** package for doing spatial predictions.
 
 
 ``` r
-pred = terra::predict(ep, model = autotuner_rf, fun = predict)
+pred <- terra::predict(ep, model = autotuner_rf$learner$model$model, fun = predict)
+
+# doing the same using mlr3spatial
+# pred <- mlr3spatial::predict_spatial(newdata = ep, learner = autotuner_rf)
 ```
 
 <div class="figure" style="text-align: center">
@@ -495,15 +502,15 @@ In case, `terra::predict()` does not support a model algorithm, you can still ma
 
 
 ``` r
-newdata = as.data.frame(as.matrix(ep))
-colSums(is.na(newdata))  # 0 NAs
+newdata <- as.data.frame(as.matrix(ep))
+colSums(is.na(newdata)) # 0 NAs
 # but assuming there were 0s results in a more generic approach
-ind = rowSums(is.na(newdata)) == 0
-tmp = autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
-newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
-pred_2 = ep$dem
+ind <- rowSums(is.na(newdata)) == 0
+tmp <- autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] <- data.table::as.data.table(tmp)[["response"]]
+pred_2 <- ep$dem
 # now fill the raster with the predicted values
-pred_2[] = newdata$pred
+pred_2[] <- newdata$pred
 # check if terra and our manual prediction is the same
 all(values(pred - pred_2) == 0)
 ```

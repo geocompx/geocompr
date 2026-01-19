@@ -570,7 +570,7 @@ routes_short_scenario = routes_short |>
   mutate(bicycle = bicycle + car_driver * uptake,
          car_driver = car_driver * (1 - uptake))
 sum(routes_short_scenario$bicycle) - sum(routes_short$bicycle)
-#> [1] 3242
+#> [1] 3241
 ```
 
 Having created a scenario in which approximately 4000 trips have switched from driving to cycling, we can now model where this updated modeled cycling activity will take place.
@@ -641,13 +641,6 @@ The results demonstrate that each graph edge represents a segment: the segments 
 ways_centrality = ways_sfn |> 
   activate("edges") |>  
   mutate(betweenness = tidygraph::centrality_edge_betweenness(lengths)) 
-```
-
-
-```
-#> [plot mode] legend/component: Some components or legends are too "wide" and are
-#> therefore rescaled.
-#> ℹ Set the tmap option `component.autoscale = FALSE` to disable rescaling.
 ```
 
 <div class="figure" style="text-align: center">

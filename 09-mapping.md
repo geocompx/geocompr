@@ -796,7 +796,8 @@ Switch **tmap** back to plotting mode with the same function:
 
 ``` r
 tmap_mode("plot")
-#> ℹ tmap mode set to "plot".
+#> ℹ tmap modes "plot" - "view"
+#> ℹ toggle with `tmap::ttm()`
 ```
 
 If you are not proficient with **tmap**, the quickest way to create interactive maps in R may be with **mapview**\index{mapview (package)}.
