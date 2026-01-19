@@ -15,16 +15,16 @@ The chapter uses the following packages:
 library(sf)
 library(terra)
 library(dplyr)
-library(data.table) # fast data frame manipulation (used by mlr3)
-library(mlr3) # machine learning (see Chapter 12)
-library(mlr3spatiotempcv) # spatiotemporal resampling
-library(mlr3tuning) # hyperparameter tuning package
-library(mlr3learners) # interface to most important machine learning pkgs
-library(paradox) # defining hyperparameter spaces
-library(ranger) # random forest package
-library(qgisprocess) # bridge to QGIS (Chapter 10)
-library(tree) # decision tree package
-library(vegan) # community ecology package
+library(data.table)        # fast data frame manipulation (used by mlr3)
+library(mlr3)              # machine learning (see Chapter 12)
+library(mlr3spatiotempcv)  # spatiotemporal resampling
+library(mlr3tuning)        # hyperparameter tuning package
+library(mlr3learners)      # interface to most important machine learning pkgs
+library(paradox)           # defining hyperparameter spaces
+library(ranger)            # random forest package
+library(qgisprocess)       # bridge to QGIS (Chapter 10)
+library(tree)              # decision tree package
+library(vegan)             # community ecology package
 ```
 
 ## Introduction
@@ -66,8 +66,8 @@ All the data needed for the subsequent analyses is available via the **spDataLar
 
 ```{r 15-eco-2}
 data("study_area", "random_points", "comm", package = "spDataLarge")
-dem <- rast(system.file("raster/dem.tif", package = "spDataLarge"))
-ndvi <- rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
 `study_area` is a polygon representing the outline of the study area, and `random_points` is an `sf` object containing the 100 randomly chosen sites.
@@ -171,14 +171,13 @@ The resulting rasters\index{raster} are saved to temporary files with an `.sdat`
 
 ```{r 15-eco-6, eval=FALSE}
 # environmental predictors: catchment slope and catchment area
-ep <- qgisprocess::qgis_run_algorithm(
+ep = qgisprocess::qgis_run_algorithm(
   alg = "sagang:sagawetnessindex",
   DEM = dem,
   SLOPE_TYPE = 1,
   SLOPE = tempfile(fileext = ".sdat"),
   AREA = tempfile(fileext = ".sdat"),
-  .quiet = TRUE
-)
+  .quiet = TRUE)
 ```
 
 This returns a list named `ep` containing the paths to the computed output rasters.
@@ -187,32 +186,32 @@ Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`
 
 ```{r 15-eco-7, eval=FALSE}
 # read in catchment area and catchment slope
-ep <- ep[c("AREA", "SLOPE")] |>
+ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
   rast()
-names(ep) <- c("carea", "cslope") # assign better names
-origin(ep) <- origin(dem) # make sure rasters have the same origin
-ep <- c(dem, ndvi, ep) # add dem and ndvi to the multi-layer SpatRaster object
+names(ep) = c("carea", "cslope") # assign better names
+origin(ep) = origin(dem) # make sure rasters have the same origin
+ep = c(dem, ndvi, ep) # add dem and ndvi to the multi-layer SpatRaster object
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
 A log10-transformation makes the distribution more normal.
 
 ```{r 15-eco-8, eval=FALSE}
-ep$carea <- log10(ep$carea)
+ep$carea = log10(ep$carea)
 ```
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
 ```{r 15-eco-9, cache.lazy=FALSE}
-ep <- rast(system.file("raster/ep.tif", package = "spDataLarge"))
+ep = rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 ```{r 15-eco-10, cache=TRUE, cache.lazy=FALSE, message=FALSE, warning=FALSE}
-ep_rp <- terra::extract(ep, random_points, ID = FALSE)
-random_points <- cbind(random_points, ep_rp)
+ep_rp = terra::extract(ep, random_points, ID = FALSE)
+random_points = cbind(random_points, ep_rp)
 ```
 
 ## Reducing dimensionality {#nmds}
@@ -246,9 +245,9 @@ Hence, we need to dismiss all sites in which no species were found.
 
 ```{r 15-eco-11}
 # presence-absence matrix
-pa <- vegan::decostand(comm, "pa") # 100 rows (sites), 69 columns (species)
+pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
-pa <- pa[rowSums(pa) != 0, ] # 84 rows, 69 columns
+pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ```
 
 The resulting matrix serves as input for the NMDS\index{NMDS}.
@@ -260,7 +259,7 @@ To make sure that the algorithm converges, we set the number of steps to 500 usi
 
 ```{r 15-eco-12, eval=FALSE, message=FALSE}
 set.seed(25072018)
-nmds <- vegan::metaMDS(comm = pa, k = 4, try = 500)
+nmds = vegan::metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
 #> ...
 #> Run 498 stress 0.08834745
@@ -278,7 +277,7 @@ saveRDS(nmds, "extdata/15-nmds.rds")
 ```
 
 ```{r 15-eco-14, include=FALSE}
-nmds <- readRDS("extdata/15-nmds.rds")
+nmds = readRDS("extdata/15-nmds.rds")
 ```
 
 A stress value of 9 represents a very good result, which means that the reduced ordination space represents the large majority of the variance of the input matrix.
@@ -289,88 +288,71 @@ Since humidity is highly correlated with elevation, we rotate the NMDS axes\inde
 Plotting the result reveals that the first axis is, as intended, clearly associated with altitude (Figure \@ref(fig:xy-nmds)).
 
 ```{r xy-nmds-code, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%", eval=FALSE}
-elev <- dplyr::filter(random_points, id %in% rownames(pa)) |>
+elev = dplyr::filter(random_points, id %in% rownames(pa)) |>
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
-rotnmds <- vegan::MDSrotate(nmds, elev)
+rotnmds = vegan::MDSrotate(nmds, elev)
 # extracting the first two axes
-sc <- vegan::scores(rotnmds, choices = 1:2, display = "sites")
+sc = vegan::scores(rotnmds, choices = 1:2, display = "sites")
 # plotting the first axis against altitude
-plot(
-  y = sc[, 1], x = elev, xlab = "elevation in m",
-  ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8
-)
+plot(y = sc[, 1], x = elev, xlab = "elevation in m",
+     ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
 ```
 
 ```{r xy-nmds, fig.cap="Plotting the first NMDS axis against altitude.", fig.scap = "First NMDS axis against altitude plot.", fig.asp=1, out.width="60%", message=FALSE, echo=FALSE}
-elev <- dplyr::filter(random_points, id %in% rownames(pa)) |>
+elev = dplyr::filter(random_points, id %in% rownames(pa)) |>
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
-rotnmds <- vegan::MDSrotate(nmds, elev)
+rotnmds = vegan::MDSrotate(nmds, elev)
 # extracting the first two axes
-sc <- vegan::scores(rotnmds, choices = 1:2, display = "sites")
+sc = vegan::scores(rotnmds, choices = 1:2, display = "sites")
 knitr::include_graphics("images/15_xy_nmds.png")
 ```
 
 ```{r 15-eco-15, eval=FALSE, echo=FALSE}
 # scores and rotated scores in one figure
-p1 <- xyplot(
-  scores(rotnmds, display = "sites")[, 2] ~
-    scores(rotnmds, display = "sites")[, 1],
-  pch = 16,
-  col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
-  xlab = list("Dimension 1", cex = 0.8),
-  ylab = list("Dimension 2", cex = 0.8),
-  scales = list(
-    x = list(relation = "same", cex = 0.8),
-    y = list(relation = "same", cex = 0.8),
-    # ticks on top are suppressed
-    tck = c(1, 0),
-    # plots axes labels only in row and column 1 and 4
-    alternating = c(1, 0, 0, 1),
-    draw = TRUE
-  ),
-  # we have to use the same colors in the legend as used for the plot
-  # points
-  par.settings = simpleTheme(
-    col = c("lightblue", "salmon"),
-    pch = 16, cex = 0.9
-  ),
-  # also the legend point size should be somewhat smaller
-  auto.key = list(
-    x = 0.7, y = 0.9, text = c("unrotated", "rotated"),
-    between = 0.5, cex = 0.9
-  ),
-  panel = function(x, y, ...) {
-    # Plot the points
-    panel.points(x, y, cex = 0.6, ...)
-    panel.points(
-      x = scores(nmds, display = "sites")[, 1],
-      y = scores(nmds, display = "sites")[, 2],
-      col = "salmon", pch = 16, cex = 0.6
-    )
-    panel.arrows(
-      x0 = scores(nmds, display = "sites")[, 1],
-      y0 = scores(nmds, display = "sites")[, 2],
-      x1 = x,
-      y1 = y,
-      length = 0.04,
-      lwd = 0.4
-    )
-  }
-)
+p1 = xyplot(scores(rotnmds, display = "sites")[, 2] ~
+              scores(rotnmds, display = "sites")[, 1], pch = 16,
+             col = "lightblue", xlim = c(-3, 2), ylim = c(-2, 2),
+             xlab = list("Dimension 1", cex = 0.8),
+             ylab = list("Dimension 2", cex = 0.8),
+             scales = list(x = list(relation = "same", cex = 0.8),
+                           y = list(relation = "same", cex = 0.8),
+                           # ticks on top are suppressed
+                           tck = c(1, 0),
+                           # plots axes labels only in row and column 1 and 4
+                           alternating = c(1, 0, 0, 1),
+                           draw = TRUE),
+             # we have to use the same colors in the legend as used for the plot
+             # points
+             par.settings = simpleTheme(col = c("lightblue", "salmon"),
+                                        pch = 16, cex = 0.9),
+             # also the legend point size should be somewhat smaller
+             auto.key = list(x = 0.7, y = 0.9, text = c("unrotated", "rotated"),
+                             between = 0.5, cex = 0.9),
+             panel = function(x, y, ...) {
+                           # Plot the points
+                           panel.points(x, y, cex = 0.6, ...)
+                           panel.points(x = scores(nmds, display = "sites")[, 1],
+                                        y = scores(nmds, display = "sites")[, 2],
+                                        col = "salmon", pch = 16, cex = 0.6)
+                           panel.arrows(x0 = scores(nmds, display = "sites")[, 1],
+                                        y0 = scores(nmds, display = "sites")[, 2],
+                                        x1 = x,
+                                        y1 = y,
+                                        length = 0.04,
+                                        lwd = 0.4)
+            })
 
 plot(scores(nmds, choices = 1:2, display = "sites"))
-points(scores(rotnmds, choices = 1:2, display = "sites"),
-  col = "lightblue",
-  pch = 16
-)
+points(scores(rotnmds, choices = 1:2, display = "sites"), col = "lightblue",
+       pch = 16)
 
-sc <- scores(nmds, choices = 1:2, display = "sites") |> as.data.frame()
-sc$id <- rownames(sc) |> as.numeric()
-rp <- inner_join(select(sc, id), st_drop_geometry(random_points))
-fit_1 <- envfit(nmds, select(rp, dem))
-fit_2 <- envfit(rotnmds, select(rp, dem))
+sc = scores(nmds, choices = 1:2, display = "sites") |> as.data.frame()
+sc$id = rownames(sc) |> as.numeric()
+rp = inner_join(select(sc, id), st_drop_geometry(random_points))
+fit_1 = envfit(nmds, select(rp, dem))
+fit_2 = envfit(rotnmds, select(rp, dem))
 par(mfrow = c(1, 2))
 plot(nmds, display = "sites")
 plot(fit_1)
@@ -394,16 +376,16 @@ We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)}
 ```{r 15-eco-16, message=FALSE, eval=TRUE}
 # construct response-predictor matrix
 # id- and response variable
-rp <- data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
+rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-rp <- inner_join(random_points, rp, by = "id")
+rp = inner_join(random_points, rp, by = "id")
 ```
 
 Decision trees split the predictor space into a number of regions.
 To illustrate this, we apply a decision tree to our data using the scores of the first NMDS\index{NMDS} axis as the response (`sc`) and altitude (`dem`) as the only predictor.
 
 ```{r 15-eco-17, eval=FALSE}
-tree_mo <- tree::tree(sc ~ dem, data = rp)
+tree_mo = tree::tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
@@ -466,7 +448,7 @@ For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@s
 
 ```{r 15-eco-20}
 # create task
-task <- mlr3spatiotempcv::as_task_regr_st(
+task = mlr3spatiotempcv::as_task_regr_st(
   select(rp, -id, -spri),
   target = "sc",
   id = "mongon"
@@ -478,7 +460,7 @@ Additionally, we got rid of the columns `id` and `spri`, since these variables s
 Next, we go on to construct a random forest\index{random forest} learner from the **ranger** package [@wright_ranger_2017].
 
 ```{r 15-eco-21}
-lrn_rf <- lrn("regr.ranger", predict_type = "response")
+lrn_rf = lrn("regr.ranger", predict_type = "response")
 ```
 
 As opposed to, for example, Support Vector Machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
@@ -496,7 +478,7 @@ Hyperparameter\index{hyperparameter} combinations will be selected randomly but 
 
 ```{r 15-eco-22}
 # specifying the search space
-search_space <- paradox::ps(
+search_space = paradox::ps(
   mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
   sample.fraction = paradox::p_dbl(lower = 0.2, upper = 0.9),
   min.node.size = paradox::p_int(lower = 1, upper = 10)
@@ -510,7 +492,7 @@ In each of these spatial partitions, we run 50 models (`trm()`) while using rand
 The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 ```{r 15-eco-23}
-autotuner_rf <- mlr3tuning::auto_tuner(
+autotuner_rf = mlr3tuning::auto_tuner(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
   measure = mlr3::msr("regr.rmse"), # performance measure
@@ -533,7 +515,7 @@ saveRDS(autotuner_rf, "extdata/15-tune.rds")
 ```
 
 ```{r 15-eco-26, echo=FALSE, cache=TRUE, cache.lazy=FALSE}
-autotuner_rf <- readRDS("extdata/15-tune.rds")
+autotuner_rf = readRDS("extdata/15-tune.rds")
 ```
 
 ```{r tuning-result, cache=TRUE, cache.lazy=FALSE}
@@ -555,43 +537,36 @@ Given a multi-layer `SpatRaster` containing rasters named as the predictors used
 As an alternative, you can also use the dedicated **mlr3spatial** package for doing spatial predictions.
 
 ```{r 15-eco-28, cache=TRUE, cache.lazy=FALSE, eval=FALSE}
-pred <- terra::predict(ep, model = autotuner_rf$learner$model$model, fun = predict)
+pred = terra::predict(ep, model = autotuner_rf$learner$model$model, fun = predict)
 
 # doing the same using mlr3spatial
-# pred <- mlr3spatial::predict_spatial(newdata = ep, learner = autotuner_rf)
+# pred = mlr3spatial::predict_spatial(newdata = ep, learner = autotuner_rf)
 ```
 
 ```{r rf-pred, echo=FALSE, eval=TRUE, fig.cap="Predictive mapping of the floristic gradient clearly revealing distinct vegetation belts.", fig.scap="Predictive mapping of the floristic gradient."}
-# hs <- terra::shade(
-#   terra::terrain(dem, v = "slope", unit = "radians"),
-#   terra::terrain(dem, v = "aspect", unit = "radians"),
-#   10, 200
-# ) |>
+# hs = terra::shade(terra::terrain(dem, v = "slope", unit = "radians"),
+#                   terra::terrain(dem, v = "aspect", unit = "radians"),
+#                   10, 200) |>
 #   terra::mask(terra::vect(study_area))
-# pred <- terra::mask(pred, terra::vect(study_area)) |>
+# pred = terra::mask(pred, terra::vect(study_area)) |>
 #   terra::trim()
-
+#
 # # remotes::install_github("r-tmap/tmap")
 # library(tmap)
-# pal <- rev(hcl.colors(n = 15, "RdYlBu"))
-# tm <- tm_shape(hs) +
+# pal = rev(hcl.colors(n = 15, "RdYlBu"))
+# tm = tm_shape(hs) +
 #   tm_grid(n.x = 3, n.y = 3, lines = FALSE) +
-#   tm_raster(
-#     col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
-#     col.legend = tm_legend_hide()
-#   ) +
+#   tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
+#             col.legend = tm_legend_hide()) +
 #   tm_shape(pred, is.main = TRUE) +
-#   tm_raster(
-#     col.scale = tm_scale_continuous(values = pal, midpoint = NA),
-#     col.legend = tm_legend(title = "NMDS1", reverse = TRUE),
-#     col_alpha = 0.8
-#   ) +
+#   tm_raster(col.scale = tm_scale_continuous(values = pal, midpoint = NA),
+#             col.legend = tm_legend(title = "NMDS1", reverse = TRUE),
+#             col_alpha = 0.8) +
 #   tm_shape(study_area) +
 #   tm_borders() +
 #   tm_layout(legend.position = tm_pos_auto_out())
 # tmap_save(tm, "images/15_rf_pred.png",
-#   width = 10, height = 8, units = "cm"
-# )
+#           width = 10, height = 8, units = "cm")
 
 knitr::include_graphics("images/15_rf_pred.png")
 ```
@@ -599,15 +574,15 @@ knitr::include_graphics("images/15_rf_pred.png")
 In case, `terra::predict()` does not support a model algorithm, you can still make the predictions manually.
 
 ```{r 15-eco-29, cache=TRUE, cache.lazy=FALSE, eval=FALSE}
-newdata <- as.data.frame(as.matrix(ep))
-colSums(is.na(newdata)) # 0 NAs
+newdata = as.data.frame(as.matrix(ep))
+colSums(is.na(newdata))  # 0 NAs
 # but assuming there were 0s results in a more generic approach
-ind <- rowSums(is.na(newdata)) == 0
-tmp <- autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
-newdata[ind, "pred"] <- data.table::as.data.table(tmp)[["response"]]
-pred_2 <- ep$dem
+ind = rowSums(is.na(newdata)) == 0
+tmp = autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
+pred_2 = ep$dem
 # now fill the raster with the predicted values
-pred_2[] <- newdata$pred
+pred_2[] = newdata$pred
 # check if terra and our manual prediction is the same
 all(values(pred - pred_2) == 0)
 ```
@@ -653,6 +628,6 @@ However, this does not imply that the random forest\index{random forest} model h
 ## Exercises
 
 ```{r, echo=FALSE, results='asis'}
-res <- knitr::knit_child("_15-ex.Rmd", quiet = TRUE, options = list(include = FALSE, eval = FALSE))
-cat(res, sep = "\n")
+res = knitr::knit_child('_15-ex.Rmd', quiet = TRUE, options = list(include = FALSE, eval = FALSE))
+cat(res, sep = '\n')
 ```
