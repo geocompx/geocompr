@@ -14,16 +14,16 @@ The chapter uses the following packages:
 library(sf)
 library(terra)
 library(dplyr)
-library(data.table) # fast data frame manipulation (used by mlr3)
-library(mlr3) # machine learning (see Chapter 12)
-library(mlr3spatiotempcv) # spatiotemporal resampling
-library(mlr3tuning) # hyperparameter tuning package
-library(mlr3learners) # interface to most important machine learning pkgs
-library(paradox) # defining hyperparameter spaces
-library(ranger) # random forest package
-library(qgisprocess) # bridge to QGIS (Chapter 10)
-library(tree) # decision tree package
-library(vegan) # community ecology package
+library(data.table)        # fast data frame manipulation (used by mlr3)
+library(mlr3)              # machine learning (see Chapter 12)
+library(mlr3spatiotempcv)  # spatiotemporal resampling
+library(mlr3tuning)        # hyperparameter tuning package
+library(mlr3learners)      # interface to most important machine learning pkgs
+library(paradox)           # defining hyperparameter spaces
+library(ranger)            # random forest package
+library(qgisprocess)       # bridge to QGIS (Chapter 10)
+library(tree)              # decision tree package
+library(vegan)             # community ecology package
 ```
 
 ## Introduction
@@ -66,8 +66,8 @@ All the data needed for the subsequent analyses is available via the **spDataLar
 
 ``` r
 data("study_area", "random_points", "comm", package = "spDataLarge")
-dem <- rast(system.file("raster/dem.tif", package = "spDataLarge"))
-ndvi <- rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
+dem = rast(system.file("raster/dem.tif", package = "spDataLarge"))
+ndvi = rast(system.file("raster/ndvi.tif", package = "spDataLarge"))
 ```
 
 `study_area` is a polygon representing the outline of the study area, and `random_points` is an `sf` object containing the 100 randomly chosen sites.
@@ -155,14 +155,13 @@ The resulting rasters\index{raster} are saved to temporary files with an `.sdat`
 
 ``` r
 # environmental predictors: catchment slope and catchment area
-ep <- qgisprocess::qgis_run_algorithm(
+ep = qgisprocess::qgis_run_algorithm(
   alg = "sagang:sagawetnessindex",
   DEM = dem,
   SLOPE_TYPE = 1,
   SLOPE = tempfile(fileext = ".sdat"),
   AREA = tempfile(fileext = ".sdat"),
-  .quiet = TRUE
-)
+  .quiet = TRUE)
 ```
 
 This returns a list named `ep` containing the paths to the computed output rasters.
@@ -172,12 +171,12 @@ Additionally, we will add two more raster objects to it, namely `dem` and `ndvi`
 
 ``` r
 # read in catchment area and catchment slope
-ep <- ep[c("AREA", "SLOPE")] |>
+ep = ep[c("AREA", "SLOPE")] |>
   unlist() |>
   rast()
-names(ep) <- c("carea", "cslope") # assign better names
-origin(ep) <- origin(dem) # make sure rasters have the same origin
-ep <- c(dem, ndvi, ep) # add dem and ndvi to the multi-layer SpatRaster object
+names(ep) = c("carea", "cslope") # assign better names
+origin(ep) = origin(dem) # make sure rasters have the same origin
+ep = c(dem, ndvi, ep) # add dem and ndvi to the multi-layer SpatRaster object
 ```
 
 Additionally, the catchment area\index{catchment area} values are highly skewed to the right (`hist(ep$carea)`).
@@ -185,22 +184,22 @@ A log10-transformation makes the distribution more normal.
 
 
 ``` r
-ep$carea <- log10(ep$carea)
+ep$carea = log10(ep$carea)
 ```
 
 As a convenience to the reader, we have added `ep` to **spDataLarge**:
 
 
 ``` r
-ep <- rast(system.file("raster/ep.tif", package = "spDataLarge"))
+ep = rast(system.file("raster/ep.tif", package = "spDataLarge"))
 ```
 
 Finally, we can extract the terrain attributes to our field observations (see also Section \@ref(raster-extraction)).
 
 
 ``` r
-ep_rp <- terra::extract(ep, random_points, ID = FALSE)
-random_points <- cbind(random_points, ep_rp)
+ep_rp = terra::extract(ep, random_points, ID = FALSE)
+random_points = cbind(random_points, ep_rp)
 ```
 
 ## Reducing dimensionality {#nmds}
@@ -235,9 +234,9 @@ Hence, we need to dismiss all sites in which no species were found.
 
 ``` r
 # presence-absence matrix
-pa <- vegan::decostand(comm, "pa") # 100 rows (sites), 69 columns (species)
+pa = vegan::decostand(comm, "pa")  # 100 rows (sites), 69 columns (species)
 # keep only sites in which at least one species was found
-pa <- pa[rowSums(pa) != 0, ] # 84 rows, 69 columns
+pa = pa[rowSums(pa) != 0, ]  # 84 rows, 69 columns
 ```
 
 The resulting matrix serves as input for the NMDS\index{NMDS}.
@@ -250,7 +249,7 @@ To make sure that the algorithm converges, we set the number of steps to 500 usi
 
 ``` r
 set.seed(25072018)
-nmds <- vegan::metaMDS(comm = pa, k = 4, try = 500)
+nmds = vegan::metaMDS(comm = pa, k = 4, try = 500)
 nmds$stress
 #> ...
 #> Run 498 stress 0.08834745
@@ -276,17 +275,15 @@ Plotting the result reveals that the first axis is, as intended, clearly associa
 
 
 ``` r
-elev <- dplyr::filter(random_points, id %in% rownames(pa)) |>
+elev = dplyr::filter(random_points, id %in% rownames(pa)) |>
   dplyr::pull(dem)
 # rotating NMDS in accordance with altitude (proxy for humidity)
-rotnmds <- vegan::MDSrotate(nmds, elev)
+rotnmds = vegan::MDSrotate(nmds, elev)
 # extracting the first two axes
-sc <- vegan::scores(rotnmds, choices = 1:2, display = "sites")
+sc = vegan::scores(rotnmds, choices = 1:2, display = "sites")
 # plotting the first axis against altitude
-plot(
-  y = sc[, 1], x = elev, xlab = "elevation in m",
-  ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8
-)
+plot(y = sc[, 1], x = elev, xlab = "elevation in m",
+     ylab = "First NMDS axis", cex.lab = 0.8, cex.axis = 0.8)
 ```
 
 <div class="figure" style="text-align: center">
@@ -313,9 +310,9 @@ We will also use the resulting data frame for the **mlr3**\index{mlr3 (package)}
 ``` r
 # construct response-predictor matrix
 # id- and response variable
-rp <- data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
+rp = data.frame(id = as.numeric(rownames(sc)), sc = sc[, 1])
 # join the predictors (dem, ndvi and terrain attributes)
-rp <- inner_join(random_points, rp, by = "id")
+rp = inner_join(random_points, rp, by = "id")
 ```
 
 Decision trees split the predictor space into a number of regions.
@@ -323,7 +320,7 @@ To illustrate this, we apply a decision tree to our data using the scores of the
 
 
 ``` r
-tree_mo <- tree::tree(sc ~ dem, data = rp)
+tree_mo = tree::tree(sc ~ dem, data = rp)
 plot(tree_mo)
 text(tree_mo, pretty = 0)
 ```
@@ -382,7 +379,7 @@ For specifying a spatial task, we use again the **mlr3spatiotempcv** package [@s
 
 ``` r
 # create task
-task <- mlr3spatiotempcv::as_task_regr_st(
+task = mlr3spatiotempcv::as_task_regr_st(
   select(rp, -id, -spri),
   target = "sc",
   id = "mongon"
@@ -395,7 +392,7 @@ Next, we go on to construct a random forest\index{random forest} learner from th
 
 
 ``` r
-lrn_rf <- lrn("regr.ranger", predict_type = "response")
+lrn_rf = lrn("regr.ranger", predict_type = "response")
 ```
 
 As opposed to, for example, Support Vector Machines\index{SVM} (see Section \@ref(svm)), random forests often already show good performances when used with the default values of their hyperparameters (which may be one reason for their popularity).
@@ -414,7 +411,7 @@ Hyperparameter\index{hyperparameter} combinations will be selected randomly but 
 
 ``` r
 # specifying the search space
-search_space <- paradox::ps(
+search_space = paradox::ps(
   mtry = paradox::p_int(lower = 1, upper = ncol(task$data()) - 1),
   sample.fraction = paradox::p_dbl(lower = 0.2, upper = 0.9),
   min.node.size = paradox::p_int(lower = 1, upper = 10)
@@ -429,7 +426,7 @@ The performance measure is the root mean squared error (RMSE\index{RMSE}).
 
 
 ``` r
-autotuner_rf <- mlr3tuning::auto_tuner(
+autotuner_rf = mlr3tuning::auto_tuner(
   learner = lrn_rf,
   resampling = mlr3::rsmp("spcv_coords", folds = 5), # spatial partitioning
   measure = mlr3::msr("regr.rmse"), # performance measure
@@ -487,10 +484,10 @@ As an alternative, you can also use the dedicated **mlr3spatial** package for do
 
 
 ``` r
-pred <- terra::predict(ep, model = autotuner_rf$learner$model$model, fun = predict)
+pred = terra::predict(ep, model = autotuner_rf$learner$model$model, fun = predict)
 
 # doing the same using mlr3spatial
-# pred <- mlr3spatial::predict_spatial(newdata = ep, learner = autotuner_rf)
+# pred = mlr3spatial::predict_spatial(newdata = ep, learner = autotuner_rf)
 ```
 
 <div class="figure" style="text-align: center">
@@ -502,15 +499,15 @@ In case, `terra::predict()` does not support a model algorithm, you can still ma
 
 
 ``` r
-newdata <- as.data.frame(as.matrix(ep))
-colSums(is.na(newdata)) # 0 NAs
+newdata = as.data.frame(as.matrix(ep))
+colSums(is.na(newdata))  # 0 NAs
 # but assuming there were 0s results in a more generic approach
-ind <- rowSums(is.na(newdata)) == 0
-tmp <- autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
-newdata[ind, "pred"] <- data.table::as.data.table(tmp)[["response"]]
-pred_2 <- ep$dem
+ind = rowSums(is.na(newdata)) == 0
+tmp = autotuner_rf$predict_newdata(newdata = newdata[ind, ], task = task)
+newdata[ind, "pred"] = data.table::as.data.table(tmp)[["response"]]
+pred_2 = ep$dem
 # now fill the raster with the predicted values
-pred_2[] <- newdata$pred
+pred_2[] = newdata$pred
 # check if terra and our manual prediction is the same
 all(values(pred - pred_2) == 0)
 ```
