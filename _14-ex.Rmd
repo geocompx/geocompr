@@ -24,8 +24,7 @@ Note that the 100 m data is much larger and may take some time to download.
 pop_1km = z22_data("population", res = "1km", year = 2022, as = "df")
 pop_1km = pop_1km |>
   rename(pop = cat_0) |>
-  mutate(pop = ifelse(pop < 0, NA, pop)) |>
-  mutate(x = x - 500, y = y - 500)  # Correct z22 coordinate offset
+  mutate(pop = ifelse(pop < 0, NA, pop))
 inh_coarse = terra::rast(pop_1km, type = "xyz", crs = "EPSG:3035")
 
 # Fine inhabitant raster (100 m resolution)
@@ -76,9 +75,6 @@ input_tidy = pop |>
   left_join(hh_size, by = c("x", "y")) |>
   select(x, y, pop, women, mean_age, hh_size) |>
   mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
-# Correct z22 coordinate offset (z22 adds 500m to already-midpoint coordinates)
-input_tidy = input_tidy |>
-  mutate(x = x - 500, y = y - 500)
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
 # attach further necessary data

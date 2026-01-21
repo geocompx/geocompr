@@ -61,9 +61,6 @@ input_tidy = pop |>
 # Filter out missing values (coded as -1)
 input_tidy = input_tidy |>
   mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
-# Correct z22 coordinate offset (z22 adds 500m to already-midpoint coordinates)
-input_tidy = input_tidy |>
-  mutate(x = x - 500, y = y - 500)
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
 # reproject German outline
