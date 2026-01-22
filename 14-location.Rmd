@@ -14,13 +14,10 @@ library(dplyr)
 library(purrr)
 library(terra)
 library(osmdata)
-library(z22)
 library(spDataLarge)
 ```
 
-We use the **z22** package [@R-z22] to access gridded German census data from 2022.
-Install it from GitHub with `remotes::install_github("JsLth/z22")`.
-Census data on shops (`shops`) and metropolitan names (`metro_names`) are available from **spDataLarge**.
+As a convenience to the reader and to ensure easy reproducibility, we have made available the downloaded data in the **spDataLarge** package.
 
 ## Introduction
 
@@ -72,35 +69,40 @@ The German government provides gridded census data at either 1 km or 100 m resol
 The **z22** package [@z22] provides convenient access to this data.
 We load four variables at 1 km resolution: population count, mean age, household size, and proportion of women.
 
-```{r 14-location-2}
+```{r 14-location-2, eval=FALSE}
 # Load Census 2022 data using z22 package
-pop = z22_data("population", res = "1km", year = 2022, as = "df") |>
+pop = z22::z22_data("population", res = "1km", year = 2022, as = "df") |>
   rename(pop = cat_0)
 # Women data only available from Census 2011
-women = z22_data("women", year = 2011, res = "1km", as = "df") |>
+women = z22::z22_data("women", year = 2011, res = "1km", as = "df") |>
   rename(women = cat_0)
-mean_age = z22_data("age_avg", res = "1km", year = 2022, as = "df") |>
+mean_age = z22::z22_data("age_avg", res = "1km", year = 2022, as = "df") |>
   rename(mean_age = cat_0)
-hh_size = z22_data("household_size_avg", res = "1km", year = 2022, as = "df") |>
+hh_size = z22::z22_data("household_size_avg", res = "1km", year = 2022, as = "df") |>
   rename(hh_size = cat_0)
+
+census_de = pop |>
+  left_join(women, by = c("x", "y")) |>
+  left_join(mean_age, by = c("x", "y")) |>
+  left_join(hh_size, by = c("x", "y"))
 ```
 
 Note that the proportion of women is not available in Census 2022, so we use data from Census 2011 for this variable.
 Unlike Census 2011 which provided data as categorical class codes, Census 2022 provides actual continuous values: exact population counts, mean age in years, and average household size as decimals.
 The `women` variable from Census 2011 contains the percentage of female inhabitants.
-The official census data provides cell center coordinates in `x_mp` and `y_mp` columns ("mp" = "Mittelpunkt", German for midpoint).
 
-The next step joins these data frames and filters out cells with missing values (coded as `-1`).
+Please note that `census_de` is also available from the **spDataLarge** package:
+
+```{r attach-census}
+data("census_de", package = "spDataLarge")
+```
+
+The next step recodes unknown values to `NA`.
+The `women` variable from Census 2011 uses `-1` and `-9` for unknown values; recoding these to `NA` ensures proper handling in raster computations and plotting.
 
 ```{r 14-location-4}
-# Join all data frames (order: pop, women, mean_age, hh_size)
-input_tidy = pop |>
-  left_join(women, by = c("x", "y")) |>
-  left_join(mean_age, by = c("x", "y")) |>
-  left_join(hh_size, by = c("x", "y")) |>
-  select(x, y, pop, women, mean_age, hh_size)
-# Filter out missing values (coded as -1)
-input_tidy = input_tidy |>
+# Recode unknown values (-1, -9) to NA
+input_tidy = census_de |>
   mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
 ```
 

@@ -8,34 +8,34 @@ library(dplyr)
 library(purrr)
 library(terra)
 library(osmdata)
-library(z22)
 library(spDataLarge)
 ```
 
-E1. Load the population data at 100 m cell resolution using `z22_data("population", res = "100m", year = 2022)`.
-Aggregate it to a cell resolution of 1 km using `terra::aggregate()` with `fun = sum`, and compare the result with the 1 km resolution data loaded directly with `z22_data("population", res = "1km", year = 2022)`.
+E1. This exercise requires the **z22** package for accessing 100 m resolution data.
+Install it with `remotes::install_github("JsLth/z22")`.
+Load the population data at 100 m cell resolution using `z22::z22_data("population", res = "100m", year = 2022)`.
+Aggregate it to a cell resolution of 1 km using `terra::aggregate()` with `fun = sum`, and compare the result with the 1 km resolution data from `census_de`.
 Note that the 100 m data is much larger and may take some time to download.
 
 ```{r, 14-ex-e1, eval=FALSE}
 # Coarse inhabitant raster (1 km resolution)
 #*******************************************
 
-# Load 1 km population data directly
-pop_1km = z22_data("population", res = "1km", year = 2022, as = "df")
-pop_1km = pop_1km |>
-  rename(pop = cat_0) |>
+# Load 1 km population data from spDataLarge
+data("census_de", package = "spDataLarge")
+pop_1km = census_de |>
+  select(x, y, pop) |>
   mutate(pop = ifelse(pop < 0, NA, pop))
 inh_coarse = terra::rast(pop_1km, type = "xyz", crs = "EPSG:3035")
 
 # Fine inhabitant raster (100 m resolution)
 #******************************************
 
-# Load 100 m population data (this may take some time)
-pop_100m = z22_data("population", res = "100m", year = 2022, as = "df")
+# Load 100 m population data using z22 (this may take some time)
+pop_100m = z22::z22_data("population", res = "100m", year = 2022, as = "df")
 pop_100m = pop_100m |>
   rename(pop = cat_0) |>
-  mutate(pop = ifelse(pop < 0, NA, pop)) |>
-  mutate(x = x - 50, y = y - 50)  # Correct z22 coordinate offset (50m for 100m resolution)
+  mutate(pop = ifelse(pop < 0, NA, pop))
 inh_fine = terra::rast(pop_100m, type = "xyz", crs = "EPSG:3035")
 
 # Comparing the coarse with the fine raster
@@ -59,21 +59,10 @@ E2. Suppose our bike shop predominantly sold electric bikes to older people.
 Change the age raster accordingly, repeat the remaining analyses and compare the changes with our original result.
 
 ```{r, 14-ex-e2, eval=FALSE}
-# Load data using z22 package
-pop = z22_data("population", res = "1km", year = 2022, as = "df") |>
-  rename(pop = cat_0)
-women = z22_data("women", year = 2011, res = "1km", as = "df") |>
-  rename(women = cat_0)
-mean_age = z22_data("age_avg", res = "1km", year = 2022, as = "df") |>
-  rename(mean_age = cat_0)
-hh_size = z22_data("household_size_avg", res = "1km", year = 2022, as = "df") |>
-  rename(hh_size = cat_0)
+# Load data from spDataLarge
+data("census_de", package = "spDataLarge")
 
-input_tidy = pop |>
-  left_join(women, by = c("x", "y")) |>
-  left_join(mean_age, by = c("x", "y")) |>
-  left_join(hh_size, by = c("x", "y")) |>
-  select(x, y, pop, women, mean_age, hh_size) |>
+input_tidy = census_de |>
   mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 

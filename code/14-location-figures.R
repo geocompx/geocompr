@@ -28,10 +28,10 @@ library(dplyr)
 library(purrr)
 library(htmlwidgets)
 library(leaflet)
+library(z22)
 
 # attach data
 data("metro_names", "shops", package = "spDataLarge")
-library(z22)
 # download German border polygon
 ger = geodata::gadm(country = "DEU", level = 0, path = tempdir())
 
@@ -52,14 +52,11 @@ mean_age = z22_data("age_avg", res = "1km", year = 2022, as = "df") |>
 hh_size = z22_data("household_size_avg", res = "1km", year = 2022, as = "df") |>
   rename(hh_size = cat_0)
 
-# Join all data frames (order: pop, women, mean_age, hh_size)
+# Join all data frames
 input_tidy = pop |>
   left_join(women, by = c("x", "y")) |>
   left_join(mean_age, by = c("x", "y")) |>
   left_join(hh_size, by = c("x", "y")) |>
-  select(x, y, pop, women, mean_age, hh_size)
-# Filter out missing values (coded as -1)
-input_tidy = input_tidy |>
   mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
