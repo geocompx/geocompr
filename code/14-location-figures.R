@@ -57,6 +57,7 @@ input_tidy = pop |>
   left_join(women, by = c("x", "y")) |>
   left_join(mean_age, by = c("x", "y")) |>
   left_join(hh_size, by = c("x", "y")) |>
+  relocate(pop, .after = y) |>
   mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
 input_ras = terra::rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 

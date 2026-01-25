@@ -15,6 +15,7 @@ library(purrr)
 library(terra)
 library(osmdata)
 library(spDataLarge)
+library(z22)
 ```
 
 As a convenience to the reader and to ensure easy reproducibility, we have made available the downloaded data in the **spDataLarge** package.
@@ -84,7 +85,8 @@ hh_size = z22::z22_data("household_size_avg", res = "1km", year = 2022, as = "df
 census_de = pop |>
   left_join(women, by = c("x", "y")) |>
   left_join(mean_age, by = c("x", "y")) |>
-  left_join(hh_size, by = c("x", "y"))
+  left_join(hh_size, by = c("x", "y")) |>
+  relocate(pop, .after = y)
 ```
 
 Note that the proportion of women is not available in Census 2022, so we use data from Census 2011 for this variable.
@@ -93,7 +95,7 @@ The `women` variable from Census 2011 contains the percentage of female inhabita
 
 Please note that `census_de` is also available from the **spDataLarge** package:
 
-```{r attach-census}
+```{r attach-census, eval=FALSE}
 data("census_de", package = "spDataLarge")
 ```
 
@@ -132,6 +134,7 @@ knitr::kable(tab,
 After the preprocessing, the data can be converted into a `SpatRaster` object (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)) with the help of the `rast()` function.
 When setting its `type` argument to `xyz`, the `x` and `y` columns of the input data frame should correspond to coordinates on a regular grid.
 All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our GitHub repository).
+Note that column order matters: the first two columns must be x and y coordinates, so use `select()` or `relocate()` to reorder columns if needed.
 
 ```{r 14-location-5, cache.lazy=FALSE}
 input_ras = rast(input_tidy, type = "xyz", crs = "EPSG:3035")
