@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2026-01-21'
+date: '2026-01-28'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -28,7 +28,7 @@ url: https://r.geocompx.org/
 ## ℹ Please use append(after = 0) instead.
 ## ℹ The deprecated feature was likely used in the metathis package.
 ##   Please report the issue at <https://github.com/gadenbuie/metathis/issues>.
-## This warning is displayed once every 8 hours.
+## This warning is displayed once per session.
 ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 ## generated.
 ```
@@ -58,7 +58,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2026-01-21.
+This version of the book was built on GH Actions on 2026-01-28.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
