@@ -14,9 +14,8 @@ library(purrr)
 library(terra)
 library(osmdata)
 library(spDataLarge)
+library(z22)
 ```
-
-- Required data will be downloaded in due course.
 
 As a convenience to the reader and to ensure easy reproducibility, we have made available the downloaded data in the **spDataLarge** package.
 
@@ -67,15 +66,32 @@ Although we have applied these steps to a specific case study, they could be gen
 ## Tidy the input data
 
 The German government provides gridded census data at either 1 km or 100 m resolution.
-The following code chunk downloads, unzips and reads in the 1 km data.
+The **z22** package [@R-z22] provides convenient access to this data.
+We load four variables at 1 km resolution: population count, mean age, household size, and proportion of women.
 
 
 ``` r
-download.file("https://tinyurl.com/ybtpkwxz", 
-              destfile = "census.zip", mode = "wb")
-unzip("census.zip") # unzip the files
-census_de = readr::read_csv2(list.files(pattern = "Gitter.csv"))
+# Load Census 2022 data using z22 package
+pop = z22::z22_data("population", res = "1km", year = 2022, as = "df") |>
+  rename(pop = cat_0)
+# Women data only available from Census 2011
+women = z22::z22_data("women", year = 2011, res = "1km", as = "df") |>
+  rename(women = cat_0)
+mean_age = z22::z22_data("age_avg", res = "1km", year = 2022, as = "df") |>
+  rename(mean_age = cat_0)
+hh_size = z22::z22_data("household_size_avg", res = "1km", year = 2022, as = "df") |>
+  rename(hh_size = cat_0)
+
+census_de = pop |>
+  left_join(women, by = c("x", "y")) |>
+  left_join(mean_age, by = c("x", "y")) |>
+  left_join(hh_size, by = c("x", "y")) |>
+  relocate(pop, .after = y)
 ```
+
+Note that the proportion of women is not available in Census 2022, so we use data from Census 2011 for this variable.
+Unlike Census 2011 which provided data as categorical class codes, Census 2022 provides actual continuous values: exact population counts, mean age in years, and average household size as decimals.
+The `women` variable from Census 2011 contains the percentage of female inhabitants.
 
 Please note that `census_de` is also available from the **spDataLarge** package:
 
@@ -84,33 +100,28 @@ Please note that `census_de` is also available from the **spDataLarge** package:
 data("census_de", package = "spDataLarge")
 ```
 
-The `census_de` object is a data frame containing 13 variables for more than 360,000 grid cells across Germany.
-For our work, we only need a subset of these: Easting (`x`) and Northing (`y`), number of inhabitants (population; `pop`), mean average age (`mean_age`), proportion of women (`women`) and average household size (`hh_size`).
-These variables are selected and renamed from German into English in the code chunk below and summarized in Table \@ref(tab:census-desc). 
-Further, `mutate()` is used to convert values `-1` and `-9` (meaning "unknown") to `NA`.
+The next step recodes unknown values to `NA`.
+The `women` variable from Census 2011 uses `-1` and `-9` for unknown values; recoding these to `NA` ensures proper handling in raster computations and plotting.
 
 
 ``` r
-# pop = population, hh_size = household size
-input = select(census_de, x = x_mp_1km, y = y_mp_1km, pop = Einwohner,
-                      women = Frauen_A, mean_age = Alter_D, hh_size = HHGroesse_D)
-# set -1 and -9 to NA
-input_tidy = mutate(input, across(.cols = c(pop, women, mean_age, hh_size), 
-                                  .fns =  ~ifelse(.x %in% c(-1, -9), NA, .x)))
+# Recode unknown values (-1, -9) to NA
+input_tidy = census_de |>
+  mutate(across(c(pop, women, mean_age, hh_size), ~ifelse(.x < 0, NA, .x)))
 ```
 
 
 
-Table: (\#tab:census-desc)Categories for each variable in census data from Datensatzbeschreibung...xlsx located in the downloaded file census.zip.
+Table: (\#tab:census-desc)Classification of census variables for Figure \@ref(fig:census-stack). Class values for population represent inhabitant counts per grid cell. For the demographic variables (women, mean age, household size), classes 1-5 correspond to weights 3-0 used in the location analysis.
 
-| Class | Population | % Female | Mean Age | Household Size |
-|:-----:|:----------:|:--------:|:--------:|:--------------:|
-|   1   |   3-250    |   0-40   |   0-40   |      1-2       |
-|   2   |  250-500   |  40-47   |  40-42   |     2-2.5      |
-|   3   |  500-2000  |  47-53   |  42-44   |     2.5-3      |
-|   4   | 2000-4000  |  53-60   |  44-47   |     3-3.5      |
-|   5   | 4000-8000  |   >60    |   >47    |      >3.5      |
-|   6   |   >8000    |          |          |                |
+| Class |Population | Women (%) | Mean age | Household size |
+|:-----:|:----------|:---------:|:--------:|:--------------:|
+|   1   |0-250      |   0-40%   |   0-40   |     1-1.5      |
+|   2   |250-500    |  40-47%   |  40-42   |     1.5-2      |
+|   3   |500-2000   |  47-53%   |  42-44   |     2-2.5      |
+|   4   |2000-4000  |  53-60%   |  44-47   |     2.5-3      |
+|   5   |4000-8000  |   >60%    |   >47    |       >3       |
+|   6   |>8000      |           |          |                |
 
 
 
@@ -119,6 +130,7 @@ Table: (\#tab:census-desc)Categories for each variable in census data from Daten
 After the preprocessing, the data can be converted into a `SpatRaster` object (see Sections \@ref(raster-classes) and \@ref(raster-subsetting)) with the help of the `rast()` function.
 When setting its `type` argument to `xyz`, the `x` and `y` columns of the input data frame should correspond to coordinates on a regular grid.
 All the remaining columns (here: `pop`, `women`, `mean_age`, `hh_size`) will serve as values of the raster layers (Figure \@ref(fig:census-stack); see also `code/14-location-figures.R` in our GitHub repository).
+Note that column order matters: the first two columns must be x and y coordinates, so use `select()` or `relocate()` to reorder columns if needed.
 
 
 ``` r
@@ -129,14 +141,14 @@ input_ras = rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 ``` r
 input_ras
 #> class       : SpatRaster 
-#> size        : 868, 642, 4  (nrow, ncol, nlyr)
+#> size        : 859, 641, 4  (nrow, ncol, nlyr)
 #> resolution  : 1000, 1000  (x, y)
-#> extent      : 4031000, 4673000, 2684000, 3552000  (xmin, xmax, ymin, ymax)
+#> extent      : 4031000, 4672000, 2689000, 3548000  (xmin, xmax, ymin, ymax)
 #> coord. ref. : ETRS89-extended / LAEA Europe (EPSG:3035) 
 #> source(s)   : memory
-#> names       : pop, women, mean_age, hh_size 
-#> min values  :   1,     1,        1,       1 
-#> max values  :   6,     5,        5,       5
+#> names       :   pop, women, mean_age, hh_size 
+#> min values  :     3,     0,      8.5,       1 
+#> max values  : 24164,   100,    104.4,     144
 ```
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS\index{CRS!projected} where each grid cell has the same area, here 1000 * 1000 square meters. 
@@ -144,58 +156,77 @@ Since we are using mainly densities such as the number of inhabitants or the por
 Be careful with geographic CRS\index{CRS!geographic} where grid cell areas constantly decrease in poleward directions (see also Section \@ref(crs-intro) and Chapter \@ref(reproj-geo-data)).</div>\EndKnitrBlock{rmdnote}
 
 <div class="figure" style="text-align: center">
-<img src="images/14_census_stack.png" alt="Gridded German census data of 2011 (see Table 14.1 for a description of the classes)." width="100%" />
-<p class="caption">(\#fig:census-stack)Gridded German census data of 2011 (see Table 14.1 for a description of the classes).</p>
+<img src="images/14_census_stack.png" alt="Gridded German census data of 2022 (women data from 2011). See Table 14.1 for reclassification thresholds." width="100%" />
+<p class="caption">(\#fig:census-stack)Gridded German census data of 2022 (women data from 2011). See Table 14.1 for reclassification thresholds.</p>
 </div>
 
-The next stage is to reclassify the values of the rasters stored in `input_ras` in accordance with the survey mentioned in Section \@ref(case-study), using the **terra** function `classify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
-In the case of the population data, we convert the classes into a numeric data type using class means. 
-Raster cells are assumed to have a population of 127 if they have a value of 1 (cells in 'class 1' contain between 3 and 250 inhabitants) and 375 if they have a value of 2 (containing 250 to 500 inhabitants), and so on (see Table \@ref(tab:census-desc)).
-A cell value of 8000 inhabitants was chosen for 'class 6' because these cells contain more than 8000 people.
-Of course, these are approximations of the true population, not precise values.^[
-The potential error introduced during this reclassification stage will be explored in the exercises.
-]
-However, the level of detail is sufficient to delineate metropolitan areas (see Section \@ref(define-metropolitan-areas)).
+The next stage is to reclassify the demographic variables (women, mean age, household size) into weights in accordance with the survey mentioned in Section \@ref(case-study), using the **terra** function `classify()`, which was introduced in Section \@ref(local-operations)\index{map algebra!local operations}.
 
-In contrast to the `pop` variable, representing absolute estimates of the total population, the remaining variables were reclassified as weights corresponding with weights used in the survey.
-Class 1 in the variable `women`, for instance, represents areas in which 0 to 40% of the population is female;
-these are reclassified with a comparatively high weight of 3 because the target demographic is predominantly male.
-Similarly, the classes containing the youngest people and highest proportion of single households are reclassified to have high weights.
+Since Census 2022 provides actual continuous values rather than class codes, we can use the population counts directly without conversion.
+This gives us more precise data for delineating metropolitan areas (see Section \@ref(define-metropolitan-areas)).
+
+For the remaining demographic variables, we reclassify continuous values into weights (0-3) based on our target audience criteria (see Table \@ref(tab:census-desc)).
+Areas with 0-40% female population receive weight 3 because the target demographic is predominantly male.
+Similarly, areas with younger mean age and smaller household sizes receive higher weights.
 
 
 ``` r
-rcl_pop = matrix(c(1, 1, 127, 2, 2, 375, 3, 3, 1250, 
-                   4, 4, 3000, 5, 5, 6000, 6, 6, 8000), 
-                 ncol = 3, byrow = TRUE)
-rcl_women = matrix(c(1, 1, 3, 2, 2, 2, 3, 3, 1, 4, 5, 0), 
-                   ncol = 3, byrow = TRUE)
-rcl_age = matrix(c(1, 1, 3, 2, 2, 0, 3, 5, 0),
-                 ncol = 3, byrow = TRUE)
-rcl_hh = rcl_women
-rcl = list(rcl_pop, rcl_women, rcl_age, rcl_hh)
+# Reclassification matrices for continuous values (from, to, weight)
+# Women: percentage of female inhabitants
+rcl_women = matrix(c(
+  0, 40, 3,    # 0-40% female -> weight 3
+  40, 47, 2,   # 40-47% -> weight 2
+  47, 53, 1,   # 47-53% -> weight 1
+  53, 60, 0,   # 53-60% -> weight 0
+  60, 100, 0   # >60% -> weight 0
+), ncol = 3, byrow = TRUE)
+
+# Mean age: continuous years
+rcl_age = matrix(c(
+  0, 40, 3,    # Mean age <40 -> weight 3
+  40, 42, 2,   # 40-42 -> weight 2
+  42, 44, 1,   # 42-44 -> weight 1
+  44, 47, 0,   # 44-47 -> weight 0
+  47, 120, 0   # >47 -> weight 0
+), ncol = 3, byrow = TRUE)
+
+# Household size: average persons per household
+rcl_hh = matrix(c(
+  0, 1.5, 3,     # 1-1.5 persons -> weight 3
+  1.5, 2.0, 2,   # 1.5-2 -> weight 2
+  2.0, 2.5, 1,   # 2-2.5 -> weight 1
+  2.5, 3.0, 0,   # 2.5-3 -> weight 0
+  3.0, 100, 0    # >3 -> weight 0
+), ncol = 3, byrow = TRUE)
+
+rcl = list(rcl_women, rcl_age, rcl_hh)
 ```
 
-Note that we have made sure that the order of the reclassification matrices in the list is the same as for the elements of `input_ras`.
-For instance, the first element corresponds in both cases to the population.
-Subsequently, the `for`-loop\index{loop!for} applies the reclassification matrix to the corresponding raster layer.
-Finally, the code chunk below ensures the `reclass` layers have the same name as the layers of `input_ras`.
+Note that we only reclassify women, mean age, and household size into weights --- not population.
+The `for`-loop\index{loop!for} applies each reclassification matrix to the corresponding raster layer.
+We keep the population layer separate as actual counts for use in metropolitan area identification.
 
 
 ``` r
-reclass = input_ras
+# Separate population (used as counts for metro detection) from variables to reclassify
+pop_ras = input_ras$pop
+
+# Reclassify women, mean_age, hh_size into weights
+demo_vars = c("women", "mean_age", "hh_size")
+reclass = input_ras[[demo_vars]]
 for (i in seq_len(nlyr(reclass))) {
   reclass[[i]] = classify(x = reclass[[i]], rcl = rcl[[i]], right = NA)
 }
-names(reclass) = names(input_ras)
+names(reclass) = demo_vars
 ```
 
 
 ``` r
 reclass # full output not shown
-#> ... 
-#> names       :  pop, women, mean_age, hh_size 
-#> min values  :  127,     0,        0,       0 
-#> max values  : 8000,     3,        3,       3
+#> ...
+#> names       : women, mean_age, hh_size
+#> min values  :     0,        0,       0
+#> max values  :     3,        3,       3
 ```
 
 ## Define metropolitan areas
@@ -204,18 +235,20 @@ We deliberately define metropolitan areas as pixels of 20 km^2^ inhabited by mor
 Pixels at this coarse resolution can rapidly be created using `aggregate()`\index{aggregation}, as introduced in Section \@ref(aggregation-and-disaggregation).
 The command below uses the argument `fact = 20` to reduce the resolution of the result 20-fold (recall the original raster resolution was 1 km^2^).
 
+Since we have actual population counts from Census 2022 (rather than class-midpoint estimates), we can aggregate them directly.
+
 
 ``` r
-pop_agg = aggregate(reclass$pop, fact = 20, fun = sum, na.rm = TRUE)
+pop_agg = aggregate(pop_ras, fact = 20, fun = sum, na.rm = TRUE)
 summary(pop_agg)
 #>       pop         
-#>  Min.   :    127  
-#>  1st Qu.:  39886  
-#>  Median :  66008  
-#>  Mean   :  99503  
-#>  3rd Qu.: 105696  
-#>  Max.   :1204870  
-#>  NA's   :447
+#>  Min.   :     25  
+#>  1st Qu.:  22768  
+#>  Median :  45542  
+#>  Mean   :  82132  
+#>  3rd Qu.:  83074  
+#>  Max.   :1464047  
+#>  NA's   :412
 ```
 
 The next stage is to keep only cells with more than half a million people.
@@ -225,7 +258,7 @@ The next stage is to keep only cells with more than half a million people.
 pop_agg = pop_agg[pop_agg > 500000, drop = FALSE] 
 ```
 
-Plotting this reveals eight metropolitan regions (Figure \@ref(fig:metro-areas)).
+Plotting this reveals several metropolitan regions (Figure \@ref(fig:metro-areas)).
 Each region consists of one or more raster cells.
 It would be nice if we could join all cells belonging to one region.
 **terra**'s\index{terra (package)} `patches()` command does exactly that.
@@ -244,7 +277,7 @@ metros = pop_agg |>
 <p class="caption">(\#fig:metro-areas)The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.</p>
 </div>
 
-The resulting eight metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/14-location-figures.R` for creating the figure) are still missing a name.
+The resulting metropolitan areas suitable for bike shops (Figure \@ref(fig:metro-areas); see also `code/14-location-figures.R` for creating the figure) are still missing a name.
 A reverse geocoding\index{geocoding} approach can settle this problem: given a coordinate, it finds the corresponding address.
 Consequently, extracting the centroid\index{centroid} coordinate of each metropolitan area can serve as an input for a reverse geocoding API\index{API}.
 This is exactly what the `rev_geocode_OSM()` function of the **tmaptools** package expects.
@@ -271,8 +304,10 @@ Table: (\#tab:metro-names)Result of the reverse geocoding.
 |:-----------------|:-------------------|
 |Hamburg           |NA                  |
 |Berlin            |NA                  |
-|Velbert           |Nordrhein-Westfalen |
+|Langenhagen       |Niedersachsen       |
+|Wülfrath          |Nordrhein-Westfalen |
 |Leipzig           |Sachsen             |
+|Dresden           |Sachsen             |
 |Frankfurt am Main |Hessen              |
 |Nürnberg          |Bayern              |
 |Stuttgart         |Baden-Württemberg   |
@@ -280,15 +315,16 @@ Table: (\#tab:metro-names)Result of the reverse geocoding.
 
 
 
-Overall, we are satisfied with the `City` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from one exception, namely Velbert which belongs to the greater region of Düsseldorf.
-Hence, we replace Velbert with Düsseldorf (Figure \@ref(fig:metro-areas)).
+Overall, we are satisfied with the `City` column serving as metropolitan names (Table \@ref(tab:metro-names)) apart from two exceptions: Velbert belongs to the greater region of Düsseldorf, and Langenhagen belongs to Hannover.
+Hence, we replace these names accordingly (Figure \@ref(fig:metro-areas)).
 Umlauts like `ü` might lead to trouble further on, for example when determining the bounding box of a metropolitan area with `opq()` (see further below), which is why we avoid them.
 
 
 ``` r
-metro_names = metro_names$city |> 
+metro_names = metro_names$city |>
   as.character() |>
   (\(x) ifelse(x == "Velbert", "Düsseldorf", x))() |>
+  (\(x) ifelse(x == "Langenhagen", "Hannover", x))() |>
   gsub("ü", "ue", x = _)
 ```
 
@@ -299,7 +335,7 @@ The **osmdata**\index{osmdata (package)} package provides easy-to-use access to 
 Instead of downloading shops for the whole of Germany, we restrict the query to the defined metropolitan areas, reducing computational load and providing shop locations only in areas of interest.
 The subsequent code chunk does this using a number of functions including:
 
-- `map()`\index{loop!map} (the **tidyverse** equivalent of `lapply()`\index{loop!lapply}), which iterates through all eight metropolitan names which subsequently define the bounding box\index{bounding box} in the OSM\index{OpenStreetMap} query function `opq()` (see Section \@ref(retrieving-data))
+- `map()`\index{loop!map} (the **tidyverse** equivalent of `lapply()`\index{loop!lapply}), which iterates through all metropolitan names which subsequently define the bounding box\index{bounding box} in the OSM\index{OpenStreetMap} query function `opq()` (see Section \@ref(retrieving-data))
 - `add_osm_feature()` to specify OSM\index{OpenStreetMap} elements with a key value of `shop` (see [wiki.openstreetmap.org](https://wiki.openstreetmap.org/wiki/Map_Features) for a list of common key:value pairs)
 - `osmdata_sf()`, which converts the OSM\index{OpenStreetMap} data into spatial objects (of class `sf`)
 - `while()`\index{loop!while}, which tries two more times to download the data if the download failed the first time^[The OSM-download will sometimes fail at the first attempt.
@@ -314,7 +350,7 @@ To make it available in your environment, run `data("shops", package = "spDataLa
 shops = purrr::map(metro_names, function(x) {
   message("Downloading shops of: ", x, "\n")
   # give the server a bit time
-  Sys.sleep(sample(seq(5, 10, 0.1), 1))
+  Sys.sleep(sample(seq(10, 15, 0.1), 1))
   query = osmdata::opq(x) |>
     osmdata::add_osm_feature(key = "shop")
   points = osmdata::osmdata_sf(query)
@@ -394,16 +430,16 @@ names(poi) = "poi"
 
 ## Identify suitable locations
 
-The only steps that remain before combining all the layers are to add `poi` to the `reclass` raster stack and remove the population layer from it.
-The reasoning for the latter is: First of all, we have already delineated metropolitan areas, that is areas where the population density is above average compared to the rest of Germany.
+The only step that remains before combining all the layers is to add `poi` to the `reclass` raster stack.
+Note that we have already kept population separate from the demographic weights, as it was used only for delineating metropolitan areas.
+The reasoning is: First, we have already identified areas where the population density is above average compared to the rest of Germany.
 Second, though it is advantageous to have many potential customers within a specific catchment area\index{catchment area}, the sheer number alone might not actually represent the desired target group.
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.
 
 
 ``` r
-# remove population raster and add poi raster
-reclass = reclass[[names(reclass) != "pop"]] |>
-  c(poi)
+# add poi raster to demographic weights
+reclass = c(reclass, poi)
 ```
 
 In common with other data science projects, data retrieval and 'tidying' have consumed much of the overall workload so far.
@@ -415,16 +451,16 @@ With clean data, the final step --- calculating a final score by summing all ras
 result = sum(reclass)
 ```
 
-For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/14-location-figures.R`).
+For instance, a score of at least 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure \@ref(fig:bikeshop-berlin); see also `code/14-location-figures.R`).
 
 <div class="figure" style="text-align: center">
 
 ```{=html}
 <div class="leaflet html-widget html-fill-item" id="htmlwidget-841de324d41155df19a0" style="width:100%;height:389.34px;"></div>
-<script type="application/json" data-for="htmlwidget-841de324d41155df19a0">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addRasterImage","args":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAM0lEQVRYhe3SMQ0AMAwEsQcb/hTSuQSaVLIR3HAJAADfqfR0wm1dEC9VevcCq+MAAIBhB20vBvBK3JZrAAAAAElFTkSuQmCC",[[52.69660085729197,13.08200261479863],[52.32107408861835,13.69815913809763]],null,null,{"tileSize":256,"zIndex":1,"minZoom":0,"opacity":0.8}]},{"method":"addLegend","args":[{"colors":["darkgreen"],"labels":["potential locations"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"unknown","title":"Legend","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[52.32107408861835,52.69660085729197],"lng":[13.08200261479863,13.69815913809763]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-841de324d41155df19a0">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addRasterImage","args":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAMUlEQVRYhe3UQQ0AIAADsROLfwsgAhIIaRVse6wAALaN5u0IZ31X6BpLAg9zUQAAVAsMngWNvXU4QAAAAABJRU5ErkJggg==",[[52.66069241497743,13.07951158055728],[52.28517866783276,13.6951365872627]],null,null,{"tileSize":256,"zIndex":1,"minZoom":0,"opacity":0.8}]},{"method":"addLegend","args":[{"colors":["darkgreen"],"labels":["potential locations"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"unknown","title":"Legend","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[52.28517866783276,52.66069241497743],"lng":[13.07951158055728,13.6951365872627]}},"evals":[],"jsHooks":[]}</script>
 ```
 
-<p class="caption">(\#fig:bikeshop-berlin)Suitable areas (i.e., raster cells with a score > 9) in accordance with our hypothetical survey for bike stores in Berlin.</p>
+<p class="caption">(\#fig:bikeshop-berlin)Suitable areas (i.e., raster cells with a score >= 9) in accordance with our hypothetical survey for bike stores in Berlin.</p>
 </div>
 
 ## Discussion and next steps
@@ -457,15 +493,13 @@ That is, if there already is a bike shop in the vicinity of the chosen location,
 ## Exercises
 
 
-E1. Download the csv file containing inhabitant information for a 100 m cell resolution (https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3).
-Please note that the unzipped file has a size of 1.23 GB.
-To read it into R, you can use `readr::read_csv`.
-This takes 30 seconds on a machine with 16 GB RAM.
-`data.table::fread()` might be even faster, and returns an object of class `data.table()`.
-Use `dplyr::as_tibble()` to convert it into a tibble.
-Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (`inh`) we have created using class mean values.
+E1. This exercise requires the **z22** package for accessing 100 m resolution data.
+Install it with `remotes::install_github("JsLth/z22")`.
+Load the population data at 100 m cell resolution using `z22::z22_data("population", res = "100m", year = 2022)`.
+Aggregate it to a cell resolution of 1 km using `terra::aggregate()` with `fun = sum`, and compare the result with the 1 km resolution data from `census_de`.
+Note that the 100 m data is much larger and may take some time to download.
 
 
 
-E2. Suppose our bike shop predominantly sold electric bikes to older people. 
+E2. Suppose our bike shop predominantly sold electric bikes to older people.
 Change the age raster accordingly, repeat the remaining analyses and compare the changes with our original result.

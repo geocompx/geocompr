@@ -120,10 +120,8 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://rspatial.org/">terra</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://docs.ropensci.org/osmdata/">osmdata</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Nowosad/spData">spDataLarge</a></span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>Required data will be downloaded in due course.</li>
-</ul>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Nowosad/spData">spDataLarge</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jslth/z22/">z22</a></span><span class="op">)</span></span></code></pre></div>
 <p>As a convenience to the reader and to ensure easy reproducibility, we have made available the downloaded data in the <strong>spDataLarge</strong> package.</p>
 </div>
 <div id="introduction-8" class="section level2" number="14.1">
@@ -178,75 +176,86 @@ The following sections will demonstrate how the techniques learned during the fi
 <span class="header-section-number">14.3</span> Tidy the input data<a class="anchor" aria-label="anchor" href="#tidy-the-input-data"><i class="fas fa-link"></i></a>
 </h2>
 <p>The German government provides gridded census data at either 1 km or 100 m resolution.
-The following code chunk downloads, unzips and reads in the 1 km data.</p>
+The <strong>z22</strong> package <span class="citation">(<a href="references.html#ref-R-z22">Lieth 2026</a>)</span> provides convenient access to this data.
+We load four variables at 1 km resolution: population count, mean age, household size, and proportion of women.</p>
 <div class="sourceCode" id="cb468"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html">download.file</a></span><span class="op">(</span><span class="st">"https://tinyurl.com/ybtpkwxz"</span>, </span>
-<span>              destfile <span class="op">=</span> <span class="st">"census.zip"</span>, mode <span class="op">=</span> <span class="st">"wb"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/unzip.html">unzip</a></span><span class="op">(</span><span class="st">"census.zip"</span><span class="op">)</span> <span class="co"># unzip the files</span></span>
-<span><span class="va">census_de</span> <span class="op">=</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv2</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html">list.files</a></span><span class="op">(</span>pattern <span class="op">=</span> <span class="st">"Gitter.csv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Load Census 2022 data using z22 package</span></span>
+<span><span class="va">pop</span> <span class="op">=</span> <span class="fu">z22</span><span class="fu">::</span><span class="fu"><a href="https://jslth.github.io/z22/reference/z22_data.html">z22_data</a></span><span class="op">(</span><span class="st">"population"</span>, res <span class="op">=</span> <span class="st">"1km"</span>, year <span class="op">=</span> <span class="fl">2022</span>, as <span class="op">=</span> <span class="st">"df"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>pop <span class="op">=</span> <span class="va">cat_0</span><span class="op">)</span></span>
+<span><span class="co"># Women data only available from Census 2011</span></span>
+<span><span class="va">women</span> <span class="op">=</span> <span class="fu">z22</span><span class="fu">::</span><span class="fu"><a href="https://jslth.github.io/z22/reference/z22_data.html">z22_data</a></span><span class="op">(</span><span class="st">"women"</span>, year <span class="op">=</span> <span class="fl">2011</span>, res <span class="op">=</span> <span class="st">"1km"</span>, as <span class="op">=</span> <span class="st">"df"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>women <span class="op">=</span> <span class="va">cat_0</span><span class="op">)</span></span>
+<span><span class="va">mean_age</span> <span class="op">=</span> <span class="fu">z22</span><span class="fu">::</span><span class="fu"><a href="https://jslth.github.io/z22/reference/z22_data.html">z22_data</a></span><span class="op">(</span><span class="st">"age_avg"</span>, res <span class="op">=</span> <span class="st">"1km"</span>, year <span class="op">=</span> <span class="fl">2022</span>, as <span class="op">=</span> <span class="st">"df"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>mean_age <span class="op">=</span> <span class="va">cat_0</span><span class="op">)</span></span>
+<span><span class="va">hh_size</span> <span class="op">=</span> <span class="fu">z22</span><span class="fu">::</span><span class="fu"><a href="https://jslth.github.io/z22/reference/z22_data.html">z22_data</a></span><span class="op">(</span><span class="st">"household_size_avg"</span>, res <span class="op">=</span> <span class="st">"1km"</span>, year <span class="op">=</span> <span class="fl">2022</span>, as <span class="op">=</span> <span class="st">"df"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html">rename</a></span><span class="op">(</span>hh_size <span class="op">=</span> <span class="va">cat_0</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">census_de</span> <span class="op">=</span> <span class="va">pop</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">women</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">mean_age</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html">left_join</a></span><span class="op">(</span><span class="va">hh_size</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/relocate.html">relocate</a></span><span class="op">(</span><span class="va">pop</span>, .after <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span></code></pre></div>
+<p>Note that the proportion of women is not available in Census 2022, so we use data from Census 2011 for this variable.
+Unlike Census 2011 which provided data as categorical class codes, Census 2022 provides actual continuous values: exact population counts, mean age in years, and average household size as decimals.
+The <code>women</code> variable from Census 2011 contains the percentage of female inhabitants.</p>
 <p>Please note that <code>census_de</code> is also available from the <strong>spDataLarge</strong> package:</p>
 <div class="sourceCode" id="cb469"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="st">"census_de"</span>, package <span class="op">=</span> <span class="st">"spDataLarge"</span><span class="op">)</span></span></code></pre></div>
-<p>The <code>census_de</code> object is a data frame containing 13 variables for more than 360,000 grid cells across Germany.
-For our work, we only need a subset of these: Easting (<code>x</code>) and Northing (<code>y</code>), number of inhabitants (population; <code>pop</code>), mean average age (<code>mean_age</code>), proportion of women (<code>women</code>) and average household size (<code>hh_size</code>).
-These variables are selected and renamed from German into English in the code chunk below and summarized in Table <a href="location.html#tab:census-desc">14.1</a>.
-Further, <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate()</a></code> is used to convert values <code>-1</code> and <code>-9</code> (meaning “unknown”) to <code>NA</code>.</p>
+<p>The next step recodes unknown values to <code>NA</code>.
+The <code>women</code> variable from Census 2011 uses <code>-1</code> and <code>-9</code> for unknown values; recoding these to <code>NA</code> ensures proper handling in raster computations and plotting.</p>
 <div class="sourceCode" id="cb470"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># pop = population, hh_size = household size</span></span>
-<span><span class="va">input</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">census_de</span>, x <span class="op">=</span> <span class="va">x_mp_1km</span>, y <span class="op">=</span> <span class="va">y_mp_1km</span>, pop <span class="op">=</span> <span class="va">Einwohner</span>,</span>
-<span>                      women <span class="op">=</span> <span class="va">Frauen_A</span>, mean_age <span class="op">=</span> <span class="va">Alter_D</span>, hh_size <span class="op">=</span> <span class="va">HHGroesse_D</span><span class="op">)</span></span>
-<span><span class="co"># set -1 and -9 to NA</span></span>
-<span><span class="va">input_tidy</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="va">input</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span>.cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">pop</span>, <span class="va">women</span>, <span class="va">mean_age</span>, <span class="va">hh_size</span><span class="op">)</span>, </span>
-<span>                                  .fns <span class="op">=</span>  <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">.x</span> <span class="op"><a href="https://rspatial.github.io/terra/reference/match.html">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="op">-</span><span class="fl">9</span><span class="op">)</span>, <span class="cn">NA</span>, <span class="va">.x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Recode unknown values (-1, -9) to NA</span></span>
+<span><span class="va">input_tidy</span> <span class="op">=</span> <span class="va">census_de</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">pop</span>, <span class="va">women</span>, <span class="va">mean_age</span>, <span class="va">hh_size</span><span class="op">)</span>, <span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">.x</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="cn">NA</span>, <span class="va">.x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="inline-table"><table class="table table-sm">
 <caption>
-<span id="tab:census-desc">TABLE 14.1: </span>Categories for each variable in census data from Datensatzbeschreibung…xlsx located in the downloaded file census.zip.</caption>
+<span id="tab:census-desc">TABLE 14.1: </span>Classification of census variables for Figure <a href="location.html#fig:census-stack">14.1</a>. Class values for population represent inhabitant counts per grid cell. For the demographic variables (women, mean age, household size), classes 1-5 correspond to weights 3-0 used in the location analysis.</caption>
 <thead><tr class="header">
 <th align="center">Class</th>
-<th align="center">Population</th>
-<th align="center">% Female</th>
-<th align="center">Mean Age</th>
-<th align="center">Household Size</th>
+<th align="left">Population</th>
+<th align="center">Women (%)</th>
+<th align="center">Mean age</th>
+<th align="center">Household size</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="center">1</td>
-<td align="center">3-250</td>
+<td align="left">0-250</td>
+<td align="center">0-40%</td>
 <td align="center">0-40</td>
-<td align="center">0-40</td>
-<td align="center">1-2</td>
+<td align="center">1-1.5</td>
 </tr>
 <tr class="even">
 <td align="center">2</td>
-<td align="center">250-500</td>
-<td align="center">40-47</td>
+<td align="left">250-500</td>
+<td align="center">40-47%</td>
 <td align="center">40-42</td>
-<td align="center">2-2.5</td>
+<td align="center">1.5-2</td>
 </tr>
 <tr class="odd">
 <td align="center">3</td>
-<td align="center">500-2000</td>
-<td align="center">47-53</td>
+<td align="left">500-2000</td>
+<td align="center">47-53%</td>
 <td align="center">42-44</td>
-<td align="center">2.5-3</td>
+<td align="center">2-2.5</td>
 </tr>
 <tr class="even">
 <td align="center">4</td>
-<td align="center">2000-4000</td>
-<td align="center">53-60</td>
+<td align="left">2000-4000</td>
+<td align="center">53-60%</td>
 <td align="center">44-47</td>
-<td align="center">3-3.5</td>
+<td align="center">2.5-3</td>
 </tr>
 <tr class="odd">
 <td align="center">5</td>
-<td align="center">4000-8000</td>
-<td align="center">&gt;60</td>
+<td align="left">4000-8000</td>
+<td align="center">&gt;60%</td>
 <td align="center">&gt;47</td>
-<td align="center">&gt;3.5</td>
+<td align="center">&gt;3</td>
 </tr>
 <tr class="even">
 <td align="center">6</td>
-<td align="center">&gt;8000</td>
+<td align="left">&gt;8000</td>
 <td align="center"></td>
 <td align="center"></td>
 <td align="center"></td>
@@ -260,20 +269,21 @@ Further, <code><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutat
 </h2>
 <p>After the preprocessing, the data can be converted into a <code>SpatRaster</code> object (see Sections <a href="spatial-class.html#raster-classes">2.3.4</a> and <a href="attr.html#raster-subsetting">3.3.1</a>) with the help of the <code><a href="https://rspatial.github.io/terra/reference/rast.html">rast()</a></code> function.
 When setting its <code>type</code> argument to <code>xyz</code>, the <code>x</code> and <code>y</code> columns of the input data frame should correspond to coordinates on a regular grid.
-All the remaining columns (here: <code>pop</code>, <code>women</code>, <code>mean_age</code>, <code>hh_size</code>) will serve as values of the raster layers (Figure <a href="location.html#fig:census-stack">14.1</a>; see also <code>code/14-location-figures.R</code> in our GitHub repository).</p>
+All the remaining columns (here: <code>pop</code>, <code>women</code>, <code>mean_age</code>, <code>hh_size</code>) will serve as values of the raster layers (Figure <a href="location.html#fig:census-stack">14.1</a>; see also <code>code/14-location-figures.R</code> in our GitHub repository).
+Note that column order matters: the first two columns must be x and y coordinates, so use <code><a href="https://dplyr.tidyverse.org/reference/select.html">select()</a></code> or <code><a href="https://dplyr.tidyverse.org/reference/relocate.html">relocate()</a></code> to reorder columns if needed.</p>
 <div class="sourceCode" id="cb471"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">input_ras</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html">rast</a></span><span class="op">(</span><span class="va">input_tidy</span>, type <span class="op">=</span> <span class="st">"xyz"</span>, crs <span class="op">=</span> <span class="st">"EPSG:3035"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb472"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">input_ras</span></span>
 <span><span class="co">#&gt; class       : SpatRaster </span></span>
-<span><span class="co">#&gt; size        : 868, 642, 4  (nrow, ncol, nlyr)</span></span>
+<span><span class="co">#&gt; size        : 859, 641, 4  (nrow, ncol, nlyr)</span></span>
 <span><span class="co">#&gt; resolution  : 1000, 1000  (x, y)</span></span>
-<span><span class="co">#&gt; extent      : 4031000, 4673000, 2684000, 3552000  (xmin, xmax, ymin, ymax)</span></span>
+<span><span class="co">#&gt; extent      : 4031000, 4672000, 2689000, 3548000  (xmin, xmax, ymin, ymax)</span></span>
 <span><span class="co">#&gt; coord. ref. : ETRS89-extended / LAEA Europe (EPSG:3035) </span></span>
 <span><span class="co">#&gt; source(s)   : memory</span></span>
-<span><span class="co">#&gt; names       : pop, women, mean_age, hh_size </span></span>
-<span><span class="co">#&gt; min values  :   1,     1,        1,       1 </span></span>
-<span><span class="co">#&gt; max values  :   6,     5,        5,       5</span></span></code></pre></div>
+<span><span class="co">#&gt; names       :   pop, women, mean_age, hh_size </span></span>
+<span><span class="co">#&gt; min values  :     3,     0,      8.5,       1 </span></span>
+<span><span class="co">#&gt; max values  : 24164,   100,    104.4,     144</span></span></code></pre></div>
 
 <div class="rmdnote">
 Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS where each grid cell has the same area, here 1000 * 1000 square meters.
@@ -282,47 +292,66 @@ Be careful with geographic CRS where grid cell areas constantly decrease in pole
 </div>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:census-stack"></span>
-<img src="images/14_census_stack.png" alt="Gridded German census data of 2011 (see Table 14.1 for a description of the classes)." width="100%"><p class="caption">
-FIGURE 14.1: Gridded German census data of 2011 (see Table 14.1 for a description of the classes).
+<img src="images/14_census_stack.png" alt="Gridded German census data of 2022 (women data from 2011). See Table 14.1 for reclassification thresholds." width="100%"><p class="caption">
+FIGURE 14.1: Gridded German census data of 2022 (women data from 2011). See Table 14.1 for reclassification thresholds.
 </p>
 </div>
-<p>The next stage is to reclassify the values of the rasters stored in <code>input_ras</code> in accordance with the survey mentioned in Section <a href="location.html#case-study">14.2</a>, using the <strong>terra</strong> function <code><a href="https://rspatial.github.io/terra/reference/classify.html">classify()</a></code>, which was introduced in Section <a href="spatial-operations.html#local-operations">4.3.3</a>.
-In the case of the population data, we convert the classes into a numeric data type using class means.
-Raster cells are assumed to have a population of 127 if they have a value of 1 (cells in ‘class 1’ contain between 3 and 250 inhabitants) and 375 if they have a value of 2 (containing 250 to 500 inhabitants), and so on (see Table <a href="location.html#tab:census-desc">14.1</a>).
-A cell value of 8000 inhabitants was chosen for ‘class 6’ because these cells contain more than 8000 people.
-Of course, these are approximations of the true population, not precise values.<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;
-The potential error introduced during this reclassification stage will be explored in the exercises.&lt;/p&gt;"><sup>98</sup></a>
-However, the level of detail is sufficient to delineate metropolitan areas (see Section <a href="location.html#define-metropolitan-areas">14.5</a>).</p>
-<p>In contrast to the <code>pop</code> variable, representing absolute estimates of the total population, the remaining variables were reclassified as weights corresponding with weights used in the survey.
-Class 1 in the variable <code>women</code>, for instance, represents areas in which 0 to 40% of the population is female;
-these are reclassified with a comparatively high weight of 3 because the target demographic is predominantly male.
-Similarly, the classes containing the youngest people and highest proportion of single households are reclassified to have high weights.</p>
+<p>The next stage is to reclassify the demographic variables (women, mean age, household size) into weights in accordance with the survey mentioned in Section <a href="location.html#case-study">14.2</a>, using the <strong>terra</strong> function <code><a href="https://rspatial.github.io/terra/reference/classify.html">classify()</a></code>, which was introduced in Section <a href="spatial-operations.html#local-operations">4.3.3</a>.</p>
+<p>Since Census 2022 provides actual continuous values rather than class codes, we can use the population counts directly without conversion.
+This gives us more precise data for delineating metropolitan areas (see Section <a href="location.html#define-metropolitan-areas">14.5</a>).</p>
+<p>For the remaining demographic variables, we reclassify continuous values into weights (0-3) based on our target audience criteria (see Table <a href="location.html#tab:census-desc">14.1</a>).
+Areas with 0-40% female population receive weight 3 because the target demographic is predominantly male.
+Similarly, areas with younger mean age and smaller household sizes receive higher weights.</p>
 <div class="sourceCode" id="cb473"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rcl_pop</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">127</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">375</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1250</span>, </span>
-<span>                   <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">3000</span>, <span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">6000</span>, <span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">8000</span><span class="op">)</span>, </span>
-<span>                 ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">rcl_women</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">1</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">0</span><span class="op">)</span>, </span>
-<span>                   ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">rcl_age</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">0</span><span class="op">)</span>,</span>
-<span>                 ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="va">rcl_hh</span> <span class="op">=</span> <span class="va">rcl_women</span></span>
-<span><span class="va">rcl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">rcl_pop</span>, <span class="va">rcl_women</span>, <span class="va">rcl_age</span>, <span class="va">rcl_hh</span><span class="op">)</span></span></code></pre></div>
-<p>Note that we have made sure that the order of the reclassification matrices in the list is the same as for the elements of <code>input_ras</code>.
-For instance, the first element corresponds in both cases to the population.
-Subsequently, the <code>for</code>-loop applies the reclassification matrix to the corresponding raster layer.
-Finally, the code chunk below ensures the <code>reclass</code> layers have the same name as the layers of <code>input_ras</code>.</p>
+<code class="sourceCode R"><span><span class="co"># Reclassification matrices for continuous values (from, to, weight)</span></span>
+<span><span class="co"># Women: percentage of female inhabitants</span></span>
+<span><span class="va">rcl_women</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  <span class="fl">0</span>, <span class="fl">40</span>, <span class="fl">3</span>,    <span class="co"># 0-40% female -&gt; weight 3</span></span>
+<span>  <span class="fl">40</span>, <span class="fl">47</span>, <span class="fl">2</span>,   <span class="co"># 40-47% -&gt; weight 2</span></span>
+<span>  <span class="fl">47</span>, <span class="fl">53</span>, <span class="fl">1</span>,   <span class="co"># 47-53% -&gt; weight 1</span></span>
+<span>  <span class="fl">53</span>, <span class="fl">60</span>, <span class="fl">0</span>,   <span class="co"># 53-60% -&gt; weight 0</span></span>
+<span>  <span class="fl">60</span>, <span class="fl">100</span>, <span class="fl">0</span>   <span class="co"># &gt;60% -&gt; weight 0</span></span>
+<span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Mean age: continuous years</span></span>
+<span><span class="va">rcl_age</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  <span class="fl">0</span>, <span class="fl">40</span>, <span class="fl">3</span>,    <span class="co"># Mean age &lt;40 -&gt; weight 3</span></span>
+<span>  <span class="fl">40</span>, <span class="fl">42</span>, <span class="fl">2</span>,   <span class="co"># 40-42 -&gt; weight 2</span></span>
+<span>  <span class="fl">42</span>, <span class="fl">44</span>, <span class="fl">1</span>,   <span class="co"># 42-44 -&gt; weight 1</span></span>
+<span>  <span class="fl">44</span>, <span class="fl">47</span>, <span class="fl">0</span>,   <span class="co"># 44-47 -&gt; weight 0</span></span>
+<span>  <span class="fl">47</span>, <span class="fl">120</span>, <span class="fl">0</span>   <span class="co"># &gt;47 -&gt; weight 0</span></span>
+<span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Household size: average persons per household</span></span>
+<span><span class="va">rcl_hh</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  <span class="fl">0</span>, <span class="fl">1.5</span>, <span class="fl">3</span>,     <span class="co"># 1-1.5 persons -&gt; weight 3</span></span>
+<span>  <span class="fl">1.5</span>, <span class="fl">2.0</span>, <span class="fl">2</span>,   <span class="co"># 1.5-2 -&gt; weight 2</span></span>
+<span>  <span class="fl">2.0</span>, <span class="fl">2.5</span>, <span class="fl">1</span>,   <span class="co"># 2-2.5 -&gt; weight 1</span></span>
+<span>  <span class="fl">2.5</span>, <span class="fl">3.0</span>, <span class="fl">0</span>,   <span class="co"># 2.5-3 -&gt; weight 0</span></span>
+<span>  <span class="fl">3.0</span>, <span class="fl">100</span>, <span class="fl">0</span>    <span class="co"># &gt;3 -&gt; weight 0</span></span>
+<span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rcl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">rcl_women</span>, <span class="va">rcl_age</span>, <span class="va">rcl_hh</span><span class="op">)</span></span></code></pre></div>
+<p>Note that we only reclassify women, mean age, and household size into weights — not population.
+The <code>for</code>-loop applies each reclassification matrix to the corresponding raster layer.
+We keep the population layer separate as actual counts for use in metropolitan area identification.</p>
 <div class="sourceCode" id="cb474"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">reclass</span> <span class="op">=</span> <span class="va">input_ras</span></span>
+<code class="sourceCode R"><span><span class="co"># Separate population (used as counts for metro detection) from variables to reclassify</span></span>
+<span><span class="va">pop_ras</span> <span class="op">=</span> <span class="va">input_ras</span><span class="op">$</span><span class="va">pop</span></span>
+<span></span>
+<span><span class="co"># Reclassify women, mean_age, hh_size into weights</span></span>
+<span><span class="va">demo_vars</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"women"</span>, <span class="st">"mean_age"</span>, <span class="st">"hh_size"</span><span class="op">)</span></span>
+<span><span class="va">reclass</span> <span class="op">=</span> <span class="va">input_ras</span><span class="op">[[</span><span class="va">demo_vars</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html">nlyr</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">reclass</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/classify.html">classify</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">reclass</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, rcl <span class="op">=</span> <span class="va">rcl</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, right <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html">names</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html">names</a></span><span class="op">(</span><span class="va">input_ras</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html">names</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span> <span class="op">=</span> <span class="va">demo_vars</span></span></code></pre></div>
 <div class="sourceCode" id="cb475"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reclass</span> <span class="co"># full output not shown</span></span>
-<span><span class="co">#&gt; ... </span></span>
-<span><span class="co">#&gt; names       :  pop, women, mean_age, hh_size </span></span>
-<span><span class="co">#&gt; min values  :  127,     0,        0,       0 </span></span>
-<span><span class="co">#&gt; max values  : 8000,     3,        3,       3</span></span></code></pre></div>
+<span><span class="co">#&gt; ...</span></span>
+<span><span class="co">#&gt; names       : women, mean_age, hh_size</span></span>
+<span><span class="co">#&gt; min values  :     0,        0,       0</span></span>
+<span><span class="co">#&gt; max values  :     3,        3,       3</span></span></code></pre></div>
 </div>
 <div id="define-metropolitan-areas" class="section level2" number="14.5">
 <h2>
@@ -331,21 +360,22 @@ Finally, the code chunk below ensures the <code>reclass</code> layers have the s
 <p>We deliberately define metropolitan areas as pixels of 20 km<sup>2</sup> inhabited by more than 500,000 people.
 Pixels at this coarse resolution can rapidly be created using <code><a href="https://rspatial.github.io/terra/reference/aggregate.html">aggregate()</a></code>, as introduced in Section <a href="geometry-operations.html#aggregation-and-disaggregation">5.3.3</a>.
 The command below uses the argument <code>fact = 20</code> to reduce the resolution of the result 20-fold (recall the original raster resolution was 1 km<sup>2</sup>).</p>
+<p>Since we have actual population counts from Census 2022 (rather than class-midpoint estimates), we can aggregate them directly.</p>
 <div class="sourceCode" id="cb476"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pop_agg</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">$</span><span class="va">pop</span>, fact <span class="op">=</span> <span class="fl">20</span>, fun <span class="op">=</span> <span class="va">sum</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pop_agg</span> <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/aggregate.html">aggregate</a></span><span class="op">(</span><span class="va">pop_ras</span>, fact <span class="op">=</span> <span class="fl">20</span>, fun <span class="op">=</span> <span class="va">sum</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/summary.html">summary</a></span><span class="op">(</span><span class="va">pop_agg</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       pop         </span></span>
-<span><span class="co">#&gt;  Min.   :    127  </span></span>
-<span><span class="co">#&gt;  1st Qu.:  39886  </span></span>
-<span><span class="co">#&gt;  Median :  66008  </span></span>
-<span><span class="co">#&gt;  Mean   :  99503  </span></span>
-<span><span class="co">#&gt;  3rd Qu.: 105696  </span></span>
-<span><span class="co">#&gt;  Max.   :1204870  </span></span>
-<span><span class="co">#&gt;  NA's   :447</span></span></code></pre></div>
+<span><span class="co">#&gt;  Min.   :     25  </span></span>
+<span><span class="co">#&gt;  1st Qu.:  22768  </span></span>
+<span><span class="co">#&gt;  Median :  45542  </span></span>
+<span><span class="co">#&gt;  Mean   :  82132  </span></span>
+<span><span class="co">#&gt;  3rd Qu.:  83074  </span></span>
+<span><span class="co">#&gt;  Max.   :1464047  </span></span>
+<span><span class="co">#&gt;  NA's   :412</span></span></code></pre></div>
 <p>The next stage is to keep only cells with more than half a million people.</p>
 <div class="sourceCode" id="cb477"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_agg</span> <span class="op">=</span> <span class="va">pop_agg</span><span class="op">[</span><span class="va">pop_agg</span> <span class="op">&gt;</span> <span class="fl">500000</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span> </span></code></pre></div>
-<p>Plotting this reveals eight metropolitan regions (Figure <a href="location.html#fig:metro-areas">14.2</a>).
+<p>Plotting this reveals several metropolitan regions (Figure <a href="location.html#fig:metro-areas">14.2</a>).
 Each region consists of one or more raster cells.
 It would be nice if we could join all cells belonging to one region.
 <strong>terra</strong>’s <code><a href="https://rspatial.github.io/terra/reference/patches.html">patches()</a></code> command does exactly that.
@@ -361,7 +391,7 @@ Subsequently, <code><a href="https://rspatial.github.io/terra/reference/as.polyg
 FIGURE 14.2: The aggregated population raster (resolution: 20 km) with the identified metropolitan areas (golden polygons) and the corresponding names.
 </p>
 </div>
-<p>The resulting eight metropolitan areas suitable for bike shops (Figure <a href="location.html#fig:metro-areas">14.2</a>; see also <code>code/14-location-figures.R</code> for creating the figure) are still missing a name.
+<p>The resulting metropolitan areas suitable for bike shops (Figure <a href="location.html#fig:metro-areas">14.2</a>; see also <code>code/14-location-figures.R</code> for creating the figure) are still missing a name.
 A reverse geocoding approach can settle this problem: given a coordinate, it finds the corresponding address.
 Consequently, extracting the centroid coordinate of each metropolitan area can serve as an input for a reverse geocoding API.
 This is exactly what the <code>rev_geocode_OSM()</code> function of the <strong>tmaptools</strong> package expects.
@@ -392,11 +422,19 @@ However, here, we are only interested in the name of the city.</p>
 <td align="left">NA</td>
 </tr>
 <tr class="odd">
-<td align="left">Velbert</td>
-<td align="left">Nordrhein-Westfalen</td>
+<td align="left">Langenhagen</td>
+<td align="left">Niedersachsen</td>
 </tr>
 <tr class="even">
+<td align="left">Wülfrath</td>
+<td align="left">Nordrhein-Westfalen</td>
+</tr>
+<tr class="odd">
 <td align="left">Leipzig</td>
+<td align="left">Sachsen</td>
+</tr>
+<tr class="even">
+<td align="left">Dresden</td>
 <td align="left">Sachsen</td>
 </tr>
 <tr class="odd">
@@ -417,13 +455,14 @@ However, here, we are only interested in the name of the city.</p>
 </tr>
 </tbody>
 </table></div>
-<p>Overall, we are satisfied with the <code>City</code> column serving as metropolitan names (Table <a href="location.html#tab:metro-names">14.2</a>) apart from one exception, namely Velbert which belongs to the greater region of Düsseldorf.
-Hence, we replace Velbert with Düsseldorf (Figure <a href="location.html#fig:metro-areas">14.2</a>).
+<p>Overall, we are satisfied with the <code>City</code> column serving as metropolitan names (Table <a href="location.html#tab:metro-names">14.2</a>) apart from two exceptions: Velbert belongs to the greater region of Düsseldorf, and Langenhagen belongs to Hannover.
+Hence, we replace these names accordingly (Figure <a href="location.html#fig:metro-areas">14.2</a>).
 Umlauts like <code>ü</code> might lead to trouble further on, for example when determining the bounding box of a metropolitan area with <code><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq()</a></code> (see further below), which is why we avoid them.</p>
 <div class="sourceCode" id="cb480"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">metro_names</span> <span class="op">=</span> <span class="va">metro_names</span><span class="op">$</span><span class="va">city</span> <span class="op">|&gt;</span> </span>
+<code class="sourceCode R"><span><span class="va">metro_names</span> <span class="op">=</span> <span class="va">metro_names</span><span class="op">$</span><span class="va">city</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/character.html">as.character</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">x</span> <span class="op">==</span> <span class="st">"Velbert"</span>, <span class="st">"Düsseldorf"</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="op">(</span>\<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span><span class="op">(</span><span class="va">x</span> <span class="op">==</span> <span class="st">"Langenhagen"</span>, <span class="st">"Hannover"</span>, <span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/grep.html">gsub</a></span><span class="op">(</span><span class="st">"ü"</span>, <span class="st">"ue"</span>, x <span class="op">=</span> <span class="va">_</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div id="points-of-interest" class="section level2" number="14.6">
@@ -436,13 +475,13 @@ Instead of downloading shops for the whole of Germany, we restrict the query to 
 The subsequent code chunk does this using a number of functions including:</p>
 <ul>
 <li>
-<code><a href="https://purrr.tidyverse.org/reference/map.html">map()</a></code> (the <strong>tidyverse</strong> equivalent of <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code>), which iterates through all eight metropolitan names which subsequently define the bounding box in the OSM query function <code><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq()</a></code> (see Section <a href="read-write.html#retrieving-data">8.5</a>)</li>
+<code><a href="https://purrr.tidyverse.org/reference/map.html">map()</a></code> (the <strong>tidyverse</strong> equivalent of <code><a href="https://rdrr.io/r/base/lapply.html">lapply()</a></code>), which iterates through all metropolitan names which subsequently define the bounding box in the OSM query function <code><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq()</a></code> (see Section <a href="read-write.html#retrieving-data">8.5</a>)</li>
 <li>
 <code><a href="https://docs.ropensci.org/osmdata/reference/add_osm_feature.html">add_osm_feature()</a></code> to specify OSM elements with a key value of <code>shop</code> (see <a href="https://wiki.openstreetmap.org/wiki/Map_Features">wiki.openstreetmap.org</a> for a list of common key:value pairs)</li>
 <li>
 <code><a href="https://docs.ropensci.org/osmdata/reference/osmdata_sf.html">osmdata_sf()</a></code>, which converts the OSM data into spatial objects (of class <code>sf</code>)</li>
 <li>
-<code>while()</code>, which tries two more times to download the data if the download failed the first time<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;The OSM-download will sometimes fail at the first attempt.&lt;/p&gt;"><sup>99</sup></a>
+<code>while()</code>, which tries two more times to download the data if the download failed the first time<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;The OSM-download will sometimes fail at the first attempt.&lt;/p&gt;"><sup>98</sup></a>
 </li>
 </ul>
 <p>Before running this code, please consider it will download almost two GB of data.
@@ -452,7 +491,7 @@ To make it available in your environment, run <code>data("shops", package = "spD
 <code class="sourceCode R"><span><span class="va">shops</span> <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span><span class="op">(</span><span class="va">metro_names</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="st">"Downloading shops of: "</span>, <span class="va">x</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="co"># give the server a bit time</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">0.1</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Sys.sleep.html">Sys.sleep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">15</span>, <span class="fl">0.1</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="va">query</span> <span class="op">=</span> <span class="fu">osmdata</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/opq.html">opq</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">osmdata</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/add_osm_feature.html">add_osm_feature</a></span><span class="op">(</span>key <span class="op">=</span> <span class="st">"shop"</span><span class="op">)</span></span>
 <span>  <span class="va">points</span> <span class="op">=</span> <span class="fu">osmdata</span><span class="fu">::</span><span class="fu"><a href="https://docs.ropensci.org/osmdata/reference/osmdata_sf.html">osmdata_sf</a></span><span class="op">(</span><span class="va">query</span><span class="op">)</span></span>
@@ -475,7 +514,7 @@ If not, we recommend to try to download the shops again for this/these specific 
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html">message</a></span><span class="op">(</span><span class="st">"There are/is still (a) metropolitan area/s without any features:\n"</span>,</span>
 <span>          <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">metro_names</span><span class="op">[</span><span class="va">ind</span><span class="op">]</span>, collapse <span class="op">=</span> <span class="st">", "</span><span class="op">)</span>, <span class="st">"\nPlease fix it!"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>To make sure that each list element (an <code>sf</code> data frame) comes with the same columns<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;This is not a given since OSM contributors are not equally meticulous when collecting data.&lt;/p&gt;"><sup>100</sup></a>, we only keep the <code>osm_id</code> and the <code>shop</code> columns with the help of the <code>map_dfr</code> loop which additionally combines all shops into one large <code>sf</code> object.</p>
+<p>To make sure that each list element (an <code>sf</code> data frame) comes with the same columns<a class="footnote-ref" tabindex="0" data-toggle="popover" data-content="&lt;p&gt;This is not a given since OSM contributors are not equally meticulous when collecting data.&lt;/p&gt;"><sup>99</sup></a>, we only keep the <code>osm_id</code> and the <code>shop</code> columns with the help of the <code>map_dfr</code> loop which additionally combines all shops into one large <code>sf</code> object.</p>
 <div class="sourceCode" id="cb483"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># select only specific columns</span></span>
 <span><span class="va">shops</span> <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html">map_dfr</a></span><span class="op">(</span><span class="va">shops</span>, <span class="va">select</span>, <span class="va">osm_id</span>, <span class="va">shop</span><span class="op">)</span></span></code></pre></div>
@@ -510,25 +549,25 @@ Here, we choose the Fisher-Jenks natural breaks approach which minimizes within-
 <h2>
 <span class="header-section-number">14.7</span> Identify suitable locations<a class="anchor" aria-label="anchor" href="#identify-suitable-locations"><i class="fas fa-link"></i></a>
 </h2>
-<p>The only steps that remain before combining all the layers are to add <code>poi</code> to the <code>reclass</code> raster stack and remove the population layer from it.
-The reasoning for the latter is: First of all, we have already delineated metropolitan areas, that is areas where the population density is above average compared to the rest of Germany.
+<p>The only step that remains before combining all the layers is to add <code>poi</code> to the <code>reclass</code> raster stack.
+Note that we have already kept population separate from the demographic weights, as it was used only for delineating metropolitan areas.
+The reasoning is: First, we have already identified areas where the population density is above average compared to the rest of Germany.
 Second, though it is advantageous to have many potential customers within a specific catchment area, the sheer number alone might not actually represent the desired target group.
 For instance, residential tower blocks are areas with a high population density but not necessarily with a high purchasing power for expensive cycle components.</p>
 <div class="sourceCode" id="cb487"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># remove population raster and add poi raster</span></span>
-<span><span class="va">reclass</span> <span class="op">=</span> <span class="va">reclass</span><span class="op">[[</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html">names</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span> <span class="op">!=</span> <span class="st">"pop"</span><span class="op">]</span><span class="op">]</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">poi</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># add poi raster to demographic weights</span></span>
+<span><span class="va">reclass</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">reclass</span>, <span class="va">poi</span><span class="op">)</span></span></code></pre></div>
 <p>In common with other data science projects, data retrieval and ‘tidying’ have consumed much of the overall workload so far.
 With clean data, the final step — calculating a final score by summing all raster layers — can be accomplished in a single line of code.</p>
 <div class="sourceCode" id="cb488"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># calculate the total score</span></span>
 <span><span class="va">result</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">reclass</span><span class="op">)</span></span></code></pre></div>
-<p>For instance, a score greater than 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure <a href="location.html#fig:bikeshop-berlin">14.3</a>; see also <code>code/14-location-figures.R</code>).</p>
+<p>For instance, a score of at least 9 might be a suitable threshold indicating raster cells where a bike shop could be placed (Figure <a href="location.html#fig:bikeshop-berlin">14.3</a>; see also <code>code/14-location-figures.R</code>).</p>
 <div class="figure" style="text-align: center">
 <span style="display:block;" id="fig:bikeshop-berlin"></span>
 <div class="leaflet html-widget html-fill-item" id="htmlwidget-841de324d41155df19a0" style="width:100%;height:389.34px;"></div>
-<script type="application/json" data-for="htmlwidget-841de324d41155df19a0">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addRasterImage","args":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAM0lEQVRYhe3SMQ0AMAwEsQcb/hTSuQSaVLIR3HAJAADfqfR0wm1dEC9VevcCq+MAAIBhB20vBvBK3JZrAAAAAElFTkSuQmCC",[[52.69660085729197,13.08200261479863],[52.32107408861835,13.69815913809763]],null,null,{"tileSize":256,"zIndex":1,"minZoom":0,"opacity":0.8}]},{"method":"addLegend","args":[{"colors":["darkgreen"],"labels":["potential locations"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"unknown","title":"Legend","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[52.32107408861835,52.69660085729197],"lng":[13.08200261479863,13.69815913809763]}},"evals":[],"jsHooks":[]}</script><p class="caption">
-FIGURE 14.3: Suitable areas (i.e., raster cells with a score &gt; 9) in accordance with our hypothetical survey for bike stores in Berlin.
+<script type="application/json" data-for="htmlwidget-841de324d41155df19a0">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addRasterImage","args":["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAMUlEQVRYhe3UQQ0AIAADsROLfwsgAhIIaRVse6wAALaN5u0IZ31X6BpLAg9zUQAAVAsMngWNvXU4QAAAAABJRU5ErkJggg==",[[52.66069241497743,13.07951158055728],[52.28517866783276,13.6951365872627]],null,null,{"tileSize":256,"zIndex":1,"minZoom":0,"opacity":0.8}]},{"method":"addLegend","args":[{"colors":["darkgreen"],"labels":["potential locations"],"na_color":null,"na_label":"NA","opacity":0.5,"position":"bottomright","type":"unknown","title":"Legend","extra":null,"layerId":null,"className":"info legend","group":null}]}],"limits":{"lat":[52.28517866783276,52.66069241497743],"lng":[13.07951158055728,13.6951365872627]}},"evals":[],"jsHooks":[]}</script><p class="caption">
+FIGURE 14.3: Suitable areas (i.e., raster cells with a score &gt;= 9) in accordance with our hypothetical survey for bike stores in Berlin.
 </p>
 </div>
 </div>
@@ -566,13 +605,11 @@ That is, if there already is a bike shop in the vicinity of the chosen location,
 <h2>
 <span class="header-section-number">14.9</span> Exercises<a class="anchor" aria-label="anchor" href="#exercises-10"><i class="fas fa-link"></i></a>
 </h2>
-<p>E1. Download the csv file containing inhabitant information for a 100 m cell resolution (<a href="https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&amp;v=3" class="uri">https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&amp;v=3</a>).
-Please note that the unzipped file has a size of 1.23 GB.
-To read it into R, you can use <code><a href="https://readr.tidyverse.org/reference/read_delim.html">readr::read_csv</a></code>.
-This takes 30 seconds on a machine with 16 GB RAM.
-<code><a href="https://rdrr.io/pkg/data.table/man/fread.html">data.table::fread()</a></code> might be even faster, and returns an object of class <code><a href="https://rdrr.io/pkg/data.table/man/data.table.html">data.table()</a></code>.
-Use <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html">dplyr::as_tibble()</a></code> to convert it into a tibble.
-Build an inhabitant raster, aggregate it to a cell resolution of 1 km, and compare the difference with the inhabitant raster (<code>inh</code>) we have created using class mean values.</p>
+<p>E1. This exercise requires the <strong>z22</strong> package for accessing 100 m resolution data.
+Install it with <code>remotes::install_github("JsLth/z22")</code>.
+Load the population data at 100 m cell resolution using <code>z22::z22_data("population", res = "100m", year = 2022)</code>.
+Aggregate it to a cell resolution of 1 km using <code><a href="https://rspatial.github.io/terra/reference/aggregate.html">terra::aggregate()</a></code> with <code>fun = sum</code>, and compare the result with the 1 km resolution data from <code>census_de</code>.
+Note that the 100 m data is much larger and may take some time to download.</p>
 <p>E2. Suppose our bike shop predominantly sold electric bikes to older people.
 Change the age raster accordingly, repeat the remaining analyses and compare the changes with our original result.</p>
 
@@ -625,7 +662,7 @@ Change the age raster accordingly, repeat the remaining analyses and compare the
 <footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
 
   <div class="col-12 col-md-6 mt-3">
-    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2026-01-28.</p>
+    <p>"<strong>Geocomputation with R</strong>" was written by Robin Lovelace, Jakub Nowosad, Jannes Muenchow. It was last built on 2026-01-30.</p>
   </div>
 
   <div class="col-12 col-md-6 mt-3">
