@@ -169,8 +169,15 @@ tm_2 = tm_shape(pop_agg/1000) +
   tm_shape(metros) +
   tm_borders(col = "gold", lwd = 2) +
   tm_shape(metros_points) +
-  tm_text("names", size = 0.55, fontface = "italic",
-          options = opt_tm_text(shadow = TRUE))
+  tm_text("names", size = 0.55, fontface = "italic", col = "white", xmod = 0.08, ymod = 0) +
+  tm_shape(metros_points) +
+  tm_text("names", size = 0.55, fontface = "italic", col = "white", xmod = -0.08, ymod = 0) +
+  tm_shape(metros_points) +
+  tm_text("names", size = 0.55, fontface = "italic", col = "white", xmod = 0, ymod = 0.08) +
+  tm_shape(metros_points) +
+  tm_text("names", size = 0.55, fontface = "italic", col = "white", xmod = 0, ymod = -0.08) +
+  tm_shape(metros_points) +
+  tm_text("names", size = 0.55, fontface = "italic")
 
 tmap_save(tm_2, "images/14_metro_areas.png", width = 5, height = 4)
 
