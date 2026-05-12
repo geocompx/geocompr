@@ -409,6 +409,7 @@ multilayer_rast = rast(multilayer_filepath)
 All of the previous examples read spatial information from files stored on your hard drive. 
 However, GDAL also allows reading data directly from online resources, such as HTTP/HTTPS/FTP web resources.
 The only thing we need to do is to add a `/vsicurl/` prefix before the path to the file.
+This tells GDAL to use its virtual file system for network resources, which uses **HTTP Range requests** to fetch only the specific byte ranges needed for an operation rather than downloading the entire file.
 Let's try it by connecting to the global monthly snow probability at 500-m resolution for the period 2000-2012.
 Snow probability for December is stored as a Cloud Optimized GeoTIFF (COG) file (see Section \@ref(file-formats)) at [zenodo.org](https://zenodo.org/record/5774954/files/clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif).
 To read an online file, we just need to provide its URL together with the `/vsicurl/` prefix.
@@ -419,18 +420,18 @@ myurl = paste0("/vsicurl/https://zenodo.org/record/5774954/files/",
                "clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif")
 snow = rast(myurl)
 snow
-#> class       : SpatRaster 
+#> class       : SpatRaster
 #> size        : 35849, 86400, 1  (nrow, ncol, nlyr)
-#> resolution  : 0.00417, 0.00417  (x, y)
-#> extent      : -180, 180, -62, 87.4  (xmin, xmax, ymin, ymax)
-#> coord. ref. : lon/lat WGS 84 (EPSG:4326) 
-#> source      : clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif 
+#> resolution  : 0.004166667, 0.004166667  (x, y)
+#> extent      : -180, 180, -62.00083, 87.37  (xmin, xmax, ymin, ymax)
+#> coord. ref. : lon/lat WGS 84 (EPSG:4326)
+#> source      : clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0.tif
 #> name        : clm_snow.prob_esacci.dec_p.90_500m_s0..0cm_2000..2012_v2.0
 ```
 
 \index{COG} 
-Due to the fact that the input data is COG, we are actually not reading this file to our RAM, but rather creating a connection to it without obtaining any values.
-Its values will be read if we apply any value-based operation (e.g., `crop()` or `extract()`).
+When combined with the `/vsicurl/` prefix, COG files enable highly efficient remote data access.
+Instead of reading the whole file into RAM, GDAL creates a connection that **selectively fetches** only the byte ranges needed for subsequent operations (e.g., `crop()` or `extract()`), making it possible to work with multi-gigabyte files over the internet almost as if they were local.
 This allows us also to just read a tiny portion of the data without downloading the entire file.
 For example, we can get the snow probability for December in Reykjavik (70%) by specifying its coordinates and applying the `extract()` function:
 

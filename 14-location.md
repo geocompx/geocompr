@@ -140,15 +140,15 @@ input_ras = rast(input_tidy, type = "xyz", crs = "EPSG:3035")
 
 ``` r
 input_ras
-#> class       : SpatRaster 
+#> class       : SpatRaster
 #> size        : 859, 641, 4  (nrow, ncol, nlyr)
 #> resolution  : 1000, 1000  (x, y)
 #> extent      : 4031000, 4672000, 2689000, 3548000  (xmin, xmax, ymin, ymax)
-#> coord. ref. : ETRS89-extended / LAEA Europe (EPSG:3035) 
+#> coord. ref. : ETRS89-extended / LAEA Europe (EPSG:3035)
 #> source(s)   : memory
-#> names       :   pop, women, mean_age, hh_size 
-#> min values  :     3,     0,      8.5,       1 
-#> max values  : 24164,   100,    104.4,     144
+#> names       :   pop, women, mean_age, hh_size
+#> min values  :     3,     0,      8.5,       1
+#> max values  : 24164,   100,   104.43,  143.88
 ```
 
 \BeginKnitrBlock{rmdnote}<div class="rmdnote">Note that we are using an equal-area projection (EPSG:3035; Lambert Equal Area Europe), i.e., a projected CRS\index{CRS!projected} where each grid cell has the same area, here 1000 * 1000 square meters. 
