@@ -11,15 +11,9 @@ dem_TPI = terrain(dem, v = "TPI")
 qgis_algo = qgis_algorithms()
 grep("wetness", qgis_algo$algorithm, value = TRUE)
 
-qgis_show_help("sagang:sagawetnessindex")
-
-dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex", 
-                                  DEM = dem)
-
-dem_wetness_1 = qgis_as_terra(dem_wetness$AREA)
-dem_wetness_2 = qgis_as_terra(dem_wetness$AREA_MOD)
-dem_wetness_3 = qgis_as_terra(dem_wetness$SLOPE)
-dem_wetness_4 = qgis_as_terra(dem_wetness$TWI)
+# Note: sagang:sagawetnessindex removed — SAGA NextGen plugin no longer available.
+# See geocompx/geocompr#1181.
+# Use terra::terrain() or GRASS alternatives for terrain attributes.
 
 # plot(dem_wetness_1)
 # plot(dem_wetness_2)
