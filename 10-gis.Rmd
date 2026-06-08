@@ -31,8 +31,7 @@ has_qgis_plugins =
   # make sure that QGIS is available
   qgisprocess::has_qgis() &&
   # make sure that all required plugins are available
-   all(qgisprocess::qgis_has_plugin(c("grassprovider", 
-                                      "processing_saga_nextgen")))
+  all(qgisprocess::qgis_has_plugin("grassprovider"))
 ```
 
 ## Introduction
@@ -152,24 +151,19 @@ Next, we can find which plugins (meaning different software) are available on ou
 ```{r plugins, eval=FALSE}
 qgis_plugins()
 #> # A tibble: 4 × 2
-#>   name                    enabled
-#>   <chr>                   <lgl>
-#> 1 grassprovider           FALSE
-#> 2 otbprovider             FALSE
-#> 3 processing              TRUE
-#> 4 processing_saga_nextgen FALSE
+#>   name           enabled
+#>   <chr>          <lgl>
+#> 1 grassprovider  FALSE
+#> 2 otbprovider    FALSE
+#> 3 processing     TRUE
 ```
 
-This tells us that the GRASS GIS (`grassprovider`) and SAGA (`processing_saga_nextgen`) plugins are available on the system but are not yet enabled.
-Since we need both later on in the chapter, let's enable them. 
+This tells us that the GRASS GIS (`grassprovider`) plugin is available on the system but is not yet enabled.
+Since we need it later on in the chapter, let's enable it. 
 
 ```{r enable-providers, eval=FALSE}
-qgis_enable_plugins(c("grassprovider", "processing_saga_nextgen"), 
-                    quiet = TRUE)
+qgis_enable_plugins("grassprovider", quiet = TRUE)
 ```
-
-Please note that aside from installing SAGA on your system, you also need to install the QGIS Python plugin Processing Saga NextGen.
-You can do so from within QGIS with the [Plugin Manager](https://docs.qgis.org/latest/en/docs/training_manual/qgis_plugins/fetching_plugins.html) or programmatically with the help of the Python package [qgis-plugin-manager](https://github.com/3liz/qgis-plugin-manager) (at least on Linux).
 
 `qgis_providers()` lists the name of the software and the corresponding count of available geoalgorithms.
 
@@ -184,10 +178,9 @@ qgis_providers()
 #> 4 3d       QGIS (3D)                       1
 #> 5 native   QGIS (native c++)             243
 #> 6 pdal     QGIS (PDAL)                    17
-#> 7 sagang   SAGA Next Gen                 509
 ```
 
-The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL, SAGA and GRASS GIS through the QGIS interface.
+The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL and GRASS GIS through the QGIS interface.
 
 Now, we are ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
@@ -391,56 +384,7 @@ dem = system.file("raster/dem.tif", package = "spDataLarge")
 The **terra** package's `terrain()` command already allows the calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
 However, GIS programs offer many more terrain characteristics, some of which can be more suitable in certain contexts.
 For example, the topographic wetness index (TWI)\index{topographic wetness index} was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
-Let's search the algorithm list for this index using `"wetness"` as keyword.
-
-```{r, eval=FALSE}
-qgis_search_algorithms("wetness") |>
-  dplyr::select(provider_title, algorithm) |>
-  head(2)
-#> # A tibble: 2 × 2
-#>   provider_title algorithm
-#>   <chr>          <chr>
-#> 1 SAGA Next Gen  sagang:sagawetnessindex
-#> 2 SAGA Next Gen  sagang:topographicwetnessindexonestep
-```
-
-An output of the above code suggests that the desired algorithm exists in the SAGA software\index{SAGA}.^[TWI can be also calculated using the `r.topidx` GRASS GIS function.]
-Though SAGA is a hybrid GIS, its main focus has been on raster processing, and here, particularly on digital elevation models\index{digital elevation model} (soil properties, terrain attributes, climate parameters). 
-Hence, SAGA is especially good at the fast processing of large (high-resolution) raster\index{raster} datasets [@conrad_system_2015].
-
-The `"sagang:sagawetnessindex"` algorithm is actually a modified TWI, that results in a more realistic soil moisture potential for the cells located in valley floors [@bohner_spatial_2006].
-
-```{r, eval=FALSE}
-qgis_show_help("sagang:sagawetnessindex")
-```
-
-Here, we stick with the default values for all arguments.
-Therefore, we only have to specify one argument -- the input `DEM`.
-Of course, when applying this algorithm you should make sure that the parameter values are in correspondence with your study aim.^[The additional arguments of `"sagang:sagawetnessindex"` are well-explained at https://gis.stackexchange.com/a/323454/20955.]
-
-Before running the SAGA algorithm from within QGIS, we change the default raster output format from `.tif` to SAGA's native raster format `.sdat`.
-Hence, all output rasters that we do not specify ourselves will from now on be written to the `.sdat` format. 
-Depending on the software versions (SAGA, GDAL) you are using, this might not be necessary, but often enough this will save you trouble when trying to read-in output rasters created with SAGA.
-
-```{r, eval=FALSE}
-options(qgisprocess.tmp_raster_ext = ".sdat")
-dem_wetness = qgis_run_algorithm("sagang:sagawetnessindex",
-  DEM = dem
-)
-```
-
-`"sagang:sagawetnessindex"` returns not one but four rasters -- catchment area, catchment slope, modified catchment area, and topographic wetness index.
-We can read a selected output by providing an output name in the `qgis_as_terra()` function.
-And since we are done with the SAGA processing from within QGIS, we change the raster output format back to `.tif`.
-
-```{r, eval=FALSE}
-dem_wetness_twi = qgis_as_terra(dem_wetness$TWI)
-# plot(dem_wetness_twi)
-options(qgisprocess.tmp_raster_ext = ".tif")
-```
-
-You can see the TWI map in the left panel of Figure \@ref(fig:qgis-raster-map).
-The topographic wetness index is unitless: its low values represent areas that will not accumulate water, while higher values show areas that will accumulate water at increasing levels.
+TWI can be calculated with the GRASS GIS function `r.topidx`, and functionality is also available in the SAGA GIS standalone software.
 
 Information from digital elevation models can also be categorized, for example, to geomorphons\index{geomorphons} -- the geomorphological phenotypes consisting of ten classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
 These phenotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
@@ -449,7 +393,7 @@ The original implementation of the geomorphons' algorithm was created in GRASS G
 
 ```{r, eval=FALSE}
 qgis_search_algorithms("geomorphon")
-#> [1] "grass:r.geomorphon" "sagang:geomorphons" 
+#> [1] "grass:r.geomorphon" 
 qgis_show_help("grass:r.geomorphon")
 # output not shown
 ```

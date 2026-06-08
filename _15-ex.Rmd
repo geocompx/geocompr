@@ -72,27 +72,16 @@ pa = vegan::decostand(comm, "pa")
 pa = pa[rowSums(pa) != 0, ]
 
 # enable plugins if not already done so
-qgisprocess::qgis_enable_plugins(c("grassprovider", "processing_saga_nextgen"))
+qgisprocess::qgis_enable_plugins("grassprovider")
 
 # compute environmental predictors (ep) catchment slope and catchment area
-ep = qgisprocess::qgis_run_algorithm(
-  alg = "sagang:sagawetnessindex",
-  DEM = dem,
-  SLOPE_TYPE = 1,
-  SLOPE = tempfile(fileext = ".sdat"),
-  AREA = tempfile(fileext = ".sdat"),
-  .quiet = TRUE)
+# Note: this previously used the SAGA NextGen plugin (sagang:sagawetnessindex)
+# which is no longer available. See geocompx/geocompr#1181.
+# Use GRASS GIS or GDAL alternatives to compute terrain attributes.
+# The previous sagang:sagawetnessindex code has been removed (see issue #1181).
+# The GRASS curvature code below still works.
+
 # read in catchment area and catchment slope
-ep = ep[c("AREA", "SLOPE")] |>
-  unlist() |>
-  terra::rast()
-# assign proper names 
-names(ep) = c("carea", "cslope")
-# make sure all rasters share the same origin
-origin(ep) = origin(dem)
-# add dem and ndvi to the multi-layer SpatRaster object
-ep = c(dem, ndvi, ep) 
-ep$carea = log10(ep$carea)
 
 # compute the curvatures
 qgis_show_help("grass7:r.slope.aspect")

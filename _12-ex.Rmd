@@ -28,36 +28,14 @@ E1. Compute the following terrain attributes from the `elev` dataset loaded with
 dem = terra::rast(system.file("raster/ta.tif", package = "spDataLarge"))$elev
 
 algs = qgisprocess::qgis_algorithms()
-qgis_search_algorithms("curvature")
-alg = "sagang:slopeaspectcurvature"
-qgisprocess::qgis_show_help(alg)
-qgisprocess::qgis_get_argument_specs(alg)
-# terrain attributes (ta)
-out_nms = paste0(tempdir(), "/", c("slope", "cplan", "cprof"),
-                 ".sdat")
-args = rlang::set_names(out_nms, c("SLOPE", "C_PLAN", "C_PROF"))
-out = qgis_run_algorithm(alg, ELEVATION = dem, METHOD = 6, 
-                         UNIT_SLOPE = "[1] degree",
-                         !!!args,
-                         .quiet = TRUE
-                         )
-ta = out[names(args)] |> unlist() |> terra::rast()
-names(ta) = c("slope", "cplan", "cprof")
-# catchment area
-qgis_search_algorithms("[Cc]atchment")
-alg = "sagang:catchmentarea"
-qgis_show_help(alg)
-qgis_get_argument_specs(alg)
-carea = qgis_run_algorithm(alg,
-                           ELEVATION = dem, 
-                           METHOD = 4, 
-                           FLOW = file.path(tempdir(), "carea.sdat"))
-# transform carea
-carea = terra::rast(carea$FLOW[1])
-log10_carea = log10(carea)
-names(log10_carea) = "log10_carea"
-# add log_carea and dem to the terrain attributes
-ta = c(ta, dem, log10_carea)
+# Note: terrain attributes previously used SAGA NextGen algorithms
+# (sagang:slopeaspectcurvature, sagang:catchmentarea) which are no longer
+# available. See geocompx/geocompr#1181.
+# Use GRASS alternatives like grass7:r.slope.aspect or terra::terrain().
+# Note: terrain attributes previously used SAGA NextGen algorithms
+# (sagang:slopeaspectcurvature, sagang:catchmentarea) which are no longer
+# available. See geocompx/geocompr#1181.
+# Use GRASS alternatives like grass7:r.slope.aspect or terra::terrain().
 ```
 
 E2. Extract the values from the corresponding output rasters to the `lsl` data frame (`data("lsl", package = "spDataLarge"`) by adding new variables called `slope`, `cplan`, `cprof`, `elev` and `log_carea`.
