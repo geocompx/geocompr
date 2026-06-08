@@ -223,7 +223,7 @@ summary(world["lifeExp"])
 #>  Mean   :70.9                      
 #>  3rd Qu.:76.8                      
 #>  Max.   :83.6                      
-#>  NA's   :10
+#>  NAs    :10
 ```
 
 Although we have only selected one variable for the `summary()` command, it also outputs a report on the geometry.

@@ -596,10 +596,13 @@ To save time downloading and preparing OSM\index{OpenStreetMap}, we will use the
 
 ``` r
 summary(bristol_ways)
-#>      highway       maxspeed             ref                     geometry   
-#>  cycleway:1721   Length:6160        Length:6160        LINESTRING   :6160  
-#>  rail    :1017   Class :character   Class :character   epsg:4326    :   0  
-#>  road    :3422   Mode  :character   Mode  :character   +proj=long...:   0
+#>      highway          maxspeed           ref                geometry   
+#>  cycleway:1721   Length   :6160   Length   :6160   LINESTRING   :6160  
+#>  rail    :1017   N.unique :  17   N.unique :  85   epsg:4326    :   0  
+#>  road    :3422   N.blank  :   0   N.blank  :   0   +proj=long...:   0  
+#>                  Min.nchar:   6   Min.nchar:   2                       
+#>                  Max.nchar:   7   Max.nchar: 104                       
+#>                  NAs      :2465   NAs      :2333
 ```
 
 The output shows that `bristol_ways` represents just over 6,000 segments on the transport network\index{network}.

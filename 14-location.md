@@ -248,7 +248,7 @@ summary(pop_agg)
 #>  Mean   :  82132  
 #>  3rd Qu.:  83074  
 #>  Max.   :1464047  
-#>  NA's   :412
+#>  NAs    :412
 ```
 
 The next stage is to keep only cells with more than half a million people.
