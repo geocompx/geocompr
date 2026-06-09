@@ -104,10 +104,60 @@ The next step is to compute variables which are not only needed for the modeling
 Specifically, we compute catchment slope and catchment area\index{catchment area} from a digital elevation model\index{digital elevation model} using R-GIS bridges (see Chapter \@ref(gis)).
 Curvatures might also represent valuable predictors, and in the Exercise section you can find out how they would impact the modeling result.
 
-To compute catchment area\index{catchment area} and catchment slope, similar functionality is available in the SAGA GIS standalone software.
-The pre-computed environmental predictors are available in **spDataLarge** as shown below.
+To compute catchment area\index{catchment area} and catchment slope, we use the **Rsagacmd**\index{Rsagacmd (package)} package which calls SAGA GIS\index{SAGA} from R (see also Section \@ref(saga)).
+**Rsagacmd** auto-generates an R interface from the `saga_cmd` help, so each SAGA library appears as a list and each tool as a function on the `saga` object.
+Printing a tool returns its description and a tibble of all parameters (type, R argument name, SAGA identifier, default), which makes it easy to look up what is available.
 
-As a convenience to the reader, we have added `ep` to **spDataLarge**:
+
+``` r
+library(Rsagacmd)
+# initialize the link to SAGA; saga_cmd must be installed on the system
+saga = saga_gis()
+saga$ta_hydrology$saga_wetness_index
+#> Help for library = ta_hydrology; tool = saga_wetness_index:
+#> Author: J.Boehner, O.Conrad (c) 2001
+#> Description: The 'SAGA Wetness Index' is similar to the 'Topographic
+#> Wetness Index' (TWI) but uses a modified catchment area, predicting a
+#> more realistic, higher potential soil moisture in valley floors.
+#>
+#> # A tibble: 12 × 7
+#>    parameter        type  argument   identifier  default available_opts
+#>    <chr>            <chr> <chr>      <chr>         <dbl> <chr>
+#>  1 Elevation        grid  dem        DEM             NA  NA
+#>  2 Weights          grid  weight     WEIGHT          NA  NA
+#>  3 Catchment Area   grid  area       AREA            NA  NA
+#>  4 Catchment Slope  grid  slope      SLOPE           NA  NA
+#>  5 Modified Catchm… grid  area_mod   AREA_MOD        NA  NA
+#>  6 Topographic Wet… grid  twi        TWI             NA  NA
+#>  7 Suction          floa… suction    SUCTION         10  …
+#>  8 Type of Area     choi… area_type  AREA_TYPE        2  [0] total …
+#>  9 Type of Slope    choi… slope_type SLOPE_TYPE       1  [0] local …
+#> ...
+```
+
+The `dem` argument is required (the digital elevation model).
+Setting `slope_type = 1` requests the catchment slope rather than the local slope (which is the SAGA default).
+The tool returns four rasters in a single call -- catchment area (`area`), catchment slope (`slope`), modified catchment area (`area_mod`), and a topographic wetness index variant (`twi`).
+
+
+``` r
+saga_twi = saga$ta_hydrology$saga_wetness_index(dem = dem, slope_type = 1)
+```
+
+`saga_twi` is a list of `SpatRaster` objects.
+We build the environmental predictor stack by combining catchment area and catchment slope with the previously loaded `dem` and `ndvi`, and we log-transform catchment area which is highly right-skewed (`hist(ep$carea)`).
+
+
+``` r
+ep = c(dem, ndvi, saga_twi$area, saga_twi$slope)
+names(ep) = c("dem", "ndvi", "carea", "cslope")
+ep$carea = log10(ep$carea)
+```
+
+For the small DEM used here, exchanging rasters between R and SAGA in memory is fine.
+For larger datasets, you can instead point **Rsagacmd** at file paths for inputs and outputs (e.g., `dem = "path/to/dem.tif"`, `area = "path/to/carea.tif"`), so the rasters never need to be loaded into R.
+
+As a convenience to the reader, the resulting `ep` is also available in **spDataLarge**:
 
 
 ``` r
@@ -487,7 +537,7 @@ What might explain the observed difference?
 
 E2. Compute all the predictor rasters\index{raster} we have used in the chapter (catchment slope, catchment area), and put them into a `SpatRaster`-object.
 Add `dem` and `ndvi` to it.
-Next, compute profile and tangential curvature and add them as additional predictor rasters (hint: `grass7:r.slope.aspect`).
+Next, compute profile and tangential curvature and add them as additional predictor rasters (hint: `grass:r.slope.aspect`).
 Finally, construct a response-predictor matrix. 
 The scores of the first NMDS\index{NMDS} axis (which were the result when using the presence-absence community matrix) rotated in accordance with elevation represent the response variable, and should be joined to `random_points` (use an inner join).
 To complete the response-predictor matrix, extract the values of the environmental predictor raster object to `random_points`.

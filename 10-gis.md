@@ -113,7 +113,7 @@ Assuming you have Docker installed and sufficient computational resources, you c
 ``` r
 library(qgisprocess)
 #> Attempting to load the cache ... Success!
-#> QGIS version: 3.30.3-'s-Hertogenbosch
+#> QGIS version: 3.44.11-Solothurn
 #> ...
 ```
 
@@ -126,12 +126,11 @@ Next, we can find which plugins (meaning different software) are available on ou
 
 ``` r
 qgis_plugins()
-#> # A tibble: 4 × 2
-#>   name           enabled
-#>   <chr>          <lgl>
-#> 1 grassprovider  FALSE
-#> 2 otbprovider    FALSE
-#> 3 processing     TRUE
+#> # A tibble: 2 × 2
+#>   name          enabled
+#>   <chr>         <lgl>
+#> 1 grassprovider FALSE
+#> 2 processing    TRUE
 ```
 
 This tells us that the GRASS GIS (`grassprovider`) plugin is available on the system but is not yet enabled.
@@ -147,18 +146,17 @@ qgis_enable_plugins("grassprovider", quiet = TRUE)
 
 ``` r
 qgis_providers()
-#> # A tibble: 7 × 3
+#> # A tibble: 5 × 3
 #>   provider provider_title    algorithm_count
 #>   <chr>    <chr>                       <int>
-#> 1 gdal     GDAL                           56
-#> 2 grass    GRASS                         306
-#> 3 qgis     QGIS                           50
+#> 1 gdal     GDAL                           57
+#> 2 grass    GRASS                         307
+#> 3 qgis     QGIS                           35
 #> 4 3d       QGIS (3D)                       1
-#> 5 native   QGIS (native c++)             243
-#> 6 pdal     QGIS (PDAL)                    17
+#> 5 native   QGIS (native c++)             316
 ```
 
-The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`, `pdal`) and external ones from the third-party providers GDAL and GRASS GIS through the QGIS interface.
+The output table affirms that we can use QGIS geoalgorithms (`native`, `qgis`, `3d`) and external ones from the third-party providers GDAL and GRASS GIS through the QGIS interface.
 
 Now, we are ready for some geocomputation with QGIS and friends, from within R!
 Let's try two example case studies.
@@ -200,11 +198,12 @@ Assuming that the short description of the function contains the word "union"\in
 
 ``` r
 qgis_search_algorithms("union")
-#> # A tibble: 2 × 5
-#>   provider provider_title    group          algorithm         algorithm_title 
-#>   <chr>    <chr>             <chr>          <chr>             <chr>           
-#> 1 native   QGIS (native c++) Vector overlay native:multiunion Union (multiple)
-#> 2 native   QGIS (native c++) Vector overlay native:union      Union  
+#> # A tibble: 3 × 5
+#>   provider provider_title    group           algorithm              algorithm_title
+#>   <chr>    <chr>             <chr>           <chr>                  <chr>
+#> 1 native   QGIS (native c++) Vector coverage native:coverageunion   Dissolve coverage
+#> 2 native   QGIS (native c++) Vector overlay  native:multiunion      Union (multiple)
+#> 3 native   QGIS (native c++) Vector overlay  native:union           Union
 ```
 
 One of the algorithms on the above list, `"native:union"`, sounds promising.
@@ -288,8 +287,8 @@ This time the found algorithm, `v.clean`, is not included in QGIS, but GRASS GIS
 GRASS GIS's `v.clean` is a powerful tool for cleaning topology of spatial vector data\index{topology cleaning}. 
 Importantly, we can use it through **qgisprocess**.
 
-\BeginKnitrBlock{rmdnote}<div class="rmdnote">The GRASS GIS provider in QGIS was called `grass7` until QGIS version 3.34.
-Thus, if you have an older QGIS version, you must prefix the algorithms with `grass7` instead of `grass`.</div>\EndKnitrBlock{rmdnote}
+\BeginKnitrBlock{rmdnote}<div class="rmdnote">The GRASS GIS provider in QGIS was called `grass7` before QGIS version 3.36.
+If you have an older QGIS version, you must prefix the algorithms with `grass7` instead of `grass`.</div>\EndKnitrBlock{rmdnote}
 
 Similar to the previous step, we should start by looking at this algorithm's help.
 
@@ -362,7 +361,45 @@ dem = system.file("raster/dem.tif", package = "spDataLarge")
 The **terra** package's `terrain()` command already allows the calculation of several fundamental topographic characteristics such as slope, aspect, TPI (*Topographic Position Index*), TRI (*Topographic Ruggedness Index*), roughness, and flow directions.
 However, GIS programs offer many more terrain characteristics, some of which can be more suitable in certain contexts.
 For example, the topographic wetness index (TWI)\index{topographic wetness index} was found useful in studying hydrological and biological processes [@sorensen_calculation_2006].
-TWI can be calculated with the GRASS GIS function `r.topidx`, and functionality is also available in the SAGA GIS standalone software.
+The classical TWI is defined as $\ln(a / \tan(\beta))$, where $a$ is the upslope contributing area per unit contour length and $\beta$ the local slope.
+We can compute it from a DEM with the GRASS\index{GRASS} GIS function `r.topidx`, which is exposed through **qgisprocess**.
+
+
+``` r
+qgis_search_algorithms("topidx") |>
+  dplyr::select(provider_title, algorithm)
+#> # A tibble: 2 × 2
+#>   provider_title algorithm
+#>   <chr>          <chr>
+#> 1 GRASS          grass:r.topidx
+#> 2 GRASS          grass:r.topmodel.topidxstats
+```
+
+`r.topidx` takes an elevation raster as input and writes a topographic-index raster as output, as we can see in its documentation.
+
+
+``` r
+qgis_show_help("grass:r.topidx")
+#> r.topidx (grass:r.topidx)
+#> ...
+#> input: Input elevation layer
+#> 	Argument type:	raster
+#> output: Topographic index
+#> 	Argument type:	rasterDestination
+#> ...
+```
+
+We supply the DEM as `input`; the output is written to a temporary file by GRASS, which we read back into R with `qgis_as_terra()`.
+
+
+``` r
+dem_twi = qgis_run_algorithm("grass:r.topidx", input = dem)
+dem_twi = qgis_as_terra(dem_twi$output)
+```
+
+You can see the resulting TWI map in the left panel of Figure \@ref(fig:qgis-raster-map).
+The topographic wetness index is dimensionless (a log of a ratio); low values represent areas that do not accumulate water, while higher values mark areas where water accumulates.
+Modified TWI variants, which replace the contributing-area term to better represent valley-floor moisture potential, are available in other tools; for example, SAGA's `saga_wetness_index` is used in Chapter \@ref(eco).
 
 Information from digital elevation models can also be categorized, for example, to geomorphons\index{geomorphons} -- the geomorphological phenotypes consisting of ten classes that represent terrain forms, such as slopes, ridges, or valleys [@jasiewicz_geomorphons_2013].
 These phenotypes are used in many studies, including landslide susceptibility, ecosystem services, human mobility, and digital soil mapping. 
