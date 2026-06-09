@@ -9,42 +9,42 @@ dem_aspect = terrain(dem, v = "aspect", unit = "radians")
 dem_TPI = terrain(dem, v = "TPI")
 
 qgis_algo = qgis_algorithms()
-grep("wetness", qgis_algo$algorithm, value = TRUE)
+grep("topidx", qgis_algo$algorithm, value = TRUE)
 
-# Note: sagang:sagawetnessindex removed — SAGA NextGen plugin no longer available.
-# See geocompx/geocompr#1181.
-# Use terra::terrain() or GRASS alternatives for terrain attributes.
+qgis_show_help("grass:r.topidx")
 
-# plot(dem_wetness_1)
-# plot(dem_wetness_2)
-# plot(dem_wetness_3)
-# plot(dem_wetness_4)
+dem_twi = qgis_run_algorithm("grass:r.topidx", input = dem)
+# r.topidx writes a Float32 GeoTIFF with a categorical attribute table attached
+# (visible as the "SetColorTable() only supported for Byte or UInt16" warning).
+# Stripping it with terra::app() so plotting/tmap see numeric values.
+dem_twi = terra::app(qgis_as_terra(dem_twi$output), as.numeric)
+names(dem_twi) = "twi"
+# plot(dem_twi)
+
 grep("geomorphon", qgis_algo$algorithm, value = TRUE)
-qgis_show_help("grass7:r.geomorphon")
+qgis_show_help("grass:r.geomorphon")
 
-dem_geomorph = qgis_run_algorithm("grass7:r.geomorphon", 
-                                 elevation = dem, 
-                                 `-m` = TRUE,
-                                 search = 120)
+dem_geomorph = qgis_run_algorithm("grass:r.geomorphon",
+                                  elevation = dem,
+                                  `-m` = TRUE,
+                                  search = 120)
 
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
-# plot(dem_geomorphon)
-# set.values(dem_geomorphon)
-# set.cats(dem_geomorphon, value = cats(dem_geomorphon)[[1]][-11, ])
+# plot(dem_geomorph_terra)
 
 dem_hillshade = shade(dem_slope, dem_aspect, 10, 200)
 
 tm1 = tm_shape(dem_hillshade) +
   tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
             col.legend = tm_legend_hide()) +
-  tm_shape(dem_wetness_4) +
+  tm_shape(dem_twi) +
   tm_raster(col_alpha = 0.5,
             col.scale = tm_scale_continuous(values = "Blues"),
             col.legend = tm_legend(title = "")) +
   tm_title("TWI", position = tm_pos_out()) +
   tm_layout(inner.margins = c(0, 0.22, 0, 0),
             legend.position = c("LEFT", "top"),
-            frame = FALSE) 
+            frame = FALSE)
 
 tm2 = tm_shape(dem_hillshade) +
   tm_raster(col.scale = tm_scale_continuous(values = rev(hcl.colors(99, "Grays"))),
@@ -56,7 +56,7 @@ tm2 = tm_shape(dem_hillshade) +
   tm_title("Geomorphons", position = tm_pos_out(pos.h = "right")) +
   tm_layout(inner.margins = c(0, 0, 0, 0.22),
             legend.position = c("RIGHT", "top"),
-            frame = FALSE) 
+            frame = FALSE)
 
 qgis_raster_map = tmap_arrange(tm1, tm2, nrow = 1)
 

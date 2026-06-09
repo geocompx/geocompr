@@ -17,7 +17,7 @@ units(x) = "m^2"
 sub = dplyr::filter(single, area < x)
 
 
-clean = qgis_run_algorithm("grass7:v.clean", input = union_sf, type = 4,
+clean = qgis_run_algorithm("grass:v.clean", input = union_sf, type = 4,
                            tool = 10, threshold = 25000, 
                            output = file.path(tempdir(), "clean.gpkg"))
 clean_sf = st_as_sf(clean)
