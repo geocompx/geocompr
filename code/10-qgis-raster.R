@@ -26,7 +26,7 @@ qgis_show_help("grass:r.geomorphon")
 
 dem_geomorph = qgis_run_algorithm("grass:r.geomorphon",
                                   elevation = dem,
-                                  `-m` = TRUE,
+                                  `-m` = 1,
                                   search = 120)
 
 dem_geomorph_terra = qgis_as_terra(dem_geomorph$forms)
@@ -41,8 +41,8 @@ tm1 = tm_shape(dem_hillshade) +
   tm_raster(col_alpha = 0.5,
             col.scale = tm_scale_continuous(values = "Blues"),
             col.legend = tm_legend(title = "")) +
-  tm_title("TWI", position = tm_pos_out()) +
-  tm_layout(inner.margins = c(0, 0.22, 0, 0),
+  tm_title("TWI", position = tm_pos_out("center", "top", pos.h = "left")) +
+  tm_layout(inner.margins = c(0, 0.32, 0, 0),
             legend.position = c("LEFT", "top"),
             frame = FALSE)
 
@@ -53,12 +53,12 @@ tm2 = tm_shape(dem_hillshade) +
   tm_raster(col_alpha = 0.5,
             col.legend = tm_legend(title = ""),
             col.scale = tm_scale_categorical(levels.drop = TRUE)) +
-  tm_title("Geomorphons", position = tm_pos_out(pos.h = "right")) +
-  tm_layout(inner.margins = c(0, 0, 0, 0.22),
+  tm_title("Geomorphons", position = tm_pos_out("center", "top", pos.h = "right")) +
+  tm_layout(inner.margins = c(0, 0, 0, 0.32),
             legend.position = c("RIGHT", "top"),
             frame = FALSE)
 
-qgis_raster_map = tmap_arrange(tm1, tm2, nrow = 1)
+qgis_raster_map = tmap_arrange(tm1, tm2, nrow = 1, asp = 0)
 
 tmap_save(qgis_raster_map, "images/10-qgis-raster-map.png",
           width = 20, height = 9, units = "cm")
