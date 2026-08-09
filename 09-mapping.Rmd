@@ -1108,8 +1108,15 @@ g1 = ggplot() + geom_sf(data = nz, aes(fill = Median_income)) +
   scale_x_continuous(breaks = c(170, 175))
 g1
 library(ggspatial)
+# Refresh nz_elev to avoid 'external pointer is not valid' error
+if (!exists("nz_elev")) {
+  nz_elev = terra::rast(system.file("raster/nz_elev.tif", package = "spDataLarge"))
+}
 ggplot() + 
-  layer_spatial(nz_elev) +
+  tryCatch(layer_spatial(nz_elev), error = function(e) {
+    nz_elev <<- terra::rast(system.file("raster/nz_elev.tif", package = "spDataLarge"))
+    layer_spatial(nz_elev)
+  }) +
   geom_sf(data = nz, fill = NA) +
   annotation_scale() +
   scale_x_continuous(breaks = c(170, 175)) +
