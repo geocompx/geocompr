@@ -1,7 +1,7 @@
 --- 
 title: 'Geocomputation with R'
 author: 'Robin Lovelace, Jakub Nowosad, Jannes Muenchow'
-date: '2026-06-12'
+date: '2026-09-14'
 site: bookdown::bookdown_site
 output: bookdown::bs4_book
 documentclass: krantz
@@ -58,7 +58,7 @@ Its current 'build status' as follows:
 
 [![Actions](https://github.com/geocompx/geocompr/workflows/Render/badge.svg)](https://github.com/geocompx/geocompr/actions)
 
-This version of the book was built on GH Actions on 2026-06-12.
+This version of the book was built on GH Actions on 2026-09-14.
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png"/></a><br/>This book is licensed to you under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 
@@ -76,13 +76,13 @@ Maintainers and contributors must follow this repository’s [CODE OF CONDUCT](h
 
 ## Reproducibility {-}
 
-The quickest way to reproduce the contents of the book if you're new to geographic data in R may be in the web browser, thanks to [Binder](https://mybinder.org/).
-Clicking on the link below should open a new window containing RStudio Server in your web browser, enabling you to open chapter files and running code chunks to test that the code is reproducible.
+The quickest way to reproduce the contents of the book if you're new to geographic data in R may be in the web browser, thanks to GitHub Codespaces / devcontainers.
+Clicking on the link below should open a cloud development environment in your web browser, enabling you to open chapter files and run code chunks to test that the code is reproducible.
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/geocompx/geocompr/main?urlpath=rstudio)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=84222786&machine=basicLinux32gb&devcontainer_path=.devcontainer.json&location=WestEurope)
 
 If you see something like the image below, congratulations, it worked!
-You can start exploring Geocomputation with R in a cloud-based environment, noting [mybinder.org user guidelines](https://mybinder.readthedocs.io/en/latest/about/user-guidelines.html)):
+You can start exploring Geocomputation with R in a cloud-based environment:
 
 <div class="figure">
 <img src="https://user-images.githubusercontent.com/1825120/134802314-6dd368c7-f5eb-4cd7-b8ff-428dfa93954c.png" alt="Screenshot of reproducible code contained in Geocomputation with R running in RStudio Server on a browser served by Binder"  />

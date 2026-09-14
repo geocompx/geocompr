@@ -424,7 +424,7 @@ autotuner_rf$train(task)
 autotuner_rf$tuning_result
 #>     mtry sample.fraction min.node.size learner_param_vals  x_domain regr.rmse
 #>    <int>           <num>         <int>             <list>    <list>     <num>
-#> 1:     4           0.803             2          <list[5]> <list[3]>      0.38
+#> 1:     4           0.807             8          <list[5]> <list[3]>     0.377
 ```
 
 ### Predictive mapping
@@ -439,13 +439,13 @@ autotuner_rf$predict(task)
 #> 
 #> ── <PredictionRegr> for 84 observations: ───────────────────────────────────────
 #>  row_ids  truth response
-#>        1 -1.084   -1.080
-#>        2 -0.975   -1.030
-#>        3 -0.912   -0.929
+#>        1 -1.082   -1.113
+#>        2 -0.955   -1.098
+#>        3 -0.921   -1.089
 #>      ---    ---      ---
-#>       82  0.814    0.637
-#>       83  0.814    0.785
-#>       84  0.808    0.824
+#>       82  0.826    0.631
+#>       83  0.826    0.778
+#>       84  0.823    0.839
 ```
 
 The `predict` method will apply the model to all observations used in the modeling.
