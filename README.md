@@ -1,3 +1,4 @@
+
 <!-- README.md is generated from README.Rmd. Please edit that file - rmarkdown::render('README.Rmd', output_format = 'github_document', output_file = 'README.md') -->
 
 # Geocomputation with R
@@ -36,7 +37,9 @@ Press](https://www.crcpress.com/9781138304512) in the [R
 Series](https://www.routledge.com/Chapman--HallCRC-The-R-Series/book-series/CRCTHERSER)
 and can be viewed online at
 [bookdown.org](https://bookdown.org/robinlovelace/geocompr/). Read the
-latest version at [r.geocompx.org](https://r.geocompx.org/).
+latest version at [r.geocompx.org](https://r.geocompx.org/) (as a backup
+option, the book is also available at
+[geocompx.github.io/geocompr/](https://geocompx.github.io/geocompr/)).
 
 <!-- 
 ### Note: we are actively working on the Second Edition 🏗
@@ -61,8 +64,11 @@ latest version at [r.geocompx.org](https://r.geocompx.org/).
 - Rewritten the "Transportation" chapter, introducing new sections on routes and route networks
 - New book parts related to the creation of geographic metadata and connecting R with cloud services
 <!-- Todo: update this bullet point (Rl 2023-03) -->
+
 <!-- Todo: add news file? (RL 2021-11) -->
+
 <!-- See NEWS.md for a summary of the changes. -->
+
 <!--
 See [https://github.com/geocompx/geocompr/compare/1.9...main](https://github.com/geocompx/geocompr/compare/1.9...main#files_bucket) for a continuously updated summary of the changes to date.
 This shows 20k+ lines of code/prose added, lots of refactoring!
@@ -101,30 +107,31 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [rsbivand](https://github.com/rsbivand),
 [iod-ine](https://github.com/iod-ine),
 [KiranmayiV](https://github.com/KiranmayiV),
-[cuixueqin](https://github.com/cuixueqin),
 [defuneste](https://github.com/defuneste),
+[cuixueqin](https://github.com/cuixueqin),
 [smkerr](https://github.com/smkerr), [zmbc](https://github.com/zmbc),
 [marcosci](https://github.com/marcosci),
 [darrellcarvalho](https://github.com/darrellcarvalho),
 [dcooley](https://github.com/dcooley),
+[apps/copilot-swe-agent](https://github.com/apps/copilot-swe-agent),
+[cortinah](https://github.com/cortinah),
 [FlorentBedecarratsNM](https://github.com/FlorentBedecarratsNM),
 [erstearns](https://github.com/erstearns),
 [appelmar](https://github.com/appelmar),
 [MikeJohnPage](https://github.com/MikeJohnPage),
 [eyesofbambi](https://github.com/eyesofbambi),
 [krystof236](https://github.com/krystof236),
-[nickbearman](https://github.com/nickbearman),
-[tylerlittlefield](https://github.com/tylerlittlefield),
-[sdesabbata](https://github.com/sdesabbata),
-[howardbaik](https://github.com/howardbaik),
-[edzer](https://github.com/edzer), [pat-s](https://github.com/pat-s),
-[giocomai](https://github.com/giocomai),
-[KHwong12](https://github.com/KHwong12),
-[LaurieLBaker](https://github.com/LaurieLBaker),
 [eblondel](https://github.com/eblondel),
-[MarHer90](https://github.com/MarHer90),
+[tylerlittlefield](https://github.com/tylerlittlefield),
+[nickbearman](https://github.com/nickbearman),
+[edzer](https://github.com/edzer), [pat-s](https://github.com/pat-s),
 [mdsumner](https://github.com/mdsumner),
-[ahmohil](https://github.com/ahmohil),
+[MarHer90](https://github.com/MarHer90),
+[LaurieLBaker](https://github.com/LaurieLBaker),
+[KHwong12](https://github.com/KHwong12),
+[giocomai](https://github.com/giocomai),
+[mvl22](https://github.com/mvl22),
+[ganes1410](https://github.com/ganes1410),
 [richfitz](https://github.com/richfitz),
 [VLucet](https://github.com/VLucet),
 [wdearden](https://github.com/wdearden),
@@ -132,23 +139,26 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [adambhouston](https://github.com/adambhouston),
 [chihinl](https://github.com/chihinl),
 [cshancock](https://github.com/cshancock),
-[e-clin](https://github.com/e-clin),
+[e-linc](https://github.com/e-linc),
 [ec-nebi](https://github.com/ec-nebi),
 [gregor-d](https://github.com/gregor-d),
+[jacobvjk](https://github.com/jacobvjk),
 [jasongrahn](https://github.com/jasongrahn),
-[p-kono](https://github.com/p-kono),
 [pokyah](https://github.com/pokyah),
 [schuetzingit](https://github.com/schuetzingit),
 [tim-salabim](https://github.com/tim-salabim),
 [tszberkowitz](https://github.com/tszberkowitz),
 [vlarmet](https://github.com/vlarmet),
+[ahmohil](https://github.com/ahmohil),
 [ateucher](https://github.com/ateucher),
 [annakrystalli](https://github.com/annakrystalli),
+[arunkhattri](https://github.com/arunkhattri),
 [andtheWings](https://github.com/andtheWings),
 [kant](https://github.com/kant),
 [gavinsimpson](https://github.com/gavinsimpson),
 [Himanshuteli](https://github.com/Himanshuteli),
 [yutannihilation](https://github.com/yutannihilation),
+[howardbaik](https://github.com/howardbaik),
 [jimr1603](https://github.com/jimr1603),
 [jbixon13](https://github.com/jbixon13),
 [jkennedyie](https://github.com/jkennedyie),
@@ -157,9 +167,7 @@ will update automatically): [prosoitos](https://github.com/prosoitos),
 [katiejolly](https://github.com/katiejolly),
 [kwhkim](https://github.com/kwhkim), [layik](https://github.com/layik),
 [mpaulacaldas](https://github.com/mpaulacaldas),
-[mtennekes](https://github.com/mtennekes),
-[mvl22](https://github.com/mvl22),
-[ganes1410](https://github.com/ganes1410).
+[mtennekes](https://github.com/mtennekes).
 
 During the project we aim to contribute ‘upstream’ to the packages that
 make geocomputation with R possible. This impact is recorded in
@@ -256,7 +264,9 @@ bookdown::serve_book(".")
 ```
 
 <!-- The code associated with each chapter is saved in the `code/chapters/` folder. -->
+
 <!-- `source("code/chapters/07-transport.R")` runs run the code chunks in chapter 7, for example. -->
+
 <!-- These R scripts are generated with the follow command which wraps `knitr::purl()`: -->
 
 ## Geocompr in a devcontainer
@@ -326,7 +336,9 @@ rmarkdown::render("README.Rmd", output_format = "github_document", output_file =
 ```
 
 <!-- ## Book statistics -->
+
 <!-- An indication of the book's progress over time is illustrated below (to be updated roughly every week as the book progresses). -->
+
 <!-- Book statistics: estimated number of pages per chapter over time. -->
 
 ## Citations
